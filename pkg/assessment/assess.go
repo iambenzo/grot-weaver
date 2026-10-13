@@ -48,6 +48,7 @@ func NewAssessor(c *catalogue.Catalogue, customNamespaces []string) *Assessor {
 
 type collected struct {
 	findings     []finding.Finding
+	requirements []scoring.RequirementCheck
 	checks       []scoring.ResourceCheck
 	attributions []ServiceAttribution
 	totals       map[finding.Signal]float64
@@ -61,7 +62,7 @@ func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
 		}
 	}
 
-	scores := scoring.Score(gathered.findings, nil, gathered.checks, options)
+	scores := scoring.Score(gathered.findings, gathered.requirements, gathered.checks, options)
 	return Result{
 		SemconvVersion: a.catalogue.Manifest.Semconv.Version,
 		Window:         inv.Window,
@@ -88,6 +89,9 @@ func (a *Assessor) assessTraceService(datasource string, service TraceService, i
 	for _, key := range service.SpanKeys {
 		into.addKeyFindings(a, at, key, service.SpanCount, catalogue.ScopeSpans)
 	}
+	groupFindings, requirements := a.spanGroupFindings(owner, service.SpanGroups, service.SpanCount)
+	into.findings = append(into.findings, groupFindings...)
+	into.requirements = append(into.requirements, requirements...)
 }
 
 func (c *collected) addKeyFindings(a *Assessor, at finding.Observation, key KeyObservation, fallbackVolume float64, scope catalogue.RenameScope) {

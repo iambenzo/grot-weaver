@@ -15,12 +15,19 @@ export interface SDK {
   distro?: string;
 }
 
+export interface SpanGroupSample {
+  group: string;
+  sampled: number;
+  present: Record<string, number>;
+}
+
 export interface TraceService {
   service_name: string;
   service_namespace: string;
   span_count: number;
   resource_keys: KeyObservation[];
   span_keys: KeyObservation[];
+  span_groups: SpanGroupSample[];
   sdk: SDK;
 }
 

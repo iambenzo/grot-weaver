@@ -20,6 +20,7 @@ type Catalogue struct {
 	attributeIndex map[string]int
 	metricIndex    map[string]int
 	placements     map[string]Placement
+	spanGroupRules []SpanGroupRule
 }
 
 func Load(fsys fs.FS) (*Catalogue, error) {
@@ -54,6 +55,7 @@ func New(manifest Manifest, registry Registry, renames RenameHistory) *Catalogue
 		attributeIndex: indexByName(registry.Attributes, func(a Attribute) string { return a.Name }),
 		metricIndex:    indexByName(registry.Metrics, func(m Metric) string { return m.Name }),
 		placements:     placementsOf(registry),
+		spanGroupRules: spanGroupRulesOf(registry),
 	}
 }
 

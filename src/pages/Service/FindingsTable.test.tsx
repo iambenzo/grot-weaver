@@ -69,4 +69,14 @@ describe('FindingsTable', () => {
 
     expect(screen.getByText(noReplacement.note as string)).toBeInTheDocument();
   });
+
+  it('describes a missing required attribute by group', () => {
+    const missing: Finding = { ...renamed, type: 'required_attribute_not_present', observed: 'span.http.server', expected: 'url.scheme', matched: undefined, bucket: undefined, source: undefined, confidence: 'medium' };
+
+    render(<FindingsTable findings={[missing]} evidence={new Map()} />);
+
+    expect(screen.getByText('url.scheme').closest('span')?.textContent).toBe('url.scheme missing from span.http.server spans');
+    expect(screen.getByText('Required missing')).toBeInTheDocument();
+    expect(screen.getByText('medium confidence')).toBeInTheDocument();
+  });
 });

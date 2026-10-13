@@ -67,7 +67,16 @@ export function FindingsTable({ findings, evidence }: FindingsTableProps) {
   );
 }
 
+const REQUIREMENT_TYPES: FindingType[] = ['required_attribute_not_present', 'recommended_attribute_not_present'];
+
 function NameCell({ finding }: { finding: Finding }) {
+  if (REQUIREMENT_TYPES.includes(finding.type)) {
+    return (
+      <span>
+        <code>{finding.expected}</code> missing from <code>{finding.observed}</code> spans
+      </span>
+    );
+  }
   const showRegistryName = finding.matched && finding.matched !== finding.observed;
   return (
     <Stack direction="column" gap={0}>

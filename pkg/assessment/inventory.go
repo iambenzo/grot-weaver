@@ -28,12 +28,19 @@ type TraceDatasource struct {
 }
 
 type TraceService struct {
-	ServiceName      string           `json:"service_name"`
-	ServiceNamespace string           `json:"service_namespace"`
-	SpanCount        float64          `json:"span_count"`
-	ResourceKeys     []KeyObservation `json:"resource_keys"`
-	SpanKeys         []KeyObservation `json:"span_keys"`
-	SDK              SDK              `json:"sdk"`
+	ServiceName      string            `json:"service_name"`
+	ServiceNamespace string            `json:"service_namespace"`
+	SpanCount        float64           `json:"span_count"`
+	ResourceKeys     []KeyObservation  `json:"resource_keys"`
+	SpanKeys         []KeyObservation  `json:"span_keys"`
+	SpanGroups       []SpanGroupSample `json:"span_groups"`
+	SDK              SDK               `json:"sdk"`
+}
+
+type SpanGroupSample struct {
+	Group   string         `json:"group"`
+	Sampled int            `json:"sampled"`
+	Present map[string]int `json:"present"`
 }
 
 type KeyObservation struct {
@@ -97,6 +104,26 @@ func (s TraceService) validate() error {
 	}
 	if s.SpanCount < 0 {
 		return fmt.Errorf("%w: service %q has negative span count", ErrInvalidInventory, s.ServiceName)
+	}
+	if len(s.SpanGroups) > MaxKeysPerService {
+		return fmt.Errorf("%w: service %q has too many span group samples", ErrInvalidInventory, s.ServiceName)
+	}
+	for _, sample := range s.SpanGroups {
+		if err := sample.validate(); err != nil {
+			return fmt.Errorf("service %q: %w", s.ServiceName, err)
+		}
+	}
+	return nil
+}
+
+func (g SpanGroupSample) validate() error {
+	if g.Group == "" || g.Sampled < 0 || len(g.Present) > MaxKeysPerService {
+		return fmt.Errorf("%w: malformed span group sample %q", ErrInvalidInventory, g.Group)
+	}
+	for attribute, count := range g.Present {
+		if count < 0 || count > g.Sampled || len(attribute) > MaxNameLength {
+			return fmt.Errorf("%w: span group %q has impossible presence for %q", ErrInvalidInventory, g.Group, attribute)
+		}
 	}
 	return nil
 }

@@ -1,7 +1,10 @@
 import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, tempoWindowParams } from '../window/window';
-import { CollectionError, KeyObservation, SDK, TraceDatasource, TraceService } from './types';
+import { SpanGroupRule } from '../api/catalogue';
+import { CollectionError, KeyObservation, SDK, SpanGroupSample, TraceDatasource, TraceService } from './types';
+import { applicableRules, sampleSpanGroup } from './spanGroups';
+import { serviceFilterExpression } from './traceql';
 
 const SERVICE_NAME_TAG = 'resource.service.name';
 const SERVICE_NAMESPACE_TAG = 'resource.service.namespace';
@@ -32,19 +35,22 @@ interface CollectorContext {
   limit: Limiter;
   window: QueryWindow;
   errors: CollectionError[];
+  spanGroupRules: SpanGroupRule[];
 }
 
-export function serviceFilterExpression(serviceName: string): string {
-  const escaped = serviceName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `${SERVICE_NAME_TAG} = "${escaped}"`;
-}
 
 export function serviceFilter(serviceName: string): string {
   return `{ ${serviceFilterExpression(serviceName)} }`;
 }
 
-export async function collectTempoInventory(uid: string, get: ProxyGet, limit: Limiter, window: QueryWindow): Promise<TempoCollection> {
-  const context: CollectorContext = { uid, get, limit, window, errors: [] };
+export async function collectTempoInventory(
+  uid: string,
+  get: ProxyGet,
+  limit: Limiter,
+  window: QueryWindow,
+  spanGroupRules: SpanGroupRule[] = []
+): Promise<TempoCollection> {
+  const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules };
   const serviceNames = await guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG));
   const services = await Promise.all((serviceNames ?? []).map((name) => collectService(context, name)));
   return { datasource: { uid, services }, errors: context.errors };
@@ -59,14 +65,30 @@ async function collectService(context: CollectorContext, serviceName: string): P
     guarded(context, step('namespace'), () => tagValues(context, SERVICE_NAMESPACE_TAG, filter)),
     collectSDK(context, filter, step),
   ]);
+  const spanGroups = await collectSpanGroups(context, serviceName, spanKeys ?? [], step);
   return {
     service_name: serviceName,
     service_namespace: namespaces?.[0] ?? '',
     span_count: 0,
     resource_keys: observations(resourceKeys),
     span_keys: observations(spanKeys),
+    span_groups: spanGroups,
     sdk,
   };
+}
+
+async function collectSpanGroups(
+  context: CollectorContext,
+  serviceName: string,
+  spanKeys: string[],
+  step: (what: string) => string
+): Promise<SpanGroupSample[]> {
+  const samples = await Promise.all(
+    applicableRules(context.spanGroupRules, spanKeys).map((rule) =>
+      guarded(context, step(`span group ${rule.id}`), () => sampleSpanGroup(context, serviceName, rule))
+    )
+  );
+  return samples.filter((sample): sample is SpanGroupSample => sample !== undefined && sample.sampled > 0);
 }
 
 async function collectSDK(context: CollectorContext, filter: string, step: (what: string) => string): Promise<SDK> {

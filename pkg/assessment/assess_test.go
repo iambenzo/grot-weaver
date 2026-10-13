@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
@@ -160,5 +161,66 @@ func Test_Assess_reportsMisplacedAttributesWithoutScoringThem(t *testing.T) {
 		if row.Owner.Name == "checkout" && row.Scores.NamingStable.Denominator != 1 {
 			t.Errorf("misplaced finding changed the naming score: %+v", row.Scores.NamingStable)
 		}
+	}
+}
+
+func Test_Assess_spanGroupRequirements(t *testing.T) {
+	inventory := Inventory{Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{{
+		ServiceName: "checkout",
+		SpanGroups: []SpanGroupSample{
+			{Group: "span.http.server", Sampled: 4, Present: map[string]int{"http.request.method": 4, "url.path": 4, "url.scheme": 1}},
+			{Group: "span.unknown.group", Sampled: 3},
+			{Group: "span.db.client", Sampled: 0},
+		},
+	}}}}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	var required, recommended []finding.Finding
+	for _, ranked := range result.Findings {
+		switch ranked.Type {
+		case finding.TypeRequiredAttributeMissing:
+			required = append(required, ranked.Finding)
+		case finding.TypeRecommendedAttributeAbsent:
+			recommended = append(recommended, ranked.Finding)
+		}
+	}
+	if len(required) != 1 || required[0].Expected != "url.scheme" || required[0].Observed != "span.http.server" || required[0].Confidence != "medium" {
+		t.Fatalf("required findings = %+v", required)
+	}
+	if !strings.Contains(required[0].Note, "missing on 3 of 4") || !strings.Contains(required[0].Note, "removed between the service and storage") {
+		t.Errorf("note = %q", required[0].Note)
+	}
+	if len(recommended) == 0 || recommended[0].Level != finding.LevelImprovement {
+		t.Errorf("recommended findings = %+v", recommended)
+	}
+	for _, row := range result.Owners {
+		if row.Owner.Name != "checkout" {
+			continue
+		}
+		if row.Scores.Requirements.Numerator != 2 || row.Scores.Requirements.Denominator != 3 {
+			t.Errorf("requirements = %+v, want 2 of 3", row.Scores.Requirements)
+		}
+	}
+}
+
+func Test_SpanGroupSample_validation(t *testing.T) {
+	tests := []struct {
+		name   string
+		sample SpanGroupSample
+		valid  bool
+	}{
+		{name: "consistent", sample: SpanGroupSample{Group: "span.http.server", Sampled: 2, Present: map[string]int{"url.path": 2}}, valid: true},
+		{name: "presence above sample size", sample: SpanGroupSample{Group: "span.http.server", Sampled: 2, Present: map[string]int{"url.path": 3}}},
+		{name: "negative sample", sample: SpanGroupSample{Group: "span.http.server", Sampled: -1}},
+		{name: "no group", sample: SpanGroupSample{Sampled: 1}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			inventory := Inventory{Traces: []TraceDatasource{{UID: "t", Services: []TraceService{{SpanGroups: []SpanGroupSample{tt.sample}}}}}}
+			if err := inventory.Validate(); (err == nil) != tt.valid {
+				t.Errorf("err = %v, want valid %v", err, tt.valid)
+			}
+		})
 	}
 }

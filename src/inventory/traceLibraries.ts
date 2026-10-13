@@ -1,7 +1,7 @@
 import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, tempoWindowParams } from '../window/window';
-import { serviceFilterExpression } from './tempo';
+import { attributeSelector, serviceFilterExpression } from './traceql';
 
 const INSTRUMENTATION_NAME = 'instrumentation:name';
 const INSTRUMENTATION_VERSION = 'instrumentation:version';
@@ -9,7 +9,6 @@ const SAMPLE_LIMIT = '20';
 const SPANS_PER_SPAN_SET = '3';
 const STEPS_PER_WINDOW = 20;
 const MIN_STEP_SECONDS = 60;
-const PLAIN_ATTRIBUTE = /^[A-Za-z0-9_.]+$/;
 
 export type LookupMethod = 'metrics' | 'sample';
 
@@ -53,12 +52,6 @@ export interface LookupContext {
   window: QueryWindow;
 }
 
-export function attributeSelector(scope: 'resource' | 'span', key: string): string {
-  if (PLAIN_ATTRIBUTE.test(key)) {
-    return `${scope}.${key}`;
-  }
-  return `${scope}."${key.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
-}
 
 export function flaggedKeyFilter(flagged: FlaggedKey): string {
   return `{ ${serviceFilterExpression(flagged.serviceName)} && ${attributeSelector(flagged.scope, flagged.key)} != nil }`;

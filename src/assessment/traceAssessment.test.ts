@@ -23,7 +23,7 @@ describe('assessTraces', () => {
         { uid: 'b', type: 'tempo', name: 'B' },
       ],
       window,
-      { get, limit: createLimiter(2), score }
+      { get, limit: createLimiter(2), score, spanGroupRules: async () => [] }
     );
 
     const [inventory, weighted] = score.mock.calls[0] as unknown as [{ window: unknown; traces: Array<{ uid: string }> }, boolean];

@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
-import { attributeSelector, flaggedKeyFilter, lookupLibraries, probeTraceQLMetrics } from './traceLibraries';
+import { flaggedKeyFilter, lookupLibraries, probeTraceQLMetrics } from './traceLibraries';
+import { attributeSelector } from './traceql';
 
 const fixtures = path.resolve(__dirname, '../../testdata/fixtures/local/tempo');
 const readFixture = (name: string) => JSON.parse(fs.readFileSync(path.join(fixtures, name), 'utf8'));

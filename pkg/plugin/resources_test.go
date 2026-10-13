@@ -163,3 +163,12 @@ func Test_CallResource_score(t *testing.T) {
 		t.Errorf("result = %+v", result)
 	}
 }
+
+func Test_CallResource_spanGroups(t *testing.T) {
+	response := callResource(t, newTestApp(t), http.MethodGet, "catalogue/span-groups")
+
+	var rules []catalogue.SpanGroupRule
+	if err := json.Unmarshal(response.Body, &rules); err != nil || response.Status != http.StatusOK || len(rules) == 0 {
+		t.Fatalf("status %d err %v rules %d", response.Status, err, len(rules))
+	}
+}

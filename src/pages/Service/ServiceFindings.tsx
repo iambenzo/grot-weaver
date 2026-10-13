@@ -14,6 +14,7 @@ import { Alert, CollapsableSection, Combobox, ComboboxOption, Field, LoadingPlac
 import { discoverDatasources, proxyGet } from '../../datasources/proxy';
 import { createLimiter } from '../../datasources/limiter';
 import { scoreInventory } from '../../api/score';
+import { fetchSpanGroupRules } from '../../api/catalogue';
 import { Attribution, Finding, Owner } from '../../api/types';
 import { TraceAssessment, assessTraces, lookupFindingLibraries, sameOwner } from '../../assessment/traceAssessment';
 import { LibraryEvidence } from '../../inventory/traceLibraries';
@@ -165,7 +166,12 @@ function useTraceAssessment(settings: PluginSettings, window: QueryWindow): Load
     let cancelled = false;
     const datasources = discoverDatasources(datasourceTypesFor(settings, 'traces'));
     const settle = (value: Outcome) => !cancelled && setLoaded({ key: window, value });
-    assessTraces(datasources, window, { get: proxyGet, limit: createLimiter(concurrencyFrom(settings)), score: scoreInventory })
+    assessTraces(datasources, window, {
+      get: proxyGet,
+      limit: createLimiter(concurrencyFrom(settings)),
+      score: scoreInventory,
+      spanGroupRules: fetchSpanGroupRules,
+    })
       .then((assessment) => settle({ status: 'ready', assessment, window }))
       .catch((error: unknown) => settle({ status: 'failed', message: messageOf(error) }));
     return () => {
