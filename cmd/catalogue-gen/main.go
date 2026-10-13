@@ -11,37 +11,38 @@ import (
 	"path/filepath"
 	"regexp"
 	"time"
+
+	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
 )
 
 const (
 	latestVersion        = "latest"
 	githubAPIBaseURL     = "https://api.github.com"
 	coreRepository       = "open-telemetry/semantic-conventions"
-	coreCatalogueFile    = "core.json"
-	manifestFile         = "manifest.json"
+	genAIRepository      = "open-telemetry/semantic-conventions-genai"
+	pinnedGenAICommit    = "5293effb97f18ddb0602da884dadee6119d67679"
 	defaultOutputDir     = "pkg/catalogue/data"
 	defaultTemplatesDir  = "catalogue/templates"
 	httpTimeout          = 30 * time.Second
 	coreRegistryTemplate = "https://github.com/" + coreRepository + "/archive/refs/tags/%s.zip[model]"
+	genAIRegistryFormat  = "https://github.com/" + genAIRepository + "/archive/%s.zip[model]"
 )
 
-var releaseTagPattern = regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
+var (
+	releaseTagPattern = regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
+	commitPattern     = regexp.MustCompile(`^[0-9a-f]{40}$`)
+)
 
 type config struct {
 	semconvVersion string
+	genAICommit    string
 	outputDir      string
 	templatesDir   string
 }
 
-type manifest struct {
-	Semconv        registrySource `json:"semconv"`
-	WeaverImage    string         `json:"weaver_image"`
-	TemplateSHA256 string         `json:"template_sha256"`
-}
-
-type registrySource struct {
-	Version  string `json:"version"`
-	Registry string `json:"registry"`
+type generatedFile struct {
+	name    string
+	content []byte
 }
 
 func main() {
@@ -57,20 +58,31 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 		return err
 	}
 
-	version, err := resolveSemconvVersion(ctx, cfg.semconvVersion)
+	github := githubClient{
+		httpClient: &http.Client{Timeout: httpTimeout},
+		baseURL:    githubAPIBaseURL,
+		token:      os.Getenv("GITHUB_TOKEN"),
+	}
+
+	version, err := resolveSemconvVersion(ctx, github, cfg.semconvVersion)
 	if err != nil {
 		return err
 	}
-
-	registry := fmt.Sprintf(coreRegistryTemplate, version)
-	raw, err := generateWithWeaver(ctx, registry, cfg.templatesDir)
+	committedAt, err := github.commitDate(ctx, genAIRepository, cfg.genAICommit)
 	if err != nil {
-		return err
+		return fmt.Errorf("look up genai commit: %w", err)
 	}
 
-	catalogue, err := normaliseJSON(raw)
+	coreRegistry := fmt.Sprintf(coreRegistryTemplate, version)
+	genAIRegistry := fmt.Sprintf(genAIRegistryFormat, cfg.genAICommit)
+
+	core, err := generateCatalogue(ctx, coreRegistry, cfg.templatesDir)
 	if err != nil {
-		return fmt.Errorf("normalise core catalogue: %w", err)
+		return fmt.Errorf("core catalogue: %w", err)
+	}
+	genAI, err := generateCatalogue(ctx, genAIRegistry, cfg.templatesDir)
+	if err != nil {
+		return fmt.Errorf("genai catalogue: %w", err)
 	}
 
 	templateHash, err := hashDirectory(cfg.templatesDir)
@@ -78,16 +90,26 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 		return fmt.Errorf("hash templates: %w", err)
 	}
 
-	built := manifest{
-		Semconv:        registrySource{Version: version, Registry: registry},
+	manifestJSON, err := marshalIndented(catalogue.Manifest{
+		Semconv:        catalogue.SemconvSource{Version: version, Registry: coreRegistry},
+		GenAI:          catalogue.GenAISource{Commit: cfg.genAICommit, CommittedAt: committedAt, Registry: genAIRegistry},
 		WeaverImage:    weaverImage,
 		TemplateSHA256: templateHash,
+	})
+	if err != nil {
+		return fmt.Errorf("encode manifest: %w", err)
 	}
-	if err := writeOutputs(cfg.outputDir, catalogue, built); err != nil {
+
+	err = writeFiles(cfg.outputDir,
+		generatedFile{name: catalogue.CoreFile, content: core},
+		generatedFile{name: catalogue.GenAIFile, content: genAI},
+		generatedFile{name: catalogue.ManifestFile, content: manifestJSON},
+	)
+	if err != nil {
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "wrote %s catalogue for semconv %s\n", cfg.outputDir, version)
+	_, err = fmt.Fprintf(stdout, "wrote %s: semconv %s, genai %s\n", cfg.outputDir, version, cfg.genAICommit)
 	return err
 }
 
@@ -95,6 +117,7 @@ func parseConfig(args []string) (config, error) {
 	flags := flag.NewFlagSet("catalogue-gen", flag.ContinueOnError)
 	cfg := config{}
 	flags.StringVar(&cfg.semconvVersion, "semconv", latestVersion, "semantic-conventions release tag, or \"latest\"")
+	flags.StringVar(&cfg.genAICommit, "genai-commit", pinnedGenAICommit, "semantic-conventions-genai commit SHA")
 	flags.StringVar(&cfg.outputDir, "out", defaultOutputDir, "directory that receives the catalogue files")
 	flags.StringVar(&cfg.templatesDir, "templates", defaultTemplatesDir, "Weaver templates directory")
 	if err := flags.Parse(args); err != nil {
@@ -103,15 +126,17 @@ func parseConfig(args []string) (config, error) {
 	if cfg.semconvVersion != latestVersion && !releaseTagPattern.MatchString(cfg.semconvVersion) {
 		return config{}, fmt.Errorf("semconv version %q is not a release tag like v1.44.0", cfg.semconvVersion)
 	}
+	if !commitPattern.MatchString(cfg.genAICommit) {
+		return config{}, fmt.Errorf("genai commit %q is not a full 40-character SHA", cfg.genAICommit)
+	}
 	return cfg, nil
 }
 
-func resolveSemconvVersion(ctx context.Context, requested string) (string, error) {
+func resolveSemconvVersion(ctx context.Context, github githubClient, requested string) (string, error) {
 	if requested != latestVersion {
 		return requested, nil
 	}
-	client := &http.Client{Timeout: httpTimeout}
-	tag, err := fetchLatestReleaseTag(ctx, client, githubAPIBaseURL, coreRepository, os.Getenv("GITHUB_TOKEN"))
+	tag, err := github.latestReleaseTag(ctx, coreRepository)
 	if err != nil {
 		return "", fmt.Errorf("find latest semconv release: %w", err)
 	}
@@ -121,16 +146,21 @@ func resolveSemconvVersion(ctx context.Context, requested string) (string, error
 	return tag, nil
 }
 
-func writeOutputs(outputDir string, catalogue []byte, built manifest) error {
+func generateCatalogue(ctx context.Context, registry, templatesDir string) ([]byte, error) {
+	raw, err := generateWithWeaver(ctx, registry, templatesDir)
+	if err != nil {
+		return nil, err
+	}
+	return normaliseJSON(raw)
+}
+
+func writeFiles(outputDir string, files ...generatedFile) error {
 	if err := os.MkdirAll(outputDir, 0o755); err != nil {
 		return fmt.Errorf("create output directory: %w", err)
 	}
-	manifestJSON, err := marshalIndented(built)
-	if err != nil {
-		return fmt.Errorf("encode manifest: %w", err)
+	var errs []error
+	for _, file := range files {
+		errs = append(errs, os.WriteFile(filepath.Join(outputDir, file.name), file.content, 0o644))
 	}
-	return errors.Join(
-		os.WriteFile(filepath.Join(outputDir, coreCatalogueFile), catalogue, 0o644),
-		os.WriteFile(filepath.Join(outputDir, manifestFile), manifestJSON, 0o644),
-	)
+	return errors.Join(errs...)
 }

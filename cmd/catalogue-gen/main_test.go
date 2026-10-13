@@ -16,6 +16,8 @@ func Test_parseConfig(t *testing.T) {
 		{name: "accepts release tag", args: []string{"-semconv", "v1.44.0"}, wantVersion: "v1.44.0"},
 		{name: "rejects tag without v", args: []string{"-semconv", "1.44.0"}, wantFailure: true},
 		{name: "rejects url injection", args: []string{"-semconv", "v1.44.0.zip[model]#"}, wantFailure: true},
+		{name: "rejects short genai commit", args: []string{"-genai-commit", "5293eff"}, wantFailure: true},
+		{name: "rejects non-hex genai commit", args: []string{"-genai-commit", "main"}, wantFailure: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -31,6 +33,9 @@ func Test_parseConfig(t *testing.T) {
 			}
 			if cfg.semconvVersion != tt.wantVersion {
 				t.Errorf("version = %q, want %q", cfg.semconvVersion, tt.wantVersion)
+			}
+			if cfg.genAICommit != pinnedGenAICommit {
+				t.Errorf("genai commit = %q, want pinned %q", cfg.genAICommit, pinnedGenAICommit)
 			}
 		})
 	}

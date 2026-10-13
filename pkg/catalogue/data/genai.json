@@ -1,0 +1,3036 @@
+{
+  "attributes": [
+    {
+      "deprecated": null,
+      "name": "aws.bedrock.guardrail.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "aws.bedrock.knowledge_base.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.agent.description",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.agent.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.agent.name",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.agent.version",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.conversation.compacted",
+      "stability": "development",
+      "type": "boolean"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.conversation.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.data_source.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.embeddings.dimension.count",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.evaluation.explanation",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.evaluation.name",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.evaluation.score.label",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.evaluation.score.value",
+      "stability": "development",
+      "type": "double"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.input.messages",
+      "stability": "development",
+      "type": "any"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.main_agent.description",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.main_agent.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.main_agent.name",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.memory.query.text",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.memory.record.count",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.memory.record.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.memory.records",
+      "stability": "development",
+      "type": "any"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.memory.store.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.operation.name",
+      "stability": "development",
+      "type": "enum"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.output.messages",
+      "stability": "development",
+      "type": "any"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.output.type",
+      "stability": "development",
+      "type": "enum"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.prompt.name",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.prompt.variable",
+      "stability": "development",
+      "type": "template[string]"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.prompt.version",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.provider.name",
+      "stability": "development",
+      "type": "enum"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.choice.count",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.encoding_formats",
+      "stability": "development",
+      "type": "string[]"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.frequency_penalty",
+      "stability": "development",
+      "type": "double"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.max_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.model",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.presence_penalty",
+      "stability": "development",
+      "type": "double"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.previous_response.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.reasoning.level",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.seed",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.stop_sequences",
+      "stability": "development",
+      "type": "string[]"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.stream",
+      "stability": "development",
+      "type": "boolean"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.stream_cursor",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.temperature",
+      "stability": "development",
+      "type": "double"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.top_k",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.request.top_p",
+      "stability": "development",
+      "type": "double"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.response.finish_reasons",
+      "stability": "development",
+      "type": "string[]"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.response.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.response.model",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.response.status",
+      "stability": "development",
+      "type": "enum"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.response.time_to_first_chunk",
+      "stability": "development",
+      "type": "double"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.retrieval.documents",
+      "stability": "development",
+      "type": "any"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.retrieval.query.text",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.retrieval.top_k",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.skill.description",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.skill.name",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.skill.resource.name",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.skill.source.uri",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.system_instructions",
+      "stability": "development",
+      "type": "any"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.token.modality",
+      "stability": "development",
+      "type": "enum"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.tool.call.arguments",
+      "stability": "development",
+      "type": "any"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.tool.call.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.tool.call.result",
+      "stability": "development",
+      "type": "any"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.tool.definitions",
+      "stability": "development",
+      "type": "any"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.tool.description",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.tool.name",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.tool.type",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.audio.cache_read.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.audio.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.audio.output_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.cache_read.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.cache_write.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.image.cache_read.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.image.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.image.output_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.output_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.reasoning.output_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.text.cache_read.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.text.input_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.usage.text.output_tokens",
+      "stability": "development",
+      "type": "int"
+    },
+    {
+      "deprecated": null,
+      "name": "gen_ai.workflow.name",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "mcp.method.name",
+      "stability": "development",
+      "type": "enum"
+    },
+    {
+      "deprecated": null,
+      "name": "mcp.protocol.version",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "mcp.resource.uri",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "mcp.session.id",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "openai.api.type",
+      "stability": "development",
+      "type": "enum"
+    },
+    {
+      "deprecated": null,
+      "name": "openai.request.service_tier",
+      "stability": "development",
+      "type": "enum"
+    },
+    {
+      "deprecated": null,
+      "name": "openai.response.service_tier",
+      "stability": "development",
+      "type": "string"
+    },
+    {
+      "deprecated": null,
+      "name": "openai.response.system_fingerprint",
+      "stability": "development",
+      "type": "string"
+    }
+  ],
+  "entities": [
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.main_agent.description",
+          "requirement_level": "recommended",
+          "role": "descriptive"
+        },
+        {
+          "name": "gen_ai.main_agent.id",
+          "requirement_level": "required",
+          "role": "identifying"
+        },
+        {
+          "name": "gen_ai.main_agent.name",
+          "requirement_level": "recommended",
+          "role": "descriptive"
+        }
+      ],
+      "deprecated": null,
+      "name": "gen_ai.main_agent",
+      "stability": "development"
+    }
+  ],
+  "events": [
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.conversation.compacted",
+          "requirement_level": {
+            "recommended": "when available"
+          }
+        },
+        {
+          "name": "gen_ai.conversation.id",
+          "requirement_level": {
+            "conditionally_required": "If and only if the instrumented library has one readily available, or the user application provides one through OpenTelemetry context or library-specific mechanisms."
+          }
+        },
+        {
+          "name": "gen_ai.input.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.output.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.output.type",
+          "requirement_level": {
+            "conditionally_required": "When applicable and if the request includes an output format."
+          }
+        },
+        {
+          "name": "gen_ai.prompt.name",
+          "requirement_level": {
+            "conditionally_required": "when a named prompt template is used"
+          }
+        },
+        {
+          "name": "gen_ai.prompt.variable",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.prompt.version",
+          "requirement_level": {
+            "conditionally_required": "when `gen_ai.prompt.name` is set and a version is available"
+          }
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.choice.count",
+          "requirement_level": {
+            "conditionally_required": "If available, in the request, and !=1."
+          }
+        },
+        {
+          "name": "gen_ai.request.frequency_penalty",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.max_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.request.presence_penalty",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.previous_response.id",
+          "requirement_level": {
+            "recommended": "When available and if the request references a previous response."
+          }
+        },
+        {
+          "name": "gen_ai.request.reasoning.level",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.request.seed",
+          "requirement_level": {
+            "conditionally_required": "If applicable and if the request includes a seed."
+          }
+        },
+        {
+          "name": "gen_ai.request.stop_sequences",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.stream",
+          "requirement_level": {
+            "conditionally_required": "If and only if the request is streaming. If unset, the request is assumed to be non-streaming."
+          }
+        },
+        {
+          "name": "gen_ai.request.temperature",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.top_k",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.request.top_p",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.finish_reasons",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.id",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.time_to_first_chunk",
+          "requirement_level": {
+            "recommended": "If the request was a streaming request."
+          }
+        },
+        {
+          "name": "gen_ai.system_instructions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.definitions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.usage.audio.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.audio.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.audio.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.cache_write.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.input_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.usage.output_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.usage.reasoning.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.text.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.text.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.text.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "name": "gen_ai.client.inference.operation.details",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "exception.message",
+          "requirement_level": {
+            "conditionally_required": "Required if `exception.type` is not set, recommended otherwise."
+          }
+        },
+        {
+          "name": "exception.stacktrace",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "exception.type",
+          "requirement_level": {
+            "conditionally_required": "Required if `exception.message` is not set, recommended otherwise."
+          }
+        }
+      ],
+      "deprecated": null,
+      "name": "gen_ai.client.operation.exception",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.evaluation.explanation",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.evaluation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.evaluation.score.label",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.evaluation.score.value",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.response.id",
+          "requirement_level": {
+            "recommended": "When available."
+          }
+        }
+      ],
+      "deprecated": null,
+      "name": "gen_ai.evaluation.result",
+      "stability": "development"
+    }
+  ],
+  "metrics": [
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.client.inference.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.client.inference.operation.input_tokens",
+      "stability": "development",
+      "unit": "{token}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.client.inference.operation.output_tokens",
+      "stability": "development",
+      "unit": "{token}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.client.inference.time_per_output_chunk",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.client.inference.time_to_first_chunk",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.token.modality",
+          "requirement_level": "required"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "counter",
+      "name": "gen_ai.client.inference.usage.cache_read.input_tokens",
+      "stability": "development",
+      "unit": "{token}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.token.modality",
+          "requirement_level": "required"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "counter",
+      "name": "gen_ai.client.inference.usage.cache_write.input_tokens",
+      "stability": "development",
+      "unit": "{token}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.token.modality",
+          "requirement_level": "required"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "counter",
+      "name": "gen_ai.client.inference.usage.input_tokens",
+      "stability": "development",
+      "unit": "{token}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.token.modality",
+          "requirement_level": "required"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "counter",
+      "name": "gen_ai.client.inference.usage.output_tokens",
+      "stability": "development",
+      "unit": "{token}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.token.modality",
+          "requirement_level": "required"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "counter",
+      "name": "gen_ai.client.inference.usage.reasoning.output_tokens",
+      "stability": "development",
+      "unit": "{token}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": {
+            "conditionally_required": "If the operation involves a call to a GenAI provider."
+          }
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.client.operation.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": {
+            "conditionally_required": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.tool.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.tool.type",
+          "requirement_level": {
+            "recommended": "If available."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.execute_tool.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": {
+            "conditionally_required": "When available."
+          }
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "recommended": "If applicable."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.invoke_agent.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": "recommended"
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.invoke_agent.inference_calls",
+      "stability": "development",
+      "unit": "{inference_call}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": "recommended"
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.invoke_agent.tool_calls",
+      "stability": "development",
+      "unit": "{tool_call}"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.workflow.name",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.invoke_workflow.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.server.request.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.server.time_per_output_token",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "gen_ai.server.time_to_first_token",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If and only if the operation fails."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": {
+            "recommended": "SHOULD be set to `execute_tool` when the operation describes a tool call and SHOULD NOT be set otherwise.\n"
+          }
+        },
+        {
+          "name": "gen_ai.prompt.name",
+          "requirement_level": {
+            "conditionally_required": "When operation is related to a specific prompt."
+          }
+        },
+        {
+          "name": "gen_ai.prompt.variable",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.name",
+          "requirement_level": {
+            "conditionally_required": "When operation is related to a specific tool."
+          }
+        },
+        {
+          "name": "jsonrpc.protocol.version",
+          "requirement_level": {
+            "recommended": "When it's not `2.0`."
+          }
+        },
+        {
+          "name": "mcp.method.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "mcp.protocol.version",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "mcp.resource.uri",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "network.protocol.name",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.protocol.version",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.transport",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "rpc.response.status_code",
+          "requirement_level": {
+            "conditionally_required": "If response contains an error code."
+          }
+        },
+        {
+          "name": "server.address",
+          "requirement_level": {
+            "recommended": "If applicable."
+          }
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "recommended": "When `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "mcp.client.operation.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If and only if session ends with an error."
+          }
+        },
+        {
+          "name": "jsonrpc.protocol.version",
+          "requirement_level": {
+            "recommended": "When it's not `2.0`."
+          }
+        },
+        {
+          "name": "mcp.protocol.version",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "network.protocol.name",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.protocol.version",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.transport",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": {
+            "recommended": "If applicable."
+          }
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "recommended": "When `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "mcp.client.session.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If and only if the operation fails."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": {
+            "recommended": "SHOULD be set to `execute_tool` when the operation describes a tool call and SHOULD NOT be set otherwise.\n"
+          }
+        },
+        {
+          "name": "gen_ai.prompt.name",
+          "requirement_level": {
+            "conditionally_required": "When operation is related to a specific prompt."
+          }
+        },
+        {
+          "name": "gen_ai.prompt.variable",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.name",
+          "requirement_level": {
+            "conditionally_required": "When operation is related to a specific tool."
+          }
+        },
+        {
+          "name": "jsonrpc.protocol.version",
+          "requirement_level": {
+            "recommended": "When it's not `2.0`."
+          }
+        },
+        {
+          "name": "mcp.method.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "mcp.protocol.version",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "mcp.resource.uri",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "network.protocol.name",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.protocol.version",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.transport",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "rpc.response.status_code",
+          "requirement_level": {
+            "conditionally_required": "If response contains an error code."
+          }
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "mcp.server.operation.duration",
+      "stability": "development",
+      "unit": "s"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If and only if session ends with an error."
+          }
+        },
+        {
+          "name": "jsonrpc.protocol.version",
+          "requirement_level": {
+            "recommended": "When it's not `2.0`."
+          }
+        },
+        {
+          "name": "mcp.protocol.version",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "network.protocol.name",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.protocol.version",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.transport",
+          "requirement_level": "recommended"
+        }
+      ],
+      "deprecated": null,
+      "instrument": "histogram",
+      "name": "mcp.server.session.duration",
+      "stability": "development",
+      "unit": "s"
+    }
+  ],
+  "spans": [
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.conversation.compacted",
+          "requirement_level": {
+            "recommended": "when available"
+          }
+        },
+        {
+          "name": "gen_ai.conversation.id",
+          "requirement_level": {
+            "conditionally_required": "If and only if the instrumented library has one readily available, or the user application provides one through OpenTelemetry context or library-specific mechanisms."
+          }
+        },
+        {
+          "name": "gen_ai.input.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.output.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.output.type",
+          "requirement_level": {
+            "conditionally_required": "When applicable and if the request includes an output format."
+          }
+        },
+        {
+          "name": "gen_ai.prompt.name",
+          "requirement_level": {
+            "conditionally_required": "when a named prompt template is used"
+          }
+        },
+        {
+          "name": "gen_ai.prompt.variable",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.prompt.version",
+          "requirement_level": {
+            "conditionally_required": "when `gen_ai.prompt.name` is set and a version is available"
+          }
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.choice.count",
+          "requirement_level": {
+            "conditionally_required": "If available, in the request, and !=1."
+          }
+        },
+        {
+          "name": "gen_ai.request.frequency_penalty",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.max_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.request.presence_penalty",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.previous_response.id",
+          "requirement_level": {
+            "recommended": "When available and if the request references a previous response."
+          }
+        },
+        {
+          "name": "gen_ai.request.reasoning.level",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.request.seed",
+          "requirement_level": {
+            "conditionally_required": "If applicable and if the request includes a seed."
+          }
+        },
+        {
+          "name": "gen_ai.request.stop_sequences",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.stream",
+          "requirement_level": {
+            "conditionally_required": "If and only if the request is streaming. If unset, the request is assumed to be non-streaming."
+          }
+        },
+        {
+          "name": "gen_ai.request.temperature",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.top_k",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.request.top_p",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.finish_reasons",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.id",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.time_to_first_chunk",
+          "requirement_level": {
+            "recommended": "If the request was a streaming request."
+          }
+        },
+        {
+          "name": "gen_ai.system_instructions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.definitions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.usage.audio.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.audio.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.audio.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.cache_write.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.input_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.usage.output_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.usage.reasoning.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.text.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.text.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.text.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.client.inference",
+      "span_kind": "client",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.agent.description",
+          "requirement_level": {
+            "conditionally_required": "If provided by the application."
+          }
+        },
+        {
+          "name": "gen_ai.agent.id",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": {
+            "conditionally_required": "If provided by the application."
+          }
+        },
+        {
+          "name": "gen_ai.agent.version",
+          "requirement_level": {
+            "conditionally_required": "If provided by the application."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.system_instructions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.create_agent.client",
+      "span_kind": "client",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.embeddings.dimension.count",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.encoding_formats",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.usage.input_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.embeddings.client",
+      "span_kind": "client",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": {
+            "conditionally_required": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.conversation.id",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.tool.call.arguments",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.call.id",
+          "requirement_level": {
+            "recommended": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.tool.call.result",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.description",
+          "requirement_level": {
+            "recommended": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.tool.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.tool.type",
+          "requirement_level": {
+            "recommended": "If available."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.execute_tool.internal",
+      "span_kind": "internal",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.output.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.stream_cursor",
+          "requirement_level": {
+            "conditionally_required": "When the fetch resumes a streamed response from a prior position."
+          }
+        },
+        {
+          "name": "gen_ai.response.finish_reasons",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.id",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.response.model",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.status",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.system_instructions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.definitions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.fetch_response.client",
+      "span_kind": "client",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.agent.description",
+          "requirement_level": {
+            "conditionally_required": "When available."
+          }
+        },
+        {
+          "name": "gen_ai.agent.id",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": {
+            "conditionally_required": "When available."
+          }
+        },
+        {
+          "name": "gen_ai.agent.version",
+          "requirement_level": {
+            "conditionally_required": "When available."
+          }
+        },
+        {
+          "name": "gen_ai.conversation.id",
+          "requirement_level": {
+            "conditionally_required": "If and only if the instrumented library has one readily available, or the user application provides one through OpenTelemetry context or library-specific mechanisms."
+          }
+        },
+        {
+          "name": "gen_ai.data_source.id",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.input.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.output.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.output.type",
+          "requirement_level": {
+            "conditionally_required": "When applicable and if the request includes an output format."
+          }
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.request.choice.count",
+          "requirement_level": {
+            "conditionally_required": "If available, in the request, and !=1."
+          }
+        },
+        {
+          "name": "gen_ai.request.frequency_penalty",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.max_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "recommended": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.request.presence_penalty",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.previous_response.id",
+          "requirement_level": {
+            "recommended": "When available and if the request references a previous response."
+          }
+        },
+        {
+          "name": "gen_ai.request.seed",
+          "requirement_level": {
+            "conditionally_required": "If applicable and if the request includes a seed."
+          }
+        },
+        {
+          "name": "gen_ai.request.stop_sequences",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.temperature",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.top_p",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.finish_reasons",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.system_instructions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.definitions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.usage.audio.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.audio.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.audio.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.cache_write.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.image.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.input_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.usage.output_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.usage.text.cache_read.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.text.input_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.usage.text.output_tokens",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.invoke_agent.client",
+      "span_kind": "client",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.agent.description",
+          "requirement_level": {
+            "conditionally_required": "When available."
+          }
+        },
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": {
+            "conditionally_required": "When available."
+          }
+        },
+        {
+          "name": "gen_ai.conversation.id",
+          "requirement_level": {
+            "conditionally_required": "If and only if the instrumented library has one readily available, or the user application provides one through OpenTelemetry context or library-specific mechanisms."
+          }
+        },
+        {
+          "name": "gen_ai.data_source.id",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.input.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.output.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.output.type",
+          "requirement_level": {
+            "conditionally_required": "When applicable and if the request includes an output format."
+          }
+        },
+        {
+          "name": "gen_ai.request.choice.count",
+          "requirement_level": {
+            "conditionally_required": "If available, in the request, and !=1."
+          }
+        },
+        {
+          "name": "gen_ai.request.frequency_penalty",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.max_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "recommended": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.request.presence_penalty",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.seed",
+          "requirement_level": {
+            "conditionally_required": "If applicable and if the request includes a seed."
+          }
+        },
+        {
+          "name": "gen_ai.request.stop_sequences",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.temperature",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.request.top_p",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.response.finish_reasons",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.system_instructions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.definitions",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.usage.input_tokens",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "gen_ai.usage.output_tokens",
+          "requirement_level": "recommended"
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.invoke_agent.internal",
+      "span_kind": "internal",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.conversation.id",
+          "requirement_level": {
+            "conditionally_required": "If and only if the instrumented library has one readily available, or the user application provides one through OpenTelemetry context or library-specific mechanisms."
+          }
+        },
+        {
+          "name": "gen_ai.input.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.output.messages",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.workflow.name",
+          "requirement_level": {
+            "conditionally_required": "When available."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.invoke_workflow.internal",
+      "span_kind": "internal",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.memory.query.text",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.memory.record.count",
+          "requirement_level": {
+            "recommended": "If the operation involves memory records and the count is available."
+          }
+        },
+        {
+          "name": "gen_ai.memory.record.id",
+          "requirement_level": {
+            "conditionally_required": "When the operation applies to a specific memory record."
+          }
+        },
+        {
+          "name": "gen_ai.memory.records",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.memory.store.id",
+          "requirement_level": {
+            "conditionally_required": "If applicable."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": {
+            "conditionally_required": "If the operation is handled by a named external GenAI provider or service."
+          }
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.memory.client",
+      "span_kind": "client",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.agent.name",
+          "requirement_level": {
+            "conditionally_required": "When available."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.plan.internal",
+      "span_kind": "internal",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If the operation ended in an error."
+          }
+        },
+        {
+          "name": "gen_ai.data_source.id",
+          "requirement_level": {
+            "conditionally_required": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "gen_ai.provider.name",
+          "requirement_level": {
+            "conditionally_required": "When applicable."
+          }
+        },
+        {
+          "name": "gen_ai.request.model",
+          "requirement_level": {
+            "conditionally_required": "If available."
+          }
+        },
+        {
+          "name": "gen_ai.retrieval.documents",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.retrieval.query.text",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.retrieval.top_k",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.address",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "conditionally_required": "If `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.gen_ai.retrieval.client",
+      "span_kind": "client",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If and only if the operation fails."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": {
+            "recommended": "SHOULD be set to `execute_tool` when the operation describes a tool call and SHOULD NOT be set otherwise.\n"
+          }
+        },
+        {
+          "name": "gen_ai.prompt.name",
+          "requirement_level": {
+            "conditionally_required": "When operation is related to a specific prompt."
+          }
+        },
+        {
+          "name": "gen_ai.prompt.variable",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.call.arguments",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.call.result",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.name",
+          "requirement_level": {
+            "conditionally_required": "When operation is related to a specific tool."
+          }
+        },
+        {
+          "name": "jsonrpc.protocol.version",
+          "requirement_level": {
+            "recommended": "When it's not `2.0`."
+          }
+        },
+        {
+          "name": "jsonrpc.request.id",
+          "requirement_level": {
+            "conditionally_required": "When the client executes a request."
+          }
+        },
+        {
+          "name": "mcp.method.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "mcp.protocol.version",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "mcp.resource.uri",
+          "requirement_level": {
+            "conditionally_required": "When the client executes a request type that includes a resource URI parameter."
+          }
+        },
+        {
+          "name": "mcp.session.id",
+          "requirement_level": {
+            "recommended": "When the MCP request or notification is part of a session."
+          }
+        },
+        {
+          "name": "network.protocol.name",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.protocol.version",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.transport",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "rpc.response.status_code",
+          "requirement_level": {
+            "conditionally_required": "If response contains an error code."
+          }
+        },
+        {
+          "name": "server.address",
+          "requirement_level": {
+            "recommended": "If applicable."
+          }
+        },
+        {
+          "name": "server.port",
+          "requirement_level": {
+            "recommended": "When `server.address` is set."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.mcp.client",
+      "span_kind": "client",
+      "stability": "development"
+    },
+    {
+      "attributes": [
+        {
+          "name": "client.address",
+          "requirement_level": {
+            "recommended": "If applicable."
+          }
+        },
+        {
+          "name": "client.port",
+          "requirement_level": {
+            "recommended": "When `client.address` is set."
+          }
+        },
+        {
+          "name": "error.type",
+          "requirement_level": {
+            "conditionally_required": "If and only if the operation fails."
+          }
+        },
+        {
+          "name": "gen_ai.operation.name",
+          "requirement_level": {
+            "recommended": "SHOULD be set to `execute_tool` when the operation describes a tool call and SHOULD NOT be set otherwise.\n"
+          }
+        },
+        {
+          "name": "gen_ai.prompt.name",
+          "requirement_level": {
+            "conditionally_required": "When operation is related to a specific prompt."
+          }
+        },
+        {
+          "name": "gen_ai.prompt.variable",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.call.arguments",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.call.result",
+          "requirement_level": "opt_in"
+        },
+        {
+          "name": "gen_ai.tool.name",
+          "requirement_level": {
+            "conditionally_required": "When operation is related to a specific tool."
+          }
+        },
+        {
+          "name": "jsonrpc.protocol.version",
+          "requirement_level": {
+            "recommended": "When it's not `2.0`."
+          }
+        },
+        {
+          "name": "jsonrpc.request.id",
+          "requirement_level": {
+            "conditionally_required": "When the client executes a request."
+          }
+        },
+        {
+          "name": "mcp.method.name",
+          "requirement_level": "required"
+        },
+        {
+          "name": "mcp.protocol.version",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "mcp.resource.uri",
+          "requirement_level": {
+            "conditionally_required": "When the client executes a request type that includes a resource URI parameter."
+          }
+        },
+        {
+          "name": "mcp.session.id",
+          "requirement_level": {
+            "recommended": "When the MCP request or notification is part of a session."
+          }
+        },
+        {
+          "name": "network.protocol.name",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.protocol.version",
+          "requirement_level": {
+            "recommended": "When applicable."
+          }
+        },
+        {
+          "name": "network.transport",
+          "requirement_level": "recommended"
+        },
+        {
+          "name": "rpc.response.status_code",
+          "requirement_level": {
+            "conditionally_required": "If response contains an error code."
+          }
+        }
+      ],
+      "deprecated": null,
+      "id": "span.mcp.server",
+      "span_kind": "server",
+      "stability": "development"
+    }
+  ]
+}
