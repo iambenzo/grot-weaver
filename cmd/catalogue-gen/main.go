@@ -58,8 +58,9 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 		return err
 	}
 
+	httpClient := &http.Client{Timeout: httpTimeout}
 	github := githubClient{
-		httpClient: &http.Client{Timeout: httpTimeout},
+		httpClient: httpClient,
 		baseURL:    githubAPIBaseURL,
 		token:      os.Getenv("GITHUB_TOKEN"),
 	}
@@ -85,13 +86,19 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 		return fmt.Errorf("genai catalogue: %w", err)
 	}
 
+	schemaURL := schemaURLFor(version)
+	renames, err := buildRenameHistory(ctx, httpClient, schemaURL)
+	if err != nil {
+		return fmt.Errorf("rename history: %w", err)
+	}
+
 	templateHash, err := hashDirectory(cfg.templatesDir)
 	if err != nil {
 		return fmt.Errorf("hash templates: %w", err)
 	}
 
 	manifestJSON, err := marshalIndented(catalogue.Manifest{
-		Semconv:        catalogue.SemconvSource{Version: version, Registry: coreRegistry},
+		Semconv:        catalogue.SemconvSource{Version: version, Registry: coreRegistry, SchemaURL: schemaURL},
 		GenAI:          catalogue.GenAISource{Commit: cfg.genAICommit, CommittedAt: committedAt, Registry: genAIRegistry},
 		WeaverImage:    weaverImage,
 		TemplateSHA256: templateHash,
@@ -103,6 +110,7 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 	err = writeFiles(cfg.outputDir,
 		generatedFile{name: catalogue.CoreFile, content: core},
 		generatedFile{name: catalogue.GenAIFile, content: genAI},
+		generatedFile{name: catalogue.RenamesFile, content: renames},
 		generatedFile{name: catalogue.ManifestFile, content: manifestJSON},
 	)
 	if err != nil {
@@ -152,6 +160,18 @@ func generateCatalogue(ctx context.Context, registry, templatesDir string) ([]by
 		return nil, err
 	}
 	return normaliseJSON(raw)
+}
+
+func buildRenameHistory(ctx context.Context, client *http.Client, schemaURL string) ([]byte, error) {
+	content, err := fetchSchema(ctx, client, schemaURL)
+	if err != nil {
+		return nil, err
+	}
+	history, err := parseRenameHistory(content)
+	if err != nil {
+		return nil, err
+	}
+	return marshalIndented(history)
 }
 
 func writeFiles(outputDir string, files ...generatedFile) error {

@@ -17,8 +17,9 @@ const (
 type Source string
 
 const (
-	SourceCore  Source = "core"
-	SourceGenAI Source = "genai"
+	SourceCore          Source = "core"
+	SourceGenAI         Source = "genai"
+	SourceRenameHistory Source = "rename_history"
 )
 
 type Deprecation struct {
@@ -116,8 +117,9 @@ type Manifest struct {
 }
 
 type SemconvSource struct {
-	Version  string `json:"version"`
-	Registry string `json:"registry"`
+	Version   string `json:"version"`
+	Registry  string `json:"registry"`
+	SchemaURL string `json:"schema_url"`
 }
 
 type GenAISource struct {

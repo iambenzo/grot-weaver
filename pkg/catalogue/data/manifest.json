@@ -1,7 +1,8 @@
 {
   "semconv": {
     "version": "v1.44.0",
-    "registry": "https://github.com/open-telemetry/semantic-conventions/archive/refs/tags/v1.44.0.zip[model]"
+    "registry": "https://github.com/open-telemetry/semantic-conventions/archive/refs/tags/v1.44.0.zip[model]",
+    "schema_url": "https://opentelemetry.io/schemas/1.44.0"
   },
   "genai": {
     "commit": "5293effb97f18ddb0602da884dadee6119d67679",

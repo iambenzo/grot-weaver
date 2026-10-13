@@ -9,12 +9,16 @@ import (
 const (
 	CoreFile     = "core.json"
 	GenAIFile    = "genai.json"
+	RenamesFile  = "renames.json"
 	ManifestFile = "manifest.json"
 )
 
 type Catalogue struct {
-	Manifest Manifest
-	Registry Registry
+	Manifest       Manifest
+	Registry       Registry
+	Renames        RenameHistory
+	attributeIndex map[string]int
+	metricIndex    map[string]int
 }
 
 func Load(fsys fs.FS) (*Catalogue, error) {
@@ -33,7 +37,22 @@ func Load(fsys fs.FS) (*Catalogue, error) {
 		return nil, err
 	}
 
-	return &Catalogue{Manifest: manifest, Registry: Overlay(core, genAI)}, nil
+	var renames RenameHistory
+	if err := readJSON(fsys, RenamesFile, &renames); err != nil {
+		return nil, err
+	}
+
+	return newCatalogue(manifest, Overlay(core, genAI), renames.inVersionOrder()), nil
+}
+
+func newCatalogue(manifest Manifest, registry Registry, renames RenameHistory) *Catalogue {
+	return &Catalogue{
+		Manifest:       manifest,
+		Registry:       registry,
+		Renames:        renames,
+		attributeIndex: indexByName(registry.Attributes, func(a Attribute) string { return a.Name }),
+		metricIndex:    indexByName(registry.Metrics, func(m Metric) string { return m.Name }),
+	}
 }
 
 func readRegistry(fsys fs.FS, name string, source Source) (Registry, error) {

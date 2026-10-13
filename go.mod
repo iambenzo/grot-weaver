@@ -2,7 +2,10 @@ module github.com/iambenzo/otel-semconv-compliance
 
 go 1.26.5
 
-require github.com/grafana/grafana-plugin-sdk-go v0.297.0
+require (
+	github.com/grafana/grafana-plugin-sdk-go v0.297.0
+	go.yaml.in/yaml/v3 v3.0.5
+)
 
 require (
 	github.com/BurntSushi/toml v1.6.0 // indirect

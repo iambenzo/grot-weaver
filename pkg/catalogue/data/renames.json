@@ -1,0 +1,1795 @@
+{
+  "schema_url": "https://opentelemetry.io/schemas/1.44.0",
+  "attributes": [
+    {
+      "from": "db.cassandra.keyspace",
+      "to": "db.name",
+      "version": "1.8.0",
+      "scope": "spans"
+    },
+    {
+      "from": "db.hbase.namespace",
+      "to": "db.name",
+      "version": "1.8.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.ip",
+      "to": "net.sock.host.addr",
+      "version": "1.13.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.peer.ip",
+      "to": "net.sock.peer.addr",
+      "version": "1.13.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.retry_count",
+      "to": "http.resend_count",
+      "version": "1.15.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.consumer_id",
+      "to": "messaging.consumer.id",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.conversation_id",
+      "to": "messaging.message.conversation_id",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.destination",
+      "to": "messaging.destination.name",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.destination_kind",
+      "to": "messaging.destination.kind",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.kafka.consumer_group",
+      "to": "messaging.kafka.consumer.group",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.kafka.message_key",
+      "to": "messaging.kafka.message.key",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.kafka.partition",
+      "to": "messaging.kafka.destination.partition",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.kafka.tombstone",
+      "to": "messaging.kafka.message.tombstone",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.message_id",
+      "to": "messaging.message.id",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.message_payload_compressed_size_bytes",
+      "to": "messaging.message.payload_compressed_size_bytes",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.message_payload_size_bytes",
+      "to": "messaging.message.payload_size_bytes",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.protocol",
+      "to": "net.app.protocol.name",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.protocol_version",
+      "to": "net.app.protocol.version",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.rabbitmq.routing_key",
+      "to": "messaging.rabbitmq.destination.routing_key",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.rocketmq.message_keys",
+      "to": "messaging.rocketmq.message.keys",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.rocketmq.message_tag",
+      "to": "messaging.rocketmq.message.tag",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.rocketmq.message_type",
+      "to": "messaging.rocketmq.message.type",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.temp_destination",
+      "to": "messaging.destination.temporary",
+      "version": "1.17.0",
+      "scope": "spans"
+    },
+    {
+      "from": "browser.user_agent",
+      "to": "user_agent.original",
+      "version": "1.19.0",
+      "scope": "resources"
+    },
+    {
+      "from": "faas.execution",
+      "to": "faas.invocation_id",
+      "version": "1.19.0",
+      "scope": "spans"
+    },
+    {
+      "from": "faas.id",
+      "to": "cloud.resource_id",
+      "version": "1.19.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.user_agent",
+      "to": "user_agent.original",
+      "version": "1.19.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.app.protocol.name",
+      "to": "net.protocol.name",
+      "version": "1.20.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.app.protocol.version",
+      "to": "net.protocol.version",
+      "version": "1.20.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.client_ip",
+      "to": "client.address",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.method",
+      "to": "http.request.method",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.request_content_length",
+      "to": "http.request.body.size",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.response_content_length",
+      "to": "http.response.body.size",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.scheme",
+      "to": "url.scheme",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.status_code",
+      "to": "http.response.status_code",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "http.url",
+      "to": "url.full",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.kafka.client_id",
+      "to": "messaging.client_id",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.rocketmq.client_id",
+      "to": "messaging.client_id",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.carrier.icc",
+      "to": "network.carrier.icc",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.carrier.mcc",
+      "to": "network.carrier.mcc",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.carrier.mnc",
+      "to": "network.carrier.mnc",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.carrier.name",
+      "to": "network.carrier.name",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.connection.subtype",
+      "to": "network.connection.subtype",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.connection.type",
+      "to": "network.connection.type",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.name",
+      "to": "server.address",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.host.port",
+      "to": "server.port",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.protocol.name",
+      "to": "network.protocol.name",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.protocol.version",
+      "to": "network.protocol.version",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.sock.host.addr",
+      "to": "server.socket.address",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.sock.host.port",
+      "to": "server.socket.port",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "net.sock.peer.name",
+      "to": "server.socket.domain",
+      "version": "1.21.0",
+      "scope": "spans"
+    },
+    {
+      "from": "action",
+      "to": "jvm.gc.action",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "jvm.gc.duration"
+      ]
+    },
+    {
+      "from": "cpu",
+      "to": "system.cpu.logical_number",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.cpu.time",
+        "system.cpu.utilization"
+      ]
+    },
+    {
+      "from": "daemon",
+      "to": "thread.daemon",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "jvm.threads.count"
+      ]
+    },
+    {
+      "from": "device",
+      "to": "system.device",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.disk.io",
+        "system.disk.io_time",
+        "system.disk.merged",
+        "system.disk.operation_time",
+        "system.disk.operations"
+      ]
+    },
+    {
+      "from": "device",
+      "to": "system.device",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.filesystem.usage",
+        "system.filesystem.utilization"
+      ]
+    },
+    {
+      "from": "device",
+      "to": "system.device",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.network.connections",
+        "system.network.dropped",
+        "system.network.errors",
+        "system.network.io",
+        "system.network.packets"
+      ]
+    },
+    {
+      "from": "direction",
+      "to": "system.disk.direction",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.disk.io",
+        "system.disk.io_time",
+        "system.disk.merged",
+        "system.disk.operation_time",
+        "system.disk.operations"
+      ]
+    },
+    {
+      "from": "direction",
+      "to": "system.network.direction",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.network.connections",
+        "system.network.dropped",
+        "system.network.errors",
+        "system.network.io",
+        "system.network.packets"
+      ]
+    },
+    {
+      "from": "direction",
+      "to": "system.paging.direction",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.paging.faults",
+        "system.paging.operations"
+      ]
+    },
+    {
+      "from": "mode",
+      "to": "system.filesystem.mode",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.filesystem.usage",
+        "system.filesystem.utilization"
+      ]
+    },
+    {
+      "from": "mountpoint",
+      "to": "system.filesystem.mountpoint",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.filesystem.usage",
+        "system.filesystem.utilization"
+      ]
+    },
+    {
+      "from": "name",
+      "to": "jvm.gc.name",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "jvm.gc.duration"
+      ]
+    },
+    {
+      "from": "pool",
+      "to": "jvm.buffer.pool.name",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "jvm.buffer.count",
+        "jvm.buffer.memory.limit",
+        "jvm.buffer.memory.usage"
+      ]
+    },
+    {
+      "from": "pool",
+      "to": "jvm.memory.pool.name",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "jvm.memory.committed",
+        "jvm.memory.init",
+        "jvm.memory.limit",
+        "jvm.memory.usage",
+        "jvm.memory.usage_after_last_gc"
+      ]
+    },
+    {
+      "from": "protocol",
+      "to": "network.protocol",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.network.connections",
+        "system.network.dropped",
+        "system.network.errors",
+        "system.network.io",
+        "system.network.packets"
+      ]
+    },
+    {
+      "from": "state",
+      "to": "system.cpu.state",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.cpu.time",
+        "system.cpu.utilization"
+      ]
+    },
+    {
+      "from": "state",
+      "to": "system.filesystem.state",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.filesystem.usage",
+        "system.filesystem.utilization"
+      ]
+    },
+    {
+      "from": "state",
+      "to": "system.memory.state",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.memory.usage",
+        "system.memory.utilization"
+      ]
+    },
+    {
+      "from": "state",
+      "to": "system.network.state",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.network.connections",
+        "system.network.dropped",
+        "system.network.errors",
+        "system.network.io",
+        "system.network.packets"
+      ]
+    },
+    {
+      "from": "state",
+      "to": "system.paging.state",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.paging.usage",
+        "system.paging.utilization"
+      ]
+    },
+    {
+      "from": "status",
+      "to": "system.processes.status",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.processes.count"
+      ]
+    },
+    {
+      "from": "type",
+      "to": "jvm.memory.type",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "jvm.memory.committed",
+        "jvm.memory.init",
+        "jvm.memory.limit",
+        "jvm.memory.usage",
+        "jvm.memory.usage_after_last_gc"
+      ]
+    },
+    {
+      "from": "type",
+      "to": "system.filesystem.type",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.filesystem.usage",
+        "system.filesystem.utilization"
+      ]
+    },
+    {
+      "from": "type",
+      "to": "system.paging.type",
+      "version": "1.22.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.paging.faults",
+        "system.paging.operations"
+      ]
+    },
+    {
+      "from": "telemetry.auto.version",
+      "to": "telemetry.distro.version",
+      "version": "1.22.0",
+      "scope": "resources"
+    },
+    {
+      "from": "http.resend_count",
+      "to": "http.request.resend_count",
+      "version": "1.22.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.message.payload_size_bytes",
+      "to": "messaging.message.body.size",
+      "version": "1.22.0",
+      "scope": "spans"
+    },
+    {
+      "from": "thread.daemon",
+      "to": "jvm.thread.daemon",
+      "version": "1.23.0",
+      "scope": "metrics",
+      "metrics": [
+        "jvm.thread.count"
+      ]
+    },
+    {
+      "from": "system.disk.io.direction",
+      "to": "disk.io.direction",
+      "version": "1.24.0",
+      "scope": "metrics"
+    },
+    {
+      "from": "system.network.io.direction",
+      "to": "network.io.direction",
+      "version": "1.24.0",
+      "scope": "metrics"
+    },
+    {
+      "from": "message.compressed_size",
+      "to": "rpc.message.compressed_size",
+      "version": "1.25.0",
+      "scope": "all"
+    },
+    {
+      "from": "message.id",
+      "to": "rpc.message.id",
+      "version": "1.25.0",
+      "scope": "all"
+    },
+    {
+      "from": "message.type",
+      "to": "rpc.message.type",
+      "version": "1.25.0",
+      "scope": "all"
+    },
+    {
+      "from": "message.uncompressed_size",
+      "to": "rpc.message.uncompressed_size",
+      "version": "1.25.0",
+      "scope": "all"
+    },
+    {
+      "from": "container.labels",
+      "to": "container.label",
+      "version": "1.25.0",
+      "scope": "metrics"
+    },
+    {
+      "from": "direction",
+      "to": "disk.io.direction",
+      "version": "1.25.0",
+      "scope": "metrics",
+      "metrics": [
+        "process.disk.io"
+      ]
+    },
+    {
+      "from": "direction",
+      "to": "network.io.direction",
+      "version": "1.25.0",
+      "scope": "metrics",
+      "metrics": [
+        "process.network.io"
+      ]
+    },
+    {
+      "from": "k8s.pod.labels",
+      "to": "k8s.pod.label",
+      "version": "1.25.0",
+      "scope": "metrics"
+    },
+    {
+      "from": "state",
+      "to": "process.cpu.state",
+      "version": "1.25.0",
+      "scope": "metrics",
+      "metrics": [
+        "process.cpu.time",
+        "process.cpu.utilization"
+      ]
+    },
+    {
+      "from": "system.processes.status",
+      "to": "system.process.status",
+      "version": "1.25.0",
+      "scope": "metrics",
+      "metrics": [
+        "system.processes.count"
+      ]
+    },
+    {
+      "from": "type",
+      "to": "process.context_switch_type",
+      "version": "1.25.0",
+      "scope": "metrics",
+      "metrics": [
+        "process.context_switches"
+      ]
+    },
+    {
+      "from": "type",
+      "to": "process.paging.fault_type",
+      "version": "1.25.0",
+      "scope": "metrics",
+      "metrics": [
+        "process.paging.faults"
+      ]
+    },
+    {
+      "from": "db.cassandra.table",
+      "to": "db.collection.name",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "db.cosmosdb.container",
+      "to": "db.collection.name",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "db.mongodb.collection",
+      "to": "db.collection.name",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "db.name",
+      "to": "db.namespace",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "db.operation",
+      "to": "db.operation.name",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "db.sql.table",
+      "to": "db.collection.name",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "db.statement",
+      "to": "db.query.text",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.kafka.destination.partition",
+      "to": "messaging.destination.partition.id",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "messaging.operation",
+      "to": "messaging.operation.type",
+      "version": "1.25.0",
+      "scope": "spans"
+    },
+    {
+      "from": "enduser.id",
+      "to": "user.id",
+      "version": "1.26.0",
+      "scope": "all"
+    },
+    {
+      "from": "messaging.client_id",
+      "to": "messaging.client.id",
+      "version": "1.26.0",
+      "scope": "metrics"
+    },
+    {
+      "from": "pool.name",
+      "to": "db.client.connections.pool.name",
+      "version": "1.26.0",
+      "scope": "metrics",
+      "metrics": [
+        "db.client.connections.create_time",
+        "db.client.connections.idle.max",
+        "db.client.connections.idle.min",
+        "db.client.connections.max",
+        "db.client.connections.pending_requests",
+        "db.client.connections.timeouts",
+        "db.client.connections.usage",
+        "db.client.connections.use_time",
+        "db.client.connections.wait_time"
+      ]
+    },
+    {
+      "from": "state",
+      "to": "db.client.connections.state",
+      "version": "1.26.0",
+      "scope": "metrics",
+      "metrics": [
+        "db.client.connections.usage"
+      ]
+    },
+    {
+      "from": "deployment.environment",
+      "to": "deployment.environment.name",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "gen_ai.usage.completion_tokens",
+      "to": "gen_ai.usage.output_tokens",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "gen_ai.usage.prompt_tokens",
+      "to": "gen_ai.usage.input_tokens",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "messaging.eventhubs.consumer.group",
+      "to": "messaging.consumer.group.name",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "messaging.kafka.consumer.group",
+      "to": "messaging.consumer.group.name",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "messaging.kafka.message.offset",
+      "to": "messaging.kafka.offset",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "messaging.rocketmq.client_group",
+      "to": "messaging.consumer.group.name",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "messaging.servicebus.destination.subscription_name",
+      "to": "messaging.destination.subscription.name",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "tls.client.server_name",
+      "to": "server.address",
+      "version": "1.27.0",
+      "scope": "all"
+    },
+    {
+      "from": "container.cpu.state",
+      "to": "cpu.mode",
+      "version": "1.27.0",
+      "scope": "metrics",
+      "metrics": [
+        "container.cpu.time",
+        "process.cpu.time",
+        "process.cpu.utilization",
+        "system.cpu.time",
+        "system.cpu.utilization"
+      ]
+    },
+    {
+      "from": "db.client.connections.pool.name",
+      "to": "db.client.connection.pool.name",
+      "version": "1.27.0",
+      "scope": "metrics",
+      "metrics": [
+        "db.client.connection.count",
+        "db.client.connection.create_time",
+        "db.client.connection.idle.max",
+        "db.client.connection.idle.min",
+        "db.client.connection.max",
+        "db.client.connection.pending_requests",
+        "db.client.connection.timeouts",
+        "db.client.connection.use_time",
+        "db.client.connection.wait_time"
+      ]
+    },
+    {
+      "from": "db.client.connections.state",
+      "to": "db.client.connection.state",
+      "version": "1.27.0",
+      "scope": "metrics",
+      "metrics": [
+        "db.client.connection.count"
+      ]
+    },
+    {
+      "from": "process.cpu.state",
+      "to": "cpu.mode",
+      "version": "1.27.0",
+      "scope": "metrics",
+      "metrics": [
+        "container.cpu.time",
+        "process.cpu.time",
+        "process.cpu.utilization",
+        "system.cpu.time",
+        "system.cpu.utilization"
+      ]
+    },
+    {
+      "from": "system.cpu.state",
+      "to": "cpu.mode",
+      "version": "1.27.0",
+      "scope": "metrics",
+      "metrics": [
+        "container.cpu.time",
+        "process.cpu.time",
+        "process.cpu.utilization",
+        "system.cpu.time",
+        "system.cpu.utilization"
+      ]
+    },
+    {
+      "from": "db.elasticsearch.cluster.name",
+      "to": "db.namespace",
+      "version": "1.27.0",
+      "scope": "spans"
+    },
+    {
+      "from": "process.executable.build_id.profiling",
+      "to": "process.executable.build_id.htlhash",
+      "version": "1.29.0",
+      "scope": "all"
+    },
+    {
+      "from": "vcs.repository.change.id",
+      "to": "vcs.change.id",
+      "version": "1.29.0",
+      "scope": "all"
+    },
+    {
+      "from": "vcs.repository.change.title",
+      "to": "vcs.change.title",
+      "version": "1.29.0",
+      "scope": "all"
+    },
+    {
+      "from": "vcs.repository.ref.name",
+      "to": "vcs.ref.head.name",
+      "version": "1.29.0",
+      "scope": "all"
+    },
+    {
+      "from": "vcs.repository.ref.revision",
+      "to": "vcs.ref.head.revision",
+      "version": "1.29.0",
+      "scope": "all"
+    },
+    {
+      "from": "vcs.repository.ref.type",
+      "to": "vcs.ref.head.type",
+      "version": "1.29.0",
+      "scope": "all"
+    },
+    {
+      "from": "system.device",
+      "to": "network.interface.name",
+      "version": "1.29.0",
+      "scope": "metrics",
+      "metrics": [
+        "container.network.io",
+        "system.network.connections",
+        "system.network.dropped",
+        "system.network.errors",
+        "system.network.io"
+      ]
+    },
+    {
+      "from": "code.column",
+      "to": "code.column.number",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "code.filepath",
+      "to": "code.file.path",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "code.function",
+      "to": "code.function.name",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "code.lineno",
+      "to": "code.line.number",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cassandra.consistency_level",
+      "to": "cassandra.consistency.level",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cassandra.coordinator.dc",
+      "to": "cassandra.coordinator.dc",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cassandra.coordinator.id",
+      "to": "cassandra.coordinator.id",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cassandra.idempotence",
+      "to": "cassandra.query.idempotent",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cassandra.page_size",
+      "to": "cassandra.page.size",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cassandra.speculative_execution_count",
+      "to": "cassandra.speculative_execution.count",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cosmosdb.client_id",
+      "to": "azure.client.id",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cosmosdb.connection_mode",
+      "to": "azure.cosmosdb.connection.mode",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cosmosdb.consistency_level",
+      "to": "azure.cosmosdb.consistency.level",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cosmosdb.regions_contacted",
+      "to": "azure.cosmosdb.operation.contacted_regions",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cosmosdb.request_charge",
+      "to": "azure.cosmosdb.operation.request_charge",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cosmosdb.request_content_length",
+      "to": "azure.cosmosdb.request.body.size",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.cosmosdb.sub_status_code",
+      "to": "azure.cosmosdb.response.sub_status_code",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.elasticsearch.node.name",
+      "to": "elasticsearch.node.name",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "db.system",
+      "to": "db.system.name",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "gen_ai.openai.request.seed",
+      "to": "gen_ai.request.seed",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "system.network.state",
+      "to": "network.connection.state",
+      "version": "1.30.0",
+      "scope": "all"
+    },
+    {
+      "from": "android.state",
+      "to": "android.app.state",
+      "version": "1.31.0",
+      "scope": "all"
+    },
+    {
+      "from": "io.state",
+      "to": "ios.app.state",
+      "version": "1.31.0",
+      "scope": "all"
+    },
+    {
+      "from": "system.cpu.logical_number",
+      "to": "cpu.logical_number",
+      "version": "1.31.0",
+      "scope": "metrics"
+    },
+    {
+      "from": "feature_flag.evaluation.reason",
+      "to": "feature_flag.result.reason",
+      "version": "1.32.0",
+      "scope": "all"
+    },
+    {
+      "from": "feature_flag.variant",
+      "to": "feature_flag.result.variant",
+      "version": "1.32.0",
+      "scope": "all"
+    },
+    {
+      "from": "feature_flag.evaluation.error.message",
+      "to": "error.message",
+      "version": "1.33.0",
+      "scope": "all"
+    },
+    {
+      "from": "feature_flag.provider_name",
+      "to": "feature_flag.provider.name",
+      "version": "1.33.0",
+      "scope": "all"
+    },
+    {
+      "from": "az.namespace",
+      "to": "azure.resource_provider.namespace",
+      "version": "1.35.0",
+      "scope": "all"
+    },
+    {
+      "from": "az.service_request_id",
+      "to": "azure.service.request.id",
+      "version": "1.35.0",
+      "scope": "all"
+    },
+    {
+      "from": "android.state",
+      "to": "android.app.state",
+      "version": "1.37.0",
+      "scope": "all"
+    },
+    {
+      "from": "container.runtime",
+      "to": "container.runtime.name",
+      "version": "1.37.0",
+      "scope": "all"
+    },
+    {
+      "from": "enduser.role",
+      "to": "user.roles",
+      "version": "1.37.0",
+      "scope": "all"
+    },
+    {
+      "from": "gen_ai.openai.request.service_tier",
+      "to": "openai.request.service_tier",
+      "version": "1.37.0",
+      "scope": "all"
+    },
+    {
+      "from": "gen_ai.openai.response.service_tier",
+      "to": "openai.response.service_tier",
+      "version": "1.37.0",
+      "scope": "all"
+    },
+    {
+      "from": "gen_ai.openai.response.system_fingerprint",
+      "to": "openai.response.system_fingerprint",
+      "version": "1.37.0",
+      "scope": "all"
+    },
+    {
+      "from": "gen_ai.system",
+      "to": "gen_ai.provider.name",
+      "version": "1.37.0",
+      "scope": "all"
+    },
+    {
+      "from": "ios.state",
+      "to": "ios.app.state",
+      "version": "1.37.0",
+      "scope": "all"
+    },
+    {
+      "from": "process.context_switch_type",
+      "to": "process.context_switch.type",
+      "version": "1.38.0",
+      "scope": "all"
+    },
+    {
+      "from": "process.paging.fault_type",
+      "to": "system.paging.fault.type",
+      "version": "1.38.0",
+      "scope": "all"
+    },
+    {
+      "from": "system.cpu.logical_number",
+      "to": "cpu.logical_number",
+      "version": "1.38.0",
+      "scope": "all"
+    },
+    {
+      "from": "system.paging.type",
+      "to": "system.paging.fault.type",
+      "version": "1.38.0",
+      "scope": "all"
+    },
+    {
+      "from": "system.process.status",
+      "to": "process.state",
+      "version": "1.38.0",
+      "scope": "all"
+    },
+    {
+      "from": "system.processes.status",
+      "to": "process.state",
+      "version": "1.38.0",
+      "scope": "all"
+    },
+    {
+      "from": "linux.memory.slab.state",
+      "to": "system.memory.linux.slab.state",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "peer.service",
+      "to": "service.peer.name",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "rpc.connect_rpc.error_code",
+      "to": "rpc.response.status_code",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "rpc.connect_rpc.request.metadata",
+      "to": "rpc.request.metadata",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "rpc.connect_rpc.response.metadata",
+      "to": "rpc.response.metadata",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "rpc.grpc.request.metadata",
+      "to": "rpc.request.metadata",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "rpc.grpc.response.metadata",
+      "to": "rpc.response.metadata",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "rpc.jsonrpc.request_id",
+      "to": "jsonrpc.request.id",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "rpc.jsonrpc.version",
+      "to": "jsonrpc.protocol.version",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "rpc.system",
+      "to": "rpc.system.name",
+      "version": "1.39.0",
+      "scope": "all"
+    },
+    {
+      "from": "feature_flag.evaluation.error.message",
+      "to": "feature_flag.error.message",
+      "version": "1.40.0",
+      "scope": "all"
+    }
+  ],
+  "metrics": [
+    {
+      "from": "process.runtime.jvm.cpu.utilization",
+      "to": "process.runtime.jvm.cpu.recent_utilization",
+      "version": "1.21.0"
+    },
+    {
+      "from": "http.client.duration",
+      "to": "http.client.request.duration",
+      "version": "1.22.0"
+    },
+    {
+      "from": "http.server.duration",
+      "to": "http.server.request.duration",
+      "version": "1.22.0"
+    },
+    {
+      "from": "http.server.request.size",
+      "to": "http.server.request.body.size",
+      "version": "1.22.0"
+    },
+    {
+      "from": "http.server.response.size",
+      "to": "http.server.response.body.size",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.buffer.count",
+      "to": "jvm.buffer.count",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.buffer.limit",
+      "to": "jvm.buffer.memory.limit",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.buffer.usage",
+      "to": "jvm.buffer.memory.usage",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.classes.current_loaded",
+      "to": "jvm.class.count",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.classes.loaded",
+      "to": "jvm.class.loaded",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.classes.unloaded",
+      "to": "jvm.class.unloaded",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.cpu.recent_utilization",
+      "to": "jvm.cpu.recent_utilization",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.cpu.time",
+      "to": "jvm.cpu.time",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.gc.duration",
+      "to": "jvm.gc.duration",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.memory.committed",
+      "to": "jvm.memory.committed",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.memory.init",
+      "to": "jvm.memory.init",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.memory.limit",
+      "to": "jvm.memory.limit",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.memory.usage",
+      "to": "jvm.memory.usage",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.memory.usage_after_last_gc",
+      "to": "jvm.memory.usage_after_last_gc",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.system.cpu.load_1m",
+      "to": "jvm.system.cpu.load_1m",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.system.cpu.utilization",
+      "to": "jvm.system.cpu.utilization",
+      "version": "1.22.0"
+    },
+    {
+      "from": "process.runtime.jvm.threads.count",
+      "to": "jvm.thread.count",
+      "version": "1.22.0"
+    },
+    {
+      "from": "jvm.memory.usage",
+      "to": "jvm.memory.used",
+      "version": "1.24.0"
+    },
+    {
+      "from": "jvm.memory.usage_after_last_gc",
+      "to": "jvm.memory.used_after_last_gc",
+      "version": "1.24.0"
+    },
+    {
+      "from": "process.open_file_descriptors",
+      "to": "process.open_file_descriptor.count",
+      "version": "1.25.0"
+    },
+    {
+      "from": "process.threads",
+      "to": "process.thread.count",
+      "version": "1.25.0"
+    },
+    {
+      "from": "system.processes.count",
+      "to": "system.process.count",
+      "version": "1.25.0"
+    },
+    {
+      "from": "system.processes.created",
+      "to": "system.process.created",
+      "version": "1.25.0"
+    },
+    {
+      "from": "db.client.connections.idle.max",
+      "to": "db.client.connection.idle.max",
+      "version": "1.26.0"
+    },
+    {
+      "from": "db.client.connections.idle.min",
+      "to": "db.client.connection.idle.min",
+      "version": "1.26.0"
+    },
+    {
+      "from": "db.client.connections.max",
+      "to": "db.client.connection.max",
+      "version": "1.26.0"
+    },
+    {
+      "from": "db.client.connections.pending_requests",
+      "to": "db.client.connection.pending_requests",
+      "version": "1.26.0"
+    },
+    {
+      "from": "db.client.connections.timeouts",
+      "to": "db.client.connection.timeouts",
+      "version": "1.26.0"
+    },
+    {
+      "from": "db.client.connections.usage",
+      "to": "db.client.connection.count",
+      "version": "1.26.0"
+    },
+    {
+      "from": "jvm.buffer.memory.usage",
+      "to": "jvm.buffer.memory.used",
+      "version": "1.27.0"
+    },
+    {
+      "from": "messaging.publish.messages",
+      "to": "messaging.client.published.messages",
+      "version": "1.27.0"
+    },
+    {
+      "from": "messaging.client.published.messages",
+      "to": "messaging.client.sent.messages",
+      "version": "1.28.0"
+    },
+    {
+      "from": "db.client.cosmosdb.active_instance.count",
+      "to": "azure.cosmosdb.client.active_instance.count",
+      "version": "1.30.0"
+    },
+    {
+      "from": "db.client.cosmosdb.operation.request_charge",
+      "to": "azure.cosmosdb.client.operation.request_charge",
+      "version": "1.30.0"
+    },
+    {
+      "from": "k8s.replication_controller.available_pods",
+      "to": "k8s.replicationcontroller.available_pods",
+      "version": "1.31.0"
+    },
+    {
+      "from": "k8s.replication_controller.desired_pods",
+      "to": "k8s.replicationcontroller.desired_pods",
+      "version": "1.31.0"
+    },
+    {
+      "from": "system.cpu.frequency",
+      "to": "cpu.frequency",
+      "version": "1.31.0"
+    },
+    {
+      "from": "system.cpu.time",
+      "to": "cpu.time",
+      "version": "1.31.0"
+    },
+    {
+      "from": "system.cpu.utilization",
+      "to": "cpu.utilization",
+      "version": "1.31.0"
+    },
+    {
+      "from": "otel.sdk.exporter.span.exported.count",
+      "to": "otel.sdk.exporter.span.exported",
+      "version": "1.32.0"
+    },
+    {
+      "from": "otel.sdk.exporter.span.inflight.count",
+      "to": "otel.sdk.exporter.span.inflight",
+      "version": "1.32.0"
+    },
+    {
+      "from": "otel.sdk.processor.span.processed.count",
+      "to": "otel.sdk.processor.span.processed",
+      "version": "1.32.0"
+    },
+    {
+      "from": "otel.sdk.span.ended.count",
+      "to": "otel.sdk.span.ended",
+      "version": "1.32.0"
+    },
+    {
+      "from": "otel.sdk.span.live.count",
+      "to": "otel.sdk.span.live",
+      "version": "1.32.0"
+    },
+    {
+      "from": "cpu.frequency",
+      "to": "system.cpu.frequency",
+      "version": "1.34.0"
+    },
+    {
+      "from": "cpu.time",
+      "to": "system.cpu.time",
+      "version": "1.34.0"
+    },
+    {
+      "from": "cpu.utilization",
+      "to": "system.cpu.utilization",
+      "version": "1.34.0"
+    },
+    {
+      "from": "system.network.connections",
+      "to": "system.network.connection.count",
+      "version": "1.35.0"
+    },
+    {
+      "from": "k8s.cronjob.active_jobs",
+      "to": "k8s.cronjob.job.active",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.daemonset.current_scheduled_nodes",
+      "to": "k8s.daemonset.node.current_scheduled",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.daemonset.desired_scheduled_nodes",
+      "to": "k8s.daemonset.node.desired_scheduled",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.daemonset.misscheduled_nodes",
+      "to": "k8s.daemonset.node.misscheduled",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.daemonset.ready_nodes",
+      "to": "k8s.daemonset.node.ready",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.deployment.available_pods",
+      "to": "k8s.deployment.pod.available",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.deployment.desired_pods",
+      "to": "k8s.deployment.pod.desired",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.hpa.current_pods",
+      "to": "k8s.hpa.pod.current",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.hpa.desired_pods",
+      "to": "k8s.hpa.pod.desired",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.hpa.max_pods",
+      "to": "k8s.hpa.pod.max",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.hpa.min_pods",
+      "to": "k8s.hpa.pod.min",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.job.active_pods",
+      "to": "k8s.job.pod.active",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.job.desired_successful_pods",
+      "to": "k8s.job.pod.desired_successful",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.job.failed_pods",
+      "to": "k8s.job.pod.failed",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.job.max_parallel_pods",
+      "to": "k8s.job.pod.max_parallel",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.job.successful_pods",
+      "to": "k8s.job.pod.successful",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.node.allocatable.cpu",
+      "to": "k8s.node.cpu.allocatable",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.node.allocatable.ephemeral_storage",
+      "to": "k8s.node.ephemeral_storage.allocatable",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.node.allocatable.memory",
+      "to": "k8s.node.memory.allocatable",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.node.allocatable.pods",
+      "to": "k8s.node.pod.allocatable",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.replicaset.available_pods",
+      "to": "k8s.replicaset.pod.available",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.replicaset.desired_pods",
+      "to": "k8s.replicaset.pod.desired",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.replication_controller.available_pods",
+      "to": "k8s.replicationcontroller.pod.available",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.replication_controller.desired_pods",
+      "to": "k8s.replicationcontroller.pod.desired",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.replicationcontroller.available_pods",
+      "to": "k8s.replicationcontroller.pod.available",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.replicationcontroller.desired_pods",
+      "to": "k8s.replicationcontroller.pod.desired",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.statefulset.current_pods",
+      "to": "k8s.statefulset.pod.current",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.statefulset.desired_pods",
+      "to": "k8s.statefulset.pod.desired",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.statefulset.ready_pods",
+      "to": "k8s.statefulset.pod.ready",
+      "version": "1.38.0"
+    },
+    {
+      "from": "k8s.statefulset.updated_pods",
+      "to": "k8s.statefulset.pod.updated",
+      "version": "1.38.0"
+    },
+    {
+      "from": "v8js.heap.space.available_size",
+      "to": "v8js.memory.heap.space.available_size",
+      "version": "1.38.0"
+    },
+    {
+      "from": "v8js.heap.space.physical_size",
+      "to": "v8js.memory.heap.space.physical_size",
+      "version": "1.38.0"
+    },
+    {
+      "from": "process.open_file_descriptor.count",
+      "to": "process.unix.file_descriptor.count",
+      "version": "1.39.0"
+    },
+    {
+      "from": "system.linux.memory.available",
+      "to": "system.memory.linux.available",
+      "version": "1.39.0"
+    },
+    {
+      "from": "system.linux.memory.slab.usage",
+      "to": "system.memory.linux.slab.usage",
+      "version": "1.39.0"
+    },
+    {
+      "from": "system.memory.shared",
+      "to": "system.memory.linux.shared",
+      "version": "1.40.0"
+    },
+    {
+      "from": "k8s.container.cpu.limit",
+      "to": "k8s.container.cpu.limit.desired",
+      "version": "1.41.0"
+    },
+    {
+      "from": "k8s.container.cpu.limit_utilization",
+      "to": "k8s.container.cpu.limit.utilization",
+      "version": "1.41.0"
+    },
+    {
+      "from": "k8s.container.cpu.request",
+      "to": "k8s.container.cpu.request.desired",
+      "version": "1.41.0"
+    },
+    {
+      "from": "k8s.container.cpu.request_utilization",
+      "to": "k8s.container.cpu.request.utilization",
+      "version": "1.41.0"
+    },
+    {
+      "from": "k8s.container.memory.limit",
+      "to": "k8s.container.memory.limit.desired",
+      "version": "1.41.0"
+    },
+    {
+      "from": "k8s.container.memory.request",
+      "to": "k8s.container.memory.request.desired",
+      "version": "1.41.0"
+    },
+    {
+      "from": "v8js.memory.heap.limit",
+      "to": "v8js.memory.heap.space.size",
+      "version": "1.42.0"
+    },
+    {
+      "from": "container.memory.paging.faults",
+      "to": "container.paging.faults",
+      "version": "1.44.0"
+    },
+    {
+      "from": "k8s.node.memory.paging.faults",
+      "to": "k8s.node.paging.faults",
+      "version": "1.44.0"
+    },
+    {
+      "from": "k8s.pod.memory.paging.faults",
+      "to": "k8s.pod.paging.faults",
+      "version": "1.44.0"
+    }
+  ]
+}
