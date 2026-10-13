@@ -6,6 +6,7 @@ toolchain go1.27.2
 
 require (
 	github.com/grafana/grafana-plugin-sdk-go v0.297.0
+	github.com/prometheus/otlptranslator v1.0.0
 	go.yaml.in/yaml/v3 v3.0.5
 )
 
