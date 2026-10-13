@@ -23,3 +23,17 @@ export const fetchSpanGroupRules: FetchSpanGroupRules = async () => {
   );
   return response.data;
 };
+
+export type FetchMetricsNeedingLabels = (names: string[]) => Promise<string[]>;
+
+export const fetchMetricsNeedingLabels: FetchMetricsNeedingLabels = async (names) => {
+  const response = await lastValueFrom(
+    getBackendSrv().fetch<{ needs_labels: string[] }>({
+      url: `/api/plugins/${pluginJson.id}/resources/catalogue/metric-matches`,
+      method: 'POST',
+      data: { names },
+      showErrorAlert: false,
+    })
+  );
+  return response.data.needs_labels;
+};

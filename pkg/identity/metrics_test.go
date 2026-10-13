@@ -52,10 +52,10 @@ func Test_ResolveMetricOwner(t *testing.T) {
 			wantFindings: []finding.Type{finding.TypeSDKDefaultServiceName}, wantChecks: 2,
 		},
 		{
-			name:         "go sdk default from envoy gateway",
-			labels:       map[string]string{"job": "unknown_service:envoy-gateway", "instance": "envoy-gateway-8677d8b958-nh682"},
-			wantOwner:    finding.Owner{Kind: finding.OwnerService, Name: "unknown_service:envoy-gateway"},
-			wantSource:   SourceJobLabel, wantOrigin: OriginNonOTel,
+			name:       "go sdk default from envoy gateway",
+			labels:     map[string]string{"job": "unknown_service:envoy-gateway", "instance": "envoy-gateway-8677d8b958-nh682"},
+			wantOwner:  finding.Owner{Kind: finding.OwnerService, Name: "unknown_service:envoy-gateway"},
+			wantSource: SourceJobLabel, wantOrigin: OriginNonOTel,
 			wantFindings: []finding.Type{finding.TypeSDKDefaultServiceName}, wantChecks: 2,
 		},
 		{

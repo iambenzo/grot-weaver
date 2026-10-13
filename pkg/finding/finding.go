@@ -76,6 +76,7 @@ type Finding struct {
 	Source             catalogue.Source      `json:"source,omitempty"`
 	Volume             float64               `json:"volume"`
 	PipelineIntroduced bool                  `json:"pipeline_introduced,omitempty"`
+	Metrics            []string              `json:"metrics,omitempty"`
 }
 
 var levels = map[Type]Level{

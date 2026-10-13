@@ -128,3 +128,7 @@ func Test_Assess_metricsFromLocalFixtures(t *testing.T) {
 		}
 	}
 }
+
+func identityTargets(series []map[string]string) identity.TargetIndex {
+	return identity.NewTargetIndex(series)
+}

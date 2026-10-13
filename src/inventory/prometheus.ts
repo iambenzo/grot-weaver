@@ -1,7 +1,7 @@
 import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, prometheusLookback, prometheusWindowParams } from '../window/window';
-import { CollectionError, MetricDatasource, MetricOwner } from './types';
+import { CollectionError, MetricDatasource, MetricOwner, OwnerLabelKeys } from './types';
 
 const TARGET_INFO = 'target_info';
 const OWNER_LABELS = ['job', 'service_name', 'service_namespace', 'otel_scope_name', 'otel_scope_version'];
@@ -31,6 +31,15 @@ export interface PrometheusCollection {
   errors: CollectionError[];
 }
 
+export type NamesNeedingLabels = (names: string[]) => Promise<string[]>;
+
+export interface LabelProgress {
+  done: number;
+  total: number;
+}
+
+const SELECTOR_LABELS = ['job', 'service_name', 'instance'];
+
 export function nameMatcher(names: string[]): string {
   const alternatives = names.map((name) => promqlString(name.replace(REGEX_META, '\\$&')));
   return `{__name__=~"${alternatives.join('|')}"}`;
@@ -49,14 +58,68 @@ export function anonymousOwnersQuery(names: string[], window: QueryWindow): stri
   return `count by (__name__, instance) (last_over_time(${selector}[${prometheusLookback(window)}]))`;
 }
 
-export async function collectPrometheusInventory(uid: string, get: ProxyGet, limit: Limiter, window: QueryWindow): Promise<PrometheusCollection> {
+export async function collectPrometheusInventory(
+  uid: string,
+  get: ProxyGet,
+  limit: Limiter,
+  window: QueryWindow,
+  namesNeedingLabels: NamesNeedingLabels = async () => [],
+  onLabelProgress: (progress: LabelProgress) => void = () => undefined
+): Promise<PrometheusCollection> {
   const context: Context = { uid, get, limit, window, errors: [] };
   const [names, targetInfo] = await Promise.all([
     guarded(context, 'metric names', () => metricNames(context)),
     guarded(context, 'target_info series', () => targetInfoSeries(context)),
   ]);
   const owners = await collectOwners(context, names ?? []);
-  return { datasource: { uid, names: names ?? [], target_info: targetInfo ?? [], owners }, errors: context.errors };
+  const needing = new Set((await guarded(context, 'metric matches', () => namesNeedingLabels(names ?? []))) ?? []);
+  const labelKeys = await collectLabelKeys(context, owners.filter((owner) => needing.has(owner.metric)), onLabelProgress);
+  return {
+    datasource: { uid, names: names ?? [], target_info: targetInfo ?? [], owners, label_keys: labelKeys },
+    errors: context.errors,
+  };
+}
+
+export function ownerSelector(owner: MetricOwner): Record<string, string> | undefined {
+  const key = SELECTOR_LABELS.find((label) => owner.labels[label]);
+  return key ? { [key]: owner.labels[key] } : undefined;
+}
+
+export function labelsMatcher(metric: string, selector: Record<string, string>): string {
+  const matchers = [`__name__="${promqlString(metric)}"`, ...Object.entries(selector).map(([key, value]) => `${key}="${promqlString(value)}"`)];
+  return `{${matchers.join(', ')}}`;
+}
+
+async function collectLabelKeys(context: Context, owners: MetricOwner[], onProgress: (progress: LabelProgress) => void): Promise<OwnerLabelKeys[]> {
+  const pairs = uniquePairs(owners);
+  let done = 0;
+  onProgress({ done, total: pairs.length });
+  const sets = await Promise.all(
+    pairs.map(async ({ metric, selector }) => {
+      const keys = await guarded(context, `label keys for ${metric}`, () => labelNames(context, labelsMatcher(metric, selector)));
+      done++;
+      onProgress({ done, total: pairs.length });
+      return keys ? { metric, selector, keys } : undefined;
+    })
+  );
+  return sets.filter((set): set is OwnerLabelKeys => set !== undefined);
+}
+
+function uniquePairs(owners: MetricOwner[]): Array<{ metric: string; selector: Record<string, string> }> {
+  const seen = new Map<string, { metric: string; selector: Record<string, string> }>();
+  for (const owner of owners) {
+    const selector = ownerSelector(owner);
+    if (selector) {
+      seen.set(`${owner.metric}|${JSON.stringify(selector)}`, { metric: owner.metric, selector });
+    }
+  }
+  return [...seen.values()];
+}
+
+async function labelNames(context: Context, matcher: string): Promise<string[]> {
+  const params = { ...prometheusWindowParams(context.window), 'match[]': matcher };
+  const response = await context.limit(() => context.get<PrometheusResponse<string[]>>(context.uid, '/api/v1/labels', params));
+  return [...response.data].sort();
 }
 
 async function metricNames(context: Context): Promise<string[]> {

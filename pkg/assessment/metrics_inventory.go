@@ -17,6 +17,13 @@ type MetricDatasource struct {
 	Names      []string            `json:"names"`
 	TargetInfo []map[string]string `json:"target_info"`
 	Owners     []MetricOwner       `json:"owners"`
+	LabelKeys  []OwnerLabelKeys    `json:"label_keys"`
+}
+
+type OwnerLabelKeys struct {
+	Metric   string            `json:"metric"`
+	Selector map[string]string `json:"selector"`
+	Keys     []string          `json:"keys"`
 }
 
 type MetricOwner struct {
@@ -87,6 +94,22 @@ func (d MetricDatasource) validate() error {
 	for _, labels := range d.TargetInfo {
 		if err := validateLabels(labels); err != nil {
 			return fmt.Errorf("datasource %s target_info: %w", d.UID, err)
+		}
+	}
+	if len(d.LabelKeys) > MaxOwnersPerSource {
+		return fmt.Errorf("%w: metric datasource %s has too many label key sets", ErrInvalidInventory, d.UID)
+	}
+	for _, set := range d.LabelKeys {
+		if set.Metric == "" || len(set.Keys) > MaxLabelsPerSet {
+			return fmt.Errorf("%w: datasource %s has a malformed label key set", ErrInvalidInventory, d.UID)
+		}
+		if err := validateLabels(set.Selector); err != nil {
+			return fmt.Errorf("datasource %s label keys of %s: %w", d.UID, set.Metric, err)
+		}
+		for _, key := range set.Keys {
+			if key == "" || len(key) > MaxNameLength {
+				return fmt.Errorf("%w: datasource %s has an empty or overlong label key", ErrInvalidInventory, d.UID)
+			}
 		}
 	}
 	for _, owner := range d.Owners {

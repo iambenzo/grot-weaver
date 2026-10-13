@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
-import { anonymousOwnersQuery, collectPrometheusInventory, nameMatcher, ownersQuery } from './prometheus';
+import { anonymousOwnersQuery, collectPrometheusInventory, labelsMatcher, nameMatcher, ownerSelector, ownersQuery } from './prometheus';
 
 const fixture = (target: string, name: string) =>
   JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../testdata/fixtures/${target}/prometheus/${name}`), 'utf8'));
@@ -20,6 +20,9 @@ function fakePrometheus(target: string, failing?: string) {
     }
     if (requestPath === '/api/v1/series') {
       return fixture(target, 'target-info-series.json');
+    }
+    if (requestPath === '/api/v1/labels') {
+      return fixture(target, 'owner-label-names.json');
     }
     if (params.query.startsWith('count by (__name__, instance)')) {
       return { status: 'success', data: { result: [{ metric: { __name__: 'envoy_cluster_upstream_cx_total', instance: 'envoy-1' }, value: [1, '3'] }] } };
@@ -68,6 +71,51 @@ describe('collectPrometheusInventory', () => {
     expect(errors).toEqual([{ datasource: 'prom', step: 'target_info series', message: 'too many series' }]);
     expect(datasource.names.length).toBeGreaterThan(0);
     expect(datasource.target_info).toEqual([]);
+  });
+});
+
+describe('per-owner label keys', () => {
+  it('asks for label names per matched metric and owner, once per pair', async () => {
+    const { get, calls } = fakePrometheus('local');
+    const progress: Array<{ done: number; total: number }> = [];
+
+    const { datasource } = await collectPrometheusInventory(
+      'prom',
+      get,
+      createLimiter(4),
+      window,
+      async () => ['http_server_request_duration_seconds_bucket'],
+      (update) => progress.push(update)
+    );
+
+    const labelCalls = calls.filter((call) => call.path === '/api/v1/labels');
+    expect(labelCalls.map((call) => call.params['match[]'])).toEqual(['{__name__="http_server_request_duration_seconds_bucket", job="shop/checkout"}']);
+    expect(labelCalls[0].params).toMatchObject({ start: '1000', end: '87400' });
+    expect(datasource.label_keys).toEqual([
+      { metric: 'http_server_request_duration_seconds_bucket', selector: { job: 'shop/checkout' }, keys: fixture('local', 'owner-label-names.json').data.sort() },
+    ]);
+    expect(progress[progress.length - 1]).toEqual({ done: 1, total: 1 });
+  });
+
+  it('skips label queries when nothing matches the registry', async () => {
+    const { get, calls } = fakePrometheus('local');
+
+    await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    expect(calls.some((call) => call.path === '/api/v1/labels')).toBe(false);
+  });
+
+  it.each([
+    [{ job: 'a', service_name: 'b', instance: 'c' }, { job: 'a' }],
+    [{ service_name: 'b', instance: 'c' }, { service_name: 'b' }],
+    [{ instance: 'c' }, { instance: 'c' }],
+    [{}, undefined],
+  ])('selects the owner by %p', (labels, expected) => {
+    expect(ownerSelector({ metric: 'm', labels, series: 1 })).toEqual(expected);
+  });
+
+  it('escapes selector values', () => {
+    expect(labelsMatcher('http.server.duration', { job: 'a"b' })).toBe('{__name__="http.server.duration", job="a\\"b"}');
   });
 });
 

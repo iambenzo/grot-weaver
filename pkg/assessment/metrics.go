@@ -22,6 +22,7 @@ type MetricAttribution struct {
 func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []ReclassificationRule, into *collected) {
 	targets := identity.NewTargetIndex(datasource.TargetInfo)
 	identityFindings := map[finding.Owner][]int{}
+	volumes := map[string]float64{}
 	for _, owner := range datasource.Owners {
 		if _, reclassified := Reclassify(owner.Metric, rules); reclassified {
 			continue
@@ -49,8 +50,10 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 		}
 		into.findings = append(into.findings, a.classifyMetricName(ownerKey, owner))
 		into.totals[finding.SignalMetrics] += owner.Series
+		volumes[ownerMetricKey(ownerKey, owner.Metric)] += owner.Series
 	}
 	into.findings = append(into.findings, a.receiverIntroducedFindings(targets)...)
+	a.assessLabelKeys(datasource, targets, rules, volumes, into)
 }
 
 func (a *Assessor) classifyMetricName(owner finding.Owner, row MetricOwner) finding.Finding {

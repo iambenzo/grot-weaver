@@ -42,11 +42,18 @@ export interface MetricOwner {
   series: number;
 }
 
+export interface OwnerLabelKeys {
+  metric: string;
+  selector: Record<string, string>;
+  keys: string[];
+}
+
 export interface MetricDatasource {
   uid: string;
   names: string[];
   target_info: Array<Record<string, string>>;
   owners: MetricOwner[];
+  label_keys: OwnerLabelKeys[];
 }
 
 export type ReclassificationAction = 'exclude' | 'pipeline';

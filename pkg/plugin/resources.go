@@ -9,6 +9,7 @@ func (a *App) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /catalogue", a.handleCatalogue)
 	mux.HandleFunc("GET /catalogue/name-forms", a.handleNameForms)
 	mux.HandleFunc("GET /catalogue/span-groups", a.handleSpanGroups)
+	mux.HandleFunc("POST /catalogue/metric-matches", a.handleMetricMatches)
 	mux.HandleFunc("POST /score", a.handleScore)
 }
 

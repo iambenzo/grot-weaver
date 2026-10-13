@@ -172,3 +172,22 @@ func Test_CallResource_spanGroups(t *testing.T) {
 		t.Fatalf("status %d err %v rules %d", response.Status, err, len(rules))
 	}
 }
+
+func Test_CallResource_metricMatches(t *testing.T) {
+	app := newTestApp(t)
+	body := []byte(`{"names":["http_server_request_duration_seconds_bucket","http_server_duration_milliseconds_count","node_cpu_seconds_total"]}`)
+
+	var sender capturingSender
+	if err := app.CallResource(context.Background(), &backend.CallResourceRequest{Method: http.MethodPost, Path: "catalogue/metric-matches", Body: body}, &sender); err != nil {
+		t.Fatal(err)
+	}
+
+	var response metricMatchesResponse
+	if err := json.Unmarshal(sender.response.Body, &response); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"http_server_request_duration_seconds_bucket", "http_server_duration_milliseconds_count"}
+	if !slices.Equal(response.NeedsLabels, want) {
+		t.Errorf("needs_labels = %v, want %v", response.NeedsLabels, want)
+	}
+}
