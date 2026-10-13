@@ -200,3 +200,33 @@ func Test_Assess_histogramPartsCountAsOneName(t *testing.T) {
 		}
 	}
 }
+
+func Test_Assess_receiverCopiesStillRaiseScrapeLabels(t *testing.T) {
+	inventory := Inventory{Metrics: []MetricDatasource{{
+		UID: "prom",
+		TargetInfo: []map[string]string{{
+			"job":                 "integrations/db-o11y",
+			"instance":            "host-a",
+			"service_name":        "integrations/db-o11y",
+			"service_instance_id": "host-a",
+			"net_host_name":       "host-a",
+			"http_scheme":         "http",
+		}},
+		Owners: []MetricOwner{{Metric: "pg_up", Labels: map[string]string{"job": "integrations/db-o11y", "instance": "host-a"}, Series: 1}},
+	}}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	pipeline := finding.Owner{Kind: finding.OwnerPipeline, Name: collectorScrapePipeline}
+	for observed, expected := range map[string]string{"net_host_name": "server.address", "http_scheme": "url.scheme"} {
+		introduced, found := metricFinding(result, pipeline, observed)
+		if !found || !introduced.PipelineIntroduced || introduced.Expected != expected {
+			t.Errorf("%s: got %+v (found %v), want pipeline_introduced with %s", observed, introduced, found, expected)
+		}
+	}
+	for _, attribution := range result.Metrics {
+		if attribution.Origin.Origin != identity.OriginCollectorScraped {
+			t.Errorf("origin for %+v = %s, want collector_scraped", attribution.Owner, attribution.Origin.Origin)
+		}
+	}
+}

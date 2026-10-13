@@ -73,11 +73,24 @@ func ScrapeTargetLabels(labels map[string]string) []string {
 	return keys
 }
 
+func copiesStructuralLabel(labels map[string]string, key, value string) bool {
+	jobNamespace, jobName, namespaced := strings.Cut(labels["job"], "/")
+	switch key {
+	case "service_name":
+		return value == labels["job"] || (namespaced && value == jobName)
+	case "service_namespace":
+		return namespaced && value == jobNamespace
+	case "service_instance_id":
+		return value == labels["instance"]
+	}
+	return false
+}
+
 func onlyScrapeTargetLabels(labels map[string]string) bool {
 	scrape := 0
-	for key := range labels {
+	for key, value := range labels {
 		switch {
-		case structuralTargetLabels[key]:
+		case structuralTargetLabels[key], copiesStructuralLabel(labels, key, value):
 		case scrapeTargetLabels[key]:
 			scrape++
 		default:

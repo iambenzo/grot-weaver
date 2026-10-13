@@ -13,7 +13,9 @@ func Test_ResolveMetricOwner(t *testing.T) {
 		{"job": "weather-app", "telemetry_sdk_name": "beyla"},
 		{"job": "unknown_service:python", "instance": "x", "telemetry_sdk_name": "opentelemetry"},
 		{"job": "node-via-otelcol-otlp", "instance": "node-exporter:9100", "server_address": "node-exporter", "server_port": "9100", "url_scheme": "http"},
-		{"instance": "envoy-envoy-gateway-system-abc", "telemetry_sdk_name": "envoy", "k8s_deployment_name": "envoy-gateway"},
+		{"instance": "envoy-envoy-gateway-system-abc", "telemetry_sdk_name": "envoy", "k8s_deployment_name": "envoy-gateway", "k8s_namespace_name": "envoy-gateway-system"},
+		{"instance": "bare-host:9901", "telemetry_sdk_name": "envoy"},
+		{"job": "integrations/db-o11y", "instance": "host-a", "service_name": "integrations/db-o11y", "service_instance_id": "host-a", "net_host_name": "host-a", "http_scheme": "http"},
 	})
 
 	tests := []struct {
@@ -59,6 +61,12 @@ func Test_ResolveMetricOwner(t *testing.T) {
 			wantFindings: []finding.Type{finding.TypeSDKDefaultServiceName}, wantChecks: 2,
 		},
 		{
+			name:       "receiver-copied service_name on a collector-scraped job is a source",
+			labels:     map[string]string{"job": "integrations/db-o11y", "instance": "host-a", "service_name": "integrations/db-o11y"},
+			wantOwner:  finding.Owner{Kind: finding.OwnerSource, Name: "integrations/db-o11y"},
+			wantSource: SourceScrapeJob, wantOrigin: OriginCollectorScraped,
+		},
+		{
 			name:       "collector-scraped job is a source",
 			labels:     map[string]string{"job": "node-via-otelcol-otlp", "instance": "node-exporter:9100"},
 			wantOwner:  finding.Owner{Kind: finding.OwnerSource, Name: "node-via-otelcol-otlp"},
@@ -73,10 +81,19 @@ func Test_ResolveMetricOwner(t *testing.T) {
 		{
 			name:       "no job but instance matches target_info (envoy)",
 			labels:     map[string]string{"instance": "envoy-envoy-gateway-system-abc"},
-			wantOwner:  finding.Owner{Kind: finding.OwnerUnattributed, Name: unattributedName},
+			wantOwner:  finding.Owner{Kind: finding.OwnerUnattributed, Namespace: "envoy-gateway-system", Name: "envoy-gateway"},
 			wantSource: SourceInstanceTarget, wantOrigin: OriginSDK,
 			wantFindings: []finding.Type{finding.TypeMissingServiceName},
-			wantHints:    map[string]string{"telemetry_sdk_name": "envoy", "k8s_deployment_name": "envoy-gateway"},
+			wantHints:    map[string]string{"telemetry_sdk_name": "envoy", "k8s_deployment_name": "envoy-gateway", "k8s_namespace_name": "envoy-gateway-system"},
+			wantChecks:   1,
+		},
+		{
+			name:       "no job and no workload falls back to the instance",
+			labels:     map[string]string{"instance": "bare-host:9901"},
+			wantOwner:  finding.Owner{Kind: finding.OwnerUnattributed, Name: "bare-host:9901"},
+			wantSource: SourceInstanceTarget, wantOrigin: OriginSDK,
+			wantFindings: []finding.Type{finding.TypeMissingServiceName},
+			wantHints:    map[string]string{"telemetry_sdk_name": "envoy"},
 			wantChecks:   1,
 		},
 		{

@@ -26,6 +26,10 @@ var hintTargetLabels = []string{
 	"k8s_deployment_name", "k8s_statefulset_name", "k8s_daemonset_name", "k8s_pod_name", "k8s_namespace_name", "host_name",
 }
 
+var workloadLabels = []string{"k8s_deployment_name", "k8s_statefulset_name", "k8s_daemonset_name"}
+
+const k8sNamespaceLabel = "k8s_namespace_name"
+
 var identityLikeLabels = []string{"service", "otel_service", "app", "client", "server"}
 
 type TargetIndex struct {
@@ -89,14 +93,7 @@ func sdkFrom(target map[string]string) SDK {
 
 func ResolveMetricOwner(labels map[string]string, targets TargetIndex, volume float64) MetricResolution {
 	scope := labels[ScopeNameLabel]
-	if name := labels[serviceNameLabel]; name != "" {
-		target, found := targets.ForJob(labels[jobLabel])
-		origin := ClassifyOrigin(target, found, scope)
-		if origin.Origin == OriginNonOTel {
-			origin = OriginClassification{Origin: OriginSDK, Confidence: nameindex.ConfidenceHigh, Reason: "series carry a service_name label"}
-		}
-		resolution := serviceResolution(finding.Owner{Kind: finding.OwnerService, Namespace: labels[serviceNamespaceLabel], Name: name}, SourceServiceNameLabel, origin, volume)
-		resolution.SDK, resolution.Target = sdkFrom(target), target
+	if resolution, resolved := resolveByServiceName(labels, targets, scope, volume); resolved {
 		return resolution
 	}
 
@@ -122,13 +119,43 @@ func ResolveMetricOwner(labels map[string]string, targets TargetIndex, volume fl
 		}
 	}
 
-	owner := finding.Owner{Kind: finding.OwnerUnattributed, Name: unattributedName}
 	if target, found := targets.byInstance[labels[instanceLabel]]; found && labels[instanceLabel] != "" {
+		owner := hintedUnattributedOwner(target, labels[instanceLabel])
 		resolution := unattributedResolution(owner, SourceInstanceTarget, ClassifyOrigin(target, true, scope), pick(target, hintTargetLabels), volume)
 		resolution.SDK, resolution.Target = sdkFrom(target), target
 		return resolution
 	}
+	owner := finding.Owner{Kind: finding.OwnerUnattributed, Name: unattributedName}
 	return unattributedResolution(owner, SourceIdentityHint, ClassifyOrigin(nil, false, scope), pick(labels, identityLikeLabels), volume)
+}
+
+func hintedUnattributedOwner(target map[string]string, instance string) finding.Owner {
+	owner := finding.Owner{Kind: finding.OwnerUnattributed, Namespace: target[k8sNamespaceLabel], Name: instance}
+	for _, label := range workloadLabels {
+		if workload := target[label]; workload != "" {
+			owner.Name = workload
+			return owner
+		}
+	}
+	return owner
+}
+
+func resolveByServiceName(labels map[string]string, targets TargetIndex, scope string, volume float64) (MetricResolution, bool) {
+	name := labels[serviceNameLabel]
+	if name == "" {
+		return MetricResolution{}, false
+	}
+	target, found := targets.ForJob(labels[jobLabel])
+	origin := ClassifyOrigin(target, found, scope)
+	if origin.Origin == OriginCollectorScraped && copiesStructuralLabel(labels, serviceNameLabel, name) {
+		return MetricResolution{}, false
+	}
+	if origin.Origin == OriginNonOTel {
+		origin = OriginClassification{Origin: OriginSDK, Confidence: nameindex.ConfidenceHigh, Reason: "series carry a service_name label"}
+	}
+	resolution := serviceResolution(finding.Owner{Kind: finding.OwnerService, Namespace: labels[serviceNamespaceLabel], Name: name}, SourceServiceNameLabel, origin, volume)
+	resolution.SDK, resolution.Target = sdkFrom(target), target
+	return resolution, true
 }
 
 func serviceResolution(owner finding.Owner, source Source, origin OriginClassification, volume float64) MetricResolution {
