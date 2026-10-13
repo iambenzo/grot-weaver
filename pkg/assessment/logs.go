@@ -27,6 +27,7 @@ type LogAttribution struct {
 func (a *Assessor) assessLogService(datasource string, service LogService, into *collected) {
 	resolution := identity.ResolveLogService(service.ServiceName, service.ServiceNamespace, service.OTLPMarkers, service.Volume)
 	owner := resolution.Attribution.Owner
+	into.noteOwner(hopContext{owner: owner})
 	into.logAttributions = append(into.logAttributions, LogAttribution{
 		Datasource:  datasource,
 		Attribution: resolution.Attribution,

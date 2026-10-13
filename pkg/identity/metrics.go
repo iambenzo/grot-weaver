@@ -76,6 +76,7 @@ type SDK struct {
 type MetricResolution struct {
 	Attribution Attribution
 	Origin      OriginClassification
+	Target      map[string]string
 	SDK         SDK
 	Hints       map[string]string
 	Findings    []finding.Finding
@@ -95,7 +96,7 @@ func ResolveMetricOwner(labels map[string]string, targets TargetIndex, volume fl
 			origin = OriginClassification{Origin: OriginSDK, Confidence: nameindex.ConfidenceHigh, Reason: "series carry a service_name label"}
 		}
 		resolution := serviceResolution(finding.Owner{Kind: finding.OwnerService, Namespace: labels[serviceNamespaceLabel], Name: name}, SourceServiceNameLabel, origin, volume)
-		resolution.SDK = sdkFrom(target)
+		resolution.SDK, resolution.Target = sdkFrom(target), target
 		return resolution
 	}
 
@@ -104,26 +105,27 @@ func ResolveMetricOwner(labels map[string]string, targets TargetIndex, volume fl
 		origin := ClassifyOrigin(target, found, scope)
 		if IsSDKDefaultServiceName(job) {
 			resolution := serviceResolution(finding.Owner{Kind: finding.OwnerService, Name: job}, SourceJobLabel, origin, volume)
-			resolution.SDK = sdkFrom(target)
+			resolution.SDK, resolution.Target = sdkFrom(target), target
 			return resolution
 		}
 		if origin.Origin == OriginSDK {
 			namespace, name := splitJob(job)
 			resolution := serviceResolution(finding.Owner{Kind: finding.OwnerService, Namespace: namespace, Name: name}, SourceJobLabel, origin, volume)
-			resolution.SDK = sdkFrom(target)
+			resolution.SDK, resolution.Target = sdkFrom(target), target
 			return resolution
 		}
 		owner := finding.Owner{Kind: finding.OwnerSource, Name: job}
 		return MetricResolution{
 			Attribution: Attribution{Owner: owner, Source: SourceScrapeJob, Confidence: nameindex.ConfidenceMedium},
 			Origin:      origin,
+			Target:      target,
 		}
 	}
 
 	owner := finding.Owner{Kind: finding.OwnerUnattributed, Name: unattributedName}
 	if target, found := targets.byInstance[labels[instanceLabel]]; found && labels[instanceLabel] != "" {
 		resolution := unattributedResolution(owner, SourceInstanceTarget, ClassifyOrigin(target, true, scope), pick(target, hintTargetLabels), volume)
-		resolution.SDK = sdkFrom(target)
+		resolution.SDK, resolution.Target = sdkFrom(target), target
 		return resolution
 	}
 	return unattributedResolution(owner, SourceIdentityHint, ClassifyOrigin(nil, false, scope), pick(labels, identityLikeLabels), volume)

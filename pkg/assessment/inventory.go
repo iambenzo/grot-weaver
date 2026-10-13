@@ -3,6 +3,7 @@ package assessment
 import (
 	"errors"
 	"fmt"
+	"path"
 )
 
 const (
@@ -24,6 +25,7 @@ type Inventory struct {
 	Logs             []LogDatasource        `json:"logs"`
 	Reclassification []ReclassificationRule `json:"reclassification,omitempty"`
 	CustomNamespaces []string               `json:"custom_namespaces,omitempty"`
+	PipelineMappings []PipelineMapping      `json:"pipeline_mappings,omitempty"`
 }
 
 const MaxCustomNamespaces = 200
@@ -104,6 +106,11 @@ func (inv Inventory) Validate() error {
 	for _, namespace := range inv.CustomNamespaces {
 		if namespace == "" || len(namespace) > MaxNameLength {
 			return fmt.Errorf("%w: empty or overlong custom namespace", ErrInvalidInventory)
+		}
+	}
+	for _, mapping := range inv.PipelineMappings {
+		if _, err := path.Match(mapping.Match, ""); err != nil || mapping.Match == "" || mapping.Pipeline == "" || len(mapping.Pipeline) > MaxNameLength {
+			return fmt.Errorf("%w: malformed pipeline mapping %q -> %q", ErrInvalidInventory, mapping.Match, mapping.Pipeline)
 		}
 	}
 	return validateReclassification(inv.Reclassification)

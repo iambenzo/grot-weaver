@@ -21,6 +21,7 @@ type MetricDatasource struct {
 	TargetInfo []map[string]string `json:"target_info"`
 	Owners     []MetricOwner       `json:"owners"`
 	LabelKeys  []OwnerLabelKeys    `json:"label_keys"`
+	Collectors []map[string]string `json:"collectors"`
 
 	StrategyOverride nameindex.Strategy `json:"strategy_override,omitempty"`
 }
@@ -99,10 +100,13 @@ func (d MetricDatasource) validate() error {
 			return fmt.Errorf("%w: datasource %s has an empty or overlong metric name", ErrInvalidInventory, d.UID)
 		}
 	}
-	for _, labels := range d.TargetInfo {
+	for _, labels := range append(slices.Clone(d.TargetInfo), d.Collectors...) {
 		if err := validateLabels(labels); err != nil {
-			return fmt.Errorf("datasource %s target_info: %w", d.UID, err)
+			return fmt.Errorf("datasource %s target_info or collectors: %w", d.UID, err)
 		}
+	}
+	if len(d.Collectors) > MaxTargetInfoSeries {
+		return fmt.Errorf("%w: metric datasource %s has too many collector rows", ErrInvalidInventory, d.UID)
 	}
 	if len(d.LabelKeys) > MaxOwnersPerSource {
 		return fmt.Errorf("%w: metric datasource %s has too many label key sets", ErrInvalidInventory, d.UID)

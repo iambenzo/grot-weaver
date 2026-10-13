@@ -84,6 +84,10 @@ export async function assessStack(
   if (settings.customNamespaces && settings.customNamespaces.length > 0) {
     inventory.custom_namespaces = settings.customNamespaces;
   }
+  const mappings = (settings.pipelineMappings ?? []).filter((mapping) => mapping.match && mapping.pipeline);
+  if (mappings.length > 0) {
+    inventory.pipeline_mappings = mappings;
+  }
   const result = await deps.score(inventory, settings.volumeWeighted === true);
   const errors = [...traces, ...metrics, ...logs].flatMap((collection) => collection.errors);
   return { result, errors, datasources };

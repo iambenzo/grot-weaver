@@ -54,6 +54,7 @@ export interface MetricDatasource {
   target_info: Array<Record<string, string>>;
   owners: MetricOwner[];
   label_keys: OwnerLabelKeys[];
+  collectors: Array<Record<string, string>>;
   strategy_override?: TranslationStrategy;
 }
 
@@ -105,6 +106,7 @@ export interface Inventory {
   logs?: LogDatasource[];
   reclassification?: ReclassificationRule[];
   custom_namespaces?: string[];
+  pipeline_mappings?: Array<{ match: string; pipeline: string }>;
 }
 
 export interface CollectionError {

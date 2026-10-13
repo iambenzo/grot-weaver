@@ -4,6 +4,7 @@ export const testIds = {
     findingsTable: 'data-testid service-findings-table',
     explore: 'data-testid service-open-explore',
     tabs: 'data-testid service-signal-tabs',
+    hops: 'data-testid service-hop-candidates',
   },
   window: {
     widenPrompt: 'data-testid window-widen-prompt',

@@ -37,6 +37,7 @@ type Result struct {
 	Metrics        []MetricAttribution     `json:"metric_attributions"`
 	Logs           []LogAttribution        `json:"log_attributions"`
 	Datasources    []DatasourceSummary     `json:"datasources"`
+	Hops           []ServiceHops           `json:"hops"`
 	Owners         []ScoreRow              `json:"owners"`
 	Namespaces     []ScoreRow              `json:"namespaces"`
 	Signals        []ScoreRow              `json:"signals"`
@@ -59,7 +60,36 @@ type collected struct {
 	metricAttributions []MetricAttribution
 	logAttributions    []LogAttribution
 	datasources        []DatasourceSummary
+	hopContexts        map[finding.Owner]hopContext
+	collectors         []Collector
 	totals             map[finding.Signal]float64
+}
+
+func (c *collected) noteOwner(context hopContext) {
+	if context.owner.Kind != finding.OwnerService && context.owner.Kind != finding.OwnerSource {
+		return
+	}
+	existing, seen := c.hopContexts[context.owner]
+	if !seen || existing.target == nil && context.target != nil {
+		c.hopContexts[context.owner] = context
+	}
+}
+
+func (c *collected) hops(mappings []PipelineMapping) []ServiceHops {
+	owners := make([]finding.Owner, 0, len(c.hopContexts))
+	for owner := range c.hopContexts {
+		owners = append(owners, owner)
+	}
+	slices.SortFunc(owners, func(a, b finding.Owner) int {
+		return cmp.Or(cmp.Compare(a.Kind, b.Kind), cmp.Compare(a.Namespace, b.Namespace), cmp.Compare(a.Name, b.Name))
+	})
+	hops := []ServiceHops{}
+	for _, owner := range owners {
+		if candidates := hopCandidates(c.hopContexts[owner], c.collectors, mappings); len(candidates) > 0 {
+			hops = append(hops, ServiceHops{Owner: owner, Candidates: candidates})
+		}
+	}
+	return hops
 }
 
 func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
@@ -76,7 +106,7 @@ func (a *Assessor) withCustomNamespaces(namespaces []string) *Assessor {
 }
 
 func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
-	gathered := collected{totals: map[finding.Signal]float64{}}
+	gathered := collected{totals: map[finding.Signal]float64{}, hopContexts: map[finding.Owner]hopContext{}}
 	for _, datasource := range inv.Traces {
 		for _, service := range datasource.Services {
 			a.assessTraceService(datasource.UID, service, &gathered)
@@ -100,6 +130,7 @@ func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
 		Metrics:        nonNil(gathered.metricAttributions),
 		Logs:           nonNil(gathered.logAttributions),
 		Datasources:    nonNil(gathered.datasources),
+		Hops:           gathered.hops(inv.PipelineMappings),
 		Owners:         rows(scores),
 		Namespaces:     rows(scoring.RollUp(servicesOnly(scores), scoring.ByNamespace)),
 		Signals:        rows(scoring.RollUp(servicesOnly(scores), scoring.BySignal)),
@@ -109,6 +140,7 @@ func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
 func (a *Assessor) assessTraceService(datasource string, service TraceService, into *collected) {
 	resolution := identity.ResolveTraceService(service.ServiceName, service.ServiceNamespace, service.SpanCount)
 	owner := resolution.Attribution.Owner
+	into.noteOwner(hopContext{owner: owner, origin: identity.OriginSDK})
 	into.attributions = append(into.attributions, ServiceAttribution{Datasource: datasource, Attribution: resolution.Attribution, SDK: service.SDK})
 	into.findings = append(into.findings, resolution.Findings...)
 	into.checks = append(into.checks, resolution.Checks...)

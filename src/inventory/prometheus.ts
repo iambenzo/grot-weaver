@@ -39,6 +39,21 @@ export interface LabelProgress {
 }
 
 const SELECTOR_LABELS = ['job', 'service_name', 'instance'];
+const COLLECTOR_LABELS = [
+  'job',
+  'instance',
+  'collector_id',
+  'pod',
+  'workload',
+  'receiver',
+  'component_path',
+  'component_id',
+];
+const COLLECTOR_METRICS = 'otelcol_receiver_accepted_.+|alloy_build_info';
+
+export function collectorsQuery(window: QueryWindow): string {
+  return `count by (${COLLECTOR_LABELS.join(', ')}) (last_over_time({__name__=~"${COLLECTOR_METRICS}"}[${prometheusLookback(window)}]))`;
+}
 
 export function nameMatcher(names: string[]): string {
   const alternatives = names.map((name) => promqlString(name.replace(REGEX_META, '\\$&')));
@@ -67,9 +82,12 @@ export async function collectPrometheusInventory(
   onLabelProgress: (progress: LabelProgress) => void = () => undefined
 ): Promise<PrometheusCollection> {
   const context: Context = { uid, get, limit, window, errors: [] };
-  const [names, targetInfo] = await Promise.all([
+  const [names, targetInfo, collectors] = await Promise.all([
     guarded(context, 'metric names', () => metricNames(context)),
     guarded(context, 'target_info series', () => targetInfoSeries(context)),
+    guarded(context, 'collector self-metrics', async () =>
+      (await instantQuery(context, collectorsQuery(window))).map((sample) => sample.metric)
+    ),
   ]);
   const owners = await collectOwners(context, names ?? []);
   const needing = new Set((await guarded(context, 'metric matches', () => namesNeedingLabels(names ?? []))) ?? []);
@@ -79,7 +97,14 @@ export async function collectPrometheusInventory(
     onLabelProgress
   );
   return {
-    datasource: { uid, names: names ?? [], target_info: targetInfo ?? [], owners, label_keys: labelKeys },
+    datasource: {
+      uid,
+      names: names ?? [],
+      target_info: targetInfo ?? [],
+      owners,
+      label_keys: labelKeys,
+      collectors: collectors ?? [],
+    },
     errors: context.errors,
   };
 }

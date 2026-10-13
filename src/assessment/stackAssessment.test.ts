@@ -53,6 +53,11 @@ describe('assessStack', () => {
         volumeWeighted: true,
         strategyOverrides: { prom: 'NoTranslation' },
         reclassification: [{ pattern: 'acme_*', action: 'exclude' }],
+        pipelineMappings: [
+          { match: 'shop/*', pipeline: 'edge' },
+          { match: '', pipeline: 'incomplete' },
+        ],
+        customNamespaces: ['acme'],
       },
       { get, limit: createLimiter(4), score, spanGroupRules: async () => [], namesNeedingLabels: async () => [] }
     );
@@ -63,5 +68,7 @@ describe('assessStack', () => {
     expect(inventory.logs?.map((ds) => ds.uid)).toEqual(['loki']);
     expect(inventory.reclassification).toEqual([{ pattern: 'acme_*', action: 'exclude' }]);
     expect(weighted).toBe(true);
+    expect(inventory.pipeline_mappings).toEqual([{ match: 'shop/*', pipeline: 'edge' }]);
+    expect(inventory.custom_namespaces).toEqual(['acme']);
   });
 });

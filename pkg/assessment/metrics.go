@@ -24,6 +24,7 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 	summary := a.detectStrategy(datasource)
 	into.datasources = append(into.datasources, summary)
 	targets := identity.NewTargetIndex(datasource.TargetInfo)
+	into.collectors = append(into.collectors, collectorsFrom(datasource.Collectors)...)
 	identityFindings := map[finding.Owner][]int{}
 	volumes := map[string]float64{}
 	names := metricNameCollector{into: into, position: map[metricNameKey]int{}}
@@ -33,6 +34,7 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 		}
 		resolution := identity.ResolveMetricOwner(owner.Labels, targets, owner.Series)
 		ownerKey := resolution.Attribution.Owner
+		into.noteOwner(hopContext{owner: ownerKey, origin: resolution.Origin.Origin, target: resolution.Target})
 		if positions, seen := identityFindings[ownerKey]; seen {
 			for _, position := range positions {
 				into.findings[position].Volume += owner.Series

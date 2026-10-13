@@ -46,6 +46,7 @@ import { QueryWindow, toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
 import { FindingsTable } from './FindingsTable';
+import { HopCandidates } from './HopCandidates';
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
@@ -226,6 +227,7 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
           exploreFor={exploreFor}
         />
       )}
+      <HopCandidates hops={(assessment.result.hops ?? []).find((hops) => sameOwner(hops.owner, identity.owner))} />
       <CollapsableSection
         label={`Conformant names (${conformant.length})`}
         isOpen={conformantOpen}

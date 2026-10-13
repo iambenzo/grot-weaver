@@ -16,6 +16,7 @@ REDACTIONS = [
     (re.compile(r"ip-10-\d+-\d+-\d+"), "ip-<redacted>"),
     (re.compile(r"\b10\.\d+\.\d+\.\d+\b"), "10.<redacted>"),
     (re.compile(r"\b10-\d+-\d+-\d+\b"), "10-<redacted>"),
+    (re.compile(r"\b172\.(1[6-9]|2\d|3[01])\.\d+\.\d+\b"), "172.<redacted>"),
     (re.compile(r"EC2AMAZ-[A-Z0-9]+"), "<windows-host>"),
     (re.compile(r"psql-[a-z0-9-]+"), "<postgres-host>"),
     (re.compile(r"aks-([a-z]+)-\d+-vmss\d*"), r"aks-\1-<node>"),
@@ -92,6 +93,10 @@ def requests_for(target, start, end):
         "count by (__name__, job, instance, service_name, service_namespace) "
         f'(last_over_time({{__name__=~"{"|".join(OWNER_BATCH)}"}}[{window}]))'
     )
+    collectors_query = (
+        "count by (job, instance, collector_id, pod, workload, receiver, component_path, component_id) "
+        f'(last_over_time({{__name__=~"otelcol_receiver_accepted_.+|alloy_build_info"}}[{window}]))'
+    )
     owner_selector = f'{target["owner_metric"]}{{job!=""}}'
     loki_selector = f'{{service_name="{target["loki_service"]}"}}'
     nanos = lambda seconds: str(seconds * 1_000_000_000)
@@ -100,6 +105,7 @@ def requests_for(target, start, end):
         "prometheus/target-info-series.json": (proxy_path(prom, "/api/v1/series", {"match[]": "target_info", "start": start, "end": end}), {}),
         "prometheus/owners-count.json": (proxy_path(prom, "/api/v1/query", {"query": owners_query, "time": end}), {}),
         "prometheus/owner-label-names.json": (proxy_path(prom, "/api/v1/labels", {"match[]": owner_selector, "start": start, "end": end}), {}),
+        "prometheus/collectors.json": (proxy_path(prom, "/api/v1/query", {"query": collectors_query, "time": end}), {}),
         "tempo/tags-resource.json": (proxy_path(tempo, "/api/v2/search/tags", {"scope": "resource", "start": start, "end": end}), {}),
         "tempo/tags-span.json": (proxy_path(tempo, "/api/v2/search/tags", {"scope": "span", "start": start, "end": end}), {}),
         "tempo/service-names.json": (proxy_path(tempo, "/api/v2/search/tag/resource.service.name/values", {"start": start, "end": end}), {}),

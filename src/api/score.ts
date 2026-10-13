@@ -26,6 +26,7 @@ export function withLists(result: AssessmentResult): AssessmentResult {
     metric_attributions: result.metric_attributions ?? [],
     log_attributions: result.log_attributions ?? [],
     datasources: result.datasources ?? [],
+    hops: result.hops ?? [],
     owners: result.owners ?? [],
     namespaces: result.namespaces ?? [],
     signals: result.signals ?? [],

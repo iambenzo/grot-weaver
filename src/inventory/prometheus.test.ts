@@ -5,6 +5,7 @@ import { createLimiter } from '../datasources/limiter';
 import {
   anonymousOwnersQuery,
   collectPrometheusInventory,
+  collectorsQuery,
   labelsMatcher,
   nameMatcher,
   ownerSelector,
@@ -156,6 +157,22 @@ describe('per-owner label keys', () => {
     expect(labelsMatcher('http.server.duration', { job: 'a"b' })).toBe(
       '{__name__="http.server.duration", job="a\\"b"}'
     );
+  });
+});
+
+describe('collector inventory', () => {
+  it('queries collector self-metrics by collector, pod and component', () => {
+    expect(collectorsQuery(window)).toBe(
+      'count by (job, instance, collector_id, pod, workload, receiver, component_path, component_id) (last_over_time({__name__=~"otelcol_receiver_accepted_.+|alloy_build_info"}[86400s]))'
+    );
+  });
+
+  it('adds collector label sets to the datasource', async () => {
+    const { get } = fakePrometheus('local');
+
+    const { datasource } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    expect(datasource.collectors.length).toBeGreaterThan(0);
   });
 });
 

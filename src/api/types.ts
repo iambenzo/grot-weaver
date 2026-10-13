@@ -97,6 +97,11 @@ export interface LogAttribution {
   sdk: { name?: string; language?: string; version?: string };
 }
 
+export interface ServiceHops {
+  owner: Owner;
+  candidates: Array<{ pipeline: string; reasons: string[]; score: number }>;
+}
+
 export interface DatasourceSummary {
   uid: string;
   signal: Signal;
@@ -115,6 +120,7 @@ export interface AssessmentResult {
   metric_attributions?: MetricAttribution[];
   log_attributions?: LogAttribution[];
   datasources?: DatasourceSummary[];
+  hops?: ServiceHops[];
   owners: ScoreRow[];
   namespaces: ScoreRow[];
   signals: ScoreRow[];

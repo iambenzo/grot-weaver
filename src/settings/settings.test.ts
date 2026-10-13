@@ -66,7 +66,7 @@ describe('datasourceTypesFor', () => {
 });
 
 describe('withStrategyOverride', () => {
-  const datasource = { uid: 'prom', names: [], target_info: [], owners: [], label_keys: [] };
+  const datasource = { uid: 'prom', names: [], target_info: [], owners: [], label_keys: [], collectors: [] };
 
   it('applies the admin override for that datasource only', () => {
     const settings = { strategyOverrides: { prom: 'UnderscoreEscapingWithoutSuffixes' as const } };
