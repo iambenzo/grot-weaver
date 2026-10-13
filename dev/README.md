@@ -10,7 +10,7 @@ Backends (host ports chosen to avoid clashing with an existing otel-lgtm on 3000
 | tempo | grafana/tempo:2.10.8 | 13200 (API), 24318 (OTLP HTTP), 19411 (Zipkin) | local-blocks enabled for TraceQL metrics |
 | otelcol | otel/opentelemetry-collector-contrib:0.162.0 | 14318 (plain OTLP HTTP), 15318 (enriched pipeline), 18888 (self-metrics) | |
 | node-exporter | prom/node-exporter:v1.12.1 | 19100 | non-OTel scrape source |
-| grafana | grafana/grafana:13.2.3 | 13000 | anonymous admin, datasources provisioned |
+| grafana | plugin dev image (`.config/Dockerfile`, grafana-enterprise 13.2.3) | 13000, 2345 (delve) | started from the repo-root `docker-compose.yaml`, which includes this stack; loads the plugin from `dist/` and provisions these datasources from `provisioning/datasources/dev.yaml` |
 
 Emitters (compose profile `emitters`, image built from `./emitter`, Python OTel SDK 1.45.1):
 
@@ -23,6 +23,16 @@ Emitters (compose profile `emitters`, image built from `./emitter`, Python OTel 
 | emit-inventory-enriched | collector enriched pipeline (resource_detection + `otelcol.pipeline=enriched`) | service.name=inventory |
 
 ## Start
+
+From the repo root (builds the plugin first, starts Grafana plus these backends):
+
+```sh
+npm run build
+go run github.com/magefile/mage@v1.17.2 build:linuxARM64
+docker compose up -d --build
+```
+
+From `dev/` (backends and emitters only, no Grafana):
 
 ```sh
 docker compose up -d
@@ -40,7 +50,7 @@ done
 ## Stop
 
 ```sh
-docker compose down          # keep nothing but the files
+docker compose down          # run in the directory you started from
 docker compose down --rmi local   # also remove the built emitter image
 ```
 

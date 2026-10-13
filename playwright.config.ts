@@ -1,0 +1,19 @@
+import type { PluginOptions } from '@grafana/plugin-e2e';
+import { defineConfig } from '@playwright/test';
+import baseConfig from './.config/playwright.config';
+
+/**
+ * Read environment variables from file.
+ * https://github.com/motdotla/dotenv
+ */
+// require('dotenv').config();
+
+/**
+ * See https://playwright.dev/docs/test-configuration.
+ */
+export default defineConfig<PluginOptions>(baseConfig, {
+  use: {
+    ...baseConfig.use,
+    baseURL: process.env.GRAFANA_URL || 'http://localhost:13000',
+  },
+});

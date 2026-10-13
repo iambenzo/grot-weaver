@@ -46,15 +46,6 @@ services:
     image: prom/node-exporter:v1.12.1
     ports: ["19100:9100"]
 
-  grafana:
-    image: grafana/grafana:13.2.3
-    environment:
-      GF_AUTH_ANONYMOUS_ENABLED: "true"
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
-      GF_AUTH_DISABLE_LOGIN_FORM: "true"
-    volumes: [./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/ds.yaml:ro]
-    ports: ["13000:3000"]
-
   emit-checkout-via-collector:
     <<: *emitter
     environment:
