@@ -16,7 +16,6 @@ import {
   Combobox,
   ComboboxOption,
   Field,
-  LoadingPlaceholder,
   Stack,
   Tab,
   TabsBar,
@@ -36,7 +35,14 @@ import { QueryWindow, toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
 import { FindingsTable } from './FindingsTable';
-import { Keyed, loadingText, useStackAssessment } from '../../assessment/useStackAssessment';
+import { Keyed, useStackAssessment } from '../../assessment/useStackAssessment';
+import {
+  EmptyTelemetry,
+  FeatureLimits,
+  LoadingProgress,
+  StackStatus,
+  hasOTelServices,
+} from '../../components/StackStatus/StackStatus';
 import { HopCandidates } from './HopCandidates';
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
@@ -88,7 +94,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   const load = useStackAssessment(settings, window);
 
   if (load.status === 'loading') {
-    return <LoadingPlaceholder text={loadingText(load)} />;
+    return <LoadingProgress progress={load.progress} labels={load.labels} />;
   }
   if (load.status === 'failed') {
     return (
@@ -109,7 +115,9 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
 
   return (
     <Stack direction="column" gap={2}>
-      <CollectionWarnings assessment={assessment} />
+      <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
+      <FeatureLimits progress={load.progress} result={assessment.result} />
+      {!assessment.partial && !hasOTelServices(assessment.result) && <EmptyTelemetry result={assessment.result} />}
       <WidenWindowPrompt
         window={load.window}
         observedItems={assessment.result.findings.length}
@@ -225,31 +233,6 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
         </Stack>
       </CollapsableSection>
     </Stack>
-  );
-}
-
-function CollectionWarnings({ assessment }: { assessment: StackAssessment }) {
-  const total = SIGNALS.reduce((sum, candidate) => sum + assessment.datasources[candidate].length, 0);
-  if (total === 0) {
-    return (
-      <Alert severity="info" title="No metrics, trace or log datasources found">
-        Add a Prometheus, Tempo or Loki datasource, or add its type in the app settings.
-      </Alert>
-    );
-  }
-  if (assessment.errors.length === 0) {
-    return null;
-  }
-  return (
-    <Alert severity="warning" title={`${assessment.errors.length} queries failed; results are partial`}>
-      <ul>
-        {assessment.errors.slice(0, 5).map((error, index) => (
-          <li key={index}>
-            {error.datasource}: {error.step} — {error.message}
-          </li>
-        ))}
-      </ul>
-    </Alert>
   );
 }
 

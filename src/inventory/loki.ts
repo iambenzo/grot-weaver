@@ -2,6 +2,7 @@ import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, lokiWindowParams, prometheusLookback } from '../window/window';
 import { CollectionError, LogDatasource, LogKeysMethod, LogService, SDK } from './types';
+import { guardStep } from './guard';
 
 const SERVICE_NAME = 'service_name';
 const SERVICE_NAMESPACE = 'service_namespace';
@@ -197,16 +198,6 @@ function lineCount(streams: SampleStream[]): number {
   return streams.reduce((total, stream) => total + stream.values.length, 0);
 }
 
-async function guarded<T>(context: Context, step: string, task: () => Promise<T>): Promise<T | undefined> {
-  try {
-    return await task();
-  } catch (error) {
-    const candidate = (error ?? {}) as { data?: { error?: string; message?: string }; message?: string };
-    context.errors.push({
-      datasource: context.uid,
-      step,
-      message: candidate.data?.error ?? candidate.data?.message ?? candidate.message ?? String(error),
-    });
-    return undefined;
-  }
+function guarded<T>(context: Context, step: string, task: () => Promise<T>): Promise<T | undefined> {
+  return guardStep(context.errors, context.uid, step, task);
 }

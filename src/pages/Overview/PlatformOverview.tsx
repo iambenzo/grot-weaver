@@ -1,10 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { SceneComponentProps, SceneObjectBase, SceneObjectState, SceneTimeRange, sceneGraph } from '@grafana/scenes';
-import { Alert, Badge, LoadingPlaceholder, Stack, Tab, TabsBar, Text } from '@grafana/ui';
+import { Alert, Badge, Stack, Tab, TabsBar, Text } from '@grafana/ui';
 import { Signal } from '../../api/types';
 import { coverageFor, groupViolations, serviceRows } from '../../assessment/overview';
 import { StackAssessment } from '../../assessment/stackAssessment';
-import { loadingText, useStackAssessment } from '../../assessment/useStackAssessment';
+import { useStackAssessment } from '../../assessment/useStackAssessment';
+import {
+  EmptyTelemetry,
+  LoadingProgress,
+  StackStatus,
+  hasOTelServices,
+} from '../../components/StackStatus/StackStatus';
 import { PluginSettings } from '../../settings/settings';
 import { toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
@@ -34,7 +40,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const [signal, setSignal] = useState<Signal>('metrics');
 
   if (load.status === 'loading') {
-    return <LoadingPlaceholder text={loadingText(load)} />;
+    return <LoadingProgress progress={load.progress} labels={load.labels} />;
   }
   if (load.status === 'failed') {
     return (
@@ -48,10 +54,26 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const { result } = assessment;
   const range = { from: String(timeRange.raw.from), to: String(timeRange.raw.to) };
   const groups = groupViolations(result.findings);
+  const status = (
+    <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
+  );
+
+  if (!assessment.partial && !hasOTelServices(result)) {
+    return (
+      <Stack direction="column" gap={3}>
+        <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} />
+        {status}
+        <EmptyTelemetry result={result} />
+        <WidenWindowPrompt window={load.window} observedItems={0} timeRange={timeRangeObject} />
+        <OwnerSections result={result} />
+      </Stack>
+    );
+  }
 
   return (
     <Stack direction="column" gap={3}>
       <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} />
+      {status}
       <WidenWindowPrompt window={load.window} observedItems={result.findings.length} timeRange={timeRangeObject} />
       <Stack direction="column" gap={2}>
         {SIGNALS.map((candidate) => (
@@ -103,11 +125,14 @@ function OverviewHeader({ assessment, windowLabel }: { assessment: StackAssessme
           const strategy = summary
             ? `, ${summary.strategy}${summary.mixed ? ' (mixed)' : ''}${summary.unit_checkable ? '' : ', unit not checkable'}`
             : '';
+          const sampled = assessment.progress.some(
+            (entry) => entry.ref.uid === ds.uid && entry.volumeMethod === 'sample'
+          );
           return (
             <Badge
               key={ds.uid}
               color="darkgrey"
-              text={`${ds.name} (${SIGNAL_LABELS[ds.signal].toLowerCase()}${strategy})`}
+              text={`${ds.name} (${SIGNAL_LABELS[ds.signal].toLowerCase()}${strategy}${sampled ? ', volume from sample' : ''})`}
             />
           );
         })}

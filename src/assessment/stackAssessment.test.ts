@@ -2,7 +2,7 @@ import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { AssessmentResult } from '../api/types';
 import { Inventory } from '../inventory/types';
-import { assessStack, mergeOwners } from './stackAssessment';
+import { DatasourceProgress, StackAssessment, assessStack, mergeOwners, retryDatasource } from './stackAssessment';
 
 const checkout = { kind: 'service' as const, namespace: 'shop', name: 'checkout' };
 
@@ -70,5 +70,86 @@ describe('assessStack', () => {
     expect(weighted).toBe(true);
     expect(inventory.pipeline_mappings).toEqual([{ match: 'shop/*', pipeline: 'edge' }]);
     expect(inventory.custom_namespaces).toEqual(['acme']);
+  });
+});
+
+describe('progress, partial results and retry', () => {
+  const datasources = {
+    metrics: [{ uid: 'prom', type: 'prometheus', name: 'P' }],
+    traces: [{ uid: 'tempo', type: 'tempo', name: 'T' }],
+    logs: [{ uid: 'loki', type: 'loki', name: 'L' }],
+  };
+  const window = { startSeconds: 1, endSeconds: 2 };
+
+  function fakeStack(denied: string[]) {
+    const get = (async (uid: string, requestPath: string) => {
+      if (denied.includes(uid)) {
+        throw { status: 403, data: { message: 'Access denied to this data source' } };
+      }
+      if (requestPath.endsWith('/values')) {
+        return { status: 'success', data: [], tagValues: [] };
+      }
+      if (requestPath === '/api/v2/search/tags') {
+        return { scopes: [] };
+      }
+      return { status: 'success', data: requestPath === '/api/v1/query' ? { result: [] } : [] };
+    }) as ProxyGet;
+    const score = jest.fn(
+      async (inventory: Inventory) =>
+        ({
+          findings: [],
+          scored: [...inventory.traces, ...(inventory.metrics ?? []), ...(inventory.logs ?? [])].map((ds) => ds.uid),
+        }) as unknown as AssessmentResult
+    );
+    const progress: DatasourceProgress[][] = [];
+    const partials: StackAssessment[] = [];
+    const deps = {
+      get,
+      limit: createLimiter(4),
+      score,
+      spanGroupRules: async () => [],
+      namesNeedingLabels: async () => [],
+      onProgress: (update: DatasourceProgress[]) => progress.push(update),
+      onPartial: (assessment: StackAssessment) => partials.push(assessment),
+    };
+    return { deps, score, progress, partials };
+  }
+
+  it('starts with every datasource pending and ends with each state', async () => {
+    const { deps, progress } = fakeStack(['loki']);
+
+    const assessment = await assessStack(datasources, window, {}, deps);
+
+    expect(progress[0].map((entry) => entry.state)).toEqual(['pending', 'pending', 'pending']);
+    expect(assessment.partial).toBe(false);
+    expect(assessment.progress.map((entry) => [entry.ref.uid, entry.state])).toEqual([
+      ['prom', 'ok'],
+      ['tempo', 'ok'],
+      ['loki', 'not_visible'],
+    ]);
+  });
+
+  it('scores what has arrived as partial before the final score', async () => {
+    const { deps, partials, score } = fakeStack([]);
+
+    const assessment = await assessStack(datasources, window, {}, deps);
+
+    expect(partials.length).toBeGreaterThan(0);
+    expect(partials.every((partial) => partial.partial)).toBe(true);
+    expect(partials.every((partial) => partial.collections.length < 3)).toBe(true);
+    expect(score).toHaveBeenCalledTimes(partials.length + 1);
+    expect((assessment.result as unknown as { scored: string[] }).scored).toEqual(['tempo', 'prom', 'loki']);
+  });
+
+  it('retries one datasource and keeps the others', async () => {
+    const first = fakeStack(['loki']);
+    const previous = await assessStack(datasources, window, {}, first.deps);
+    const second = fakeStack([]);
+
+    const retried = await retryDatasource(previous, 'loki', window, {}, second.deps);
+
+    expect(retried.progress.find((entry) => entry.ref.uid === 'loki')?.state).toBe('ok');
+    expect(retried.collections.map((collection) => collection.ref.uid)).toEqual(['prom', 'tempo', 'loki']);
+    expect(second.partials).toEqual([]);
   });
 });

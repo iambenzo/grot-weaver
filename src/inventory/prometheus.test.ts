@@ -101,7 +101,9 @@ describe('collectPrometheusInventory', () => {
 
     const { datasource, errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
 
-    expect(errors).toEqual([{ datasource: 'prom', step: 'target_info series', message: 'too many series' }]);
+    expect(errors).toEqual([
+      { datasource: 'prom', step: 'target_info series', message: 'too many series', status: 422 },
+    ]);
     expect(datasource.names.length).toBeGreaterThan(0);
     expect(datasource.target_info).toEqual([]);
   });

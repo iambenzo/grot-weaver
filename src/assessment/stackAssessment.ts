@@ -1,12 +1,13 @@
 import { DatasourceRef, ProxyGet, discoverDatasources } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
-import { collectTempoInventory } from '../inventory/tempo';
+import { VolumeMethod, collectTempoInventory } from '../inventory/tempo';
 import { collectPrometheusInventory, LabelProgress, NamesNeedingLabels } from '../inventory/prometheus';
 import { collectLokiInventory } from '../inventory/loki';
-import { CollectionError, Inventory } from '../inventory/types';
+import { CollectionError, Inventory, LogDatasource, MetricDatasource, TraceDatasource } from '../inventory/types';
+import { isPermissionDenied } from '../inventory/guard';
 import { QueryWindow } from '../window/window';
 import { ScoreInventory } from '../api/score';
-import { FetchSpanGroupRules } from '../api/catalogue';
+import { FetchSpanGroupRules, SpanGroupRule } from '../api/catalogue';
 import { AssessmentResult, Owner, Signal } from '../api/types';
 import {
   DEFAULT_LOG_SAMPLE_LIMIT,
@@ -20,10 +21,33 @@ import {
 
 export type DatasourcesBySignal = Record<Signal, DatasourceRef[]>;
 
+export type DatasourceState = 'pending' | 'ok' | 'errors' | 'not_visible';
+
+export interface DatasourceProgress {
+  ref: DatasourceRef;
+  signal: Signal;
+  state: DatasourceState;
+  errors: CollectionError[];
+  volumeMethod?: VolumeMethod;
+}
+
+export interface Collection {
+  ref: DatasourceRef;
+  signal: Signal;
+  errors: CollectionError[];
+  traces?: TraceDatasource;
+  metrics?: MetricDatasource;
+  logs?: LogDatasource;
+  volumeMethod?: VolumeMethod;
+}
+
 export interface StackAssessment {
   result: AssessmentResult;
   errors: CollectionError[];
   datasources: DatasourcesBySignal;
+  collections: Collection[];
+  progress: DatasourceProgress[];
+  partial: boolean;
 }
 
 export interface StackDependencies {
@@ -33,50 +57,123 @@ export interface StackDependencies {
   spanGroupRules: FetchSpanGroupRules;
   namesNeedingLabels: NamesNeedingLabels;
   onLabelProgress?: (progress: LabelProgress) => void;
+  onProgress?: (progress: DatasourceProgress[]) => void;
+  onPartial?: (assessment: StackAssessment) => void;
 }
 
-export async function assessStack(
+interface Target {
+  ref: DatasourceRef;
+  signal: Signal;
+}
+
+const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
+
+export function assessStack(
   datasources: DatasourcesBySignal,
   window: QueryWindow,
   settings: PluginSettings,
   deps: StackDependencies
 ): Promise<StackAssessment> {
+  return runAssessment(datasources, targetsOf(datasources), [], window, settings, deps);
+}
+
+export function retryDatasource(
+  previous: StackAssessment,
+  uid: string,
+  window: QueryWindow,
+  settings: PluginSettings,
+  deps: StackDependencies
+): Promise<StackAssessment> {
+  const targets = targetsOf(previous.datasources).filter((target) => target.ref.uid === uid);
+  const kept = previous.collections.filter((collection) => collection.ref.uid !== uid);
+  return runAssessment(previous.datasources, targets, kept, window, settings, deps);
+}
+
+export function stateOf(collection: Collection): DatasourceState {
+  if (collection.errors.some(isPermissionDenied)) {
+    return 'not_visible';
+  }
+  return collection.errors.length > 0 ? 'errors' : 'ok';
+}
+
+async function runAssessment(
+  datasources: DatasourcesBySignal,
+  targets: Target[],
+  seed: Collection[],
+  window: QueryWindow,
+  settings: PluginSettings,
+  deps: StackDependencies
+): Promise<StackAssessment> {
   const rules = await deps.spanGroupRules().catch(() => []);
-  const [traces, metrics, logs] = await Promise.all([
-    Promise.all(
-      datasources.traces.map((ds) =>
-        collectTempoInventory(
-          ds.uid,
-          deps.get,
-          deps.limit,
-          window,
-          rules,
-          sampleLimit(settings.traceSampleLimit, DEFAULT_TRACE_SAMPLE_LIMIT)
-        )
-      )
-    ),
-    Promise.all(
-      datasources.metrics.map((ds) =>
-        collectPrometheusInventory(ds.uid, deps.get, deps.limit, window, deps.namesNeedingLabels, deps.onLabelProgress)
-      )
-    ),
-    Promise.all(
-      datasources.logs.map((ds) =>
-        collectLokiInventory(
-          ds.uid,
-          deps.get,
-          deps.limit,
-          window,
-          sampleLimit(settings.logSampleLimit, DEFAULT_LOG_SAMPLE_LIMIT)
-        )
-      )
-    ),
-  ]);
+  const collections = [...seed];
+  let finished = false;
+  const snapshot = () => progressOf(datasources, collections);
+  const scoreCollected = async (partial: boolean): Promise<StackAssessment> => {
+    const ordered = orderLike(datasources, collections);
+    const result = await deps.score(buildInventory(ordered, window, settings), settings.volumeWeighted === true);
+    const errors = ordered.flatMap((collection) => collection.errors);
+    return { result, errors, datasources, collections: ordered, progress: progressOf(datasources, ordered), partial };
+  };
+  deps.onProgress?.(snapshot());
+  await Promise.all(
+    targets.map(async (target) => {
+      collections.push(await collect(target, window, settings, deps, rules));
+      deps.onProgress?.(snapshot());
+      if (finished || collections.length === targetsOf(datasources).length || !deps.onPartial) {
+        return;
+      }
+      const partial = await scoreCollected(true).catch(() => undefined);
+      if (partial && !finished) {
+        deps.onPartial(partial);
+      }
+    })
+  );
+  const assessment = await scoreCollected(false);
+  finished = true;
+  return assessment;
+}
+
+async function collect(
+  target: Target,
+  window: QueryWindow,
+  settings: PluginSettings,
+  deps: StackDependencies,
+  rules: SpanGroupRule[]
+): Promise<Collection> {
+  const { ref, signal } = target;
+  if (signal === 'traces') {
+    const limit = sampleLimit(settings.traceSampleLimit, DEFAULT_TRACE_SAMPLE_LIMIT);
+    const collected = await collectTempoInventory(ref.uid, deps.get, deps.limit, window, rules, limit);
+    return {
+      ref,
+      signal,
+      errors: collected.errors,
+      traces: collected.datasource,
+      volumeMethod: collected.volumeMethod,
+    };
+  }
+  if (signal === 'metrics') {
+    const collected = await collectPrometheusInventory(
+      ref.uid,
+      deps.get,
+      deps.limit,
+      window,
+      deps.namesNeedingLabels,
+      deps.onLabelProgress
+    );
+    return { ref, signal, errors: collected.errors, metrics: withStrategyOverride(collected.datasource, settings) };
+  }
+  const limit = sampleLimit(settings.logSampleLimit, DEFAULT_LOG_SAMPLE_LIMIT);
+  const collected = await collectLokiInventory(ref.uid, deps.get, deps.limit, window, limit);
+  return { ref, signal, errors: collected.errors, logs: collected.datasource };
+}
+
+function buildInventory(collections: Collection[], window: QueryWindow, settings: PluginSettings): Inventory {
   const inventory: Inventory = {
     window: { start: window.startSeconds, end: window.endSeconds },
-    traces: traces.map((collection) => collection.datasource),
-    metrics: metrics.map((collection) => withStrategyOverride(collection.datasource, settings)),
-    logs: logs.map((collection) => collection.datasource),
+    traces: collections.flatMap((collection) => (collection.traces ? [collection.traces] : [])),
+    metrics: collections.flatMap((collection) => (collection.metrics ? [collection.metrics] : [])),
+    logs: collections.flatMap((collection) => (collection.logs ? [collection.logs] : [])),
   };
   if (settings.reclassification) {
     inventory.reclassification = settings.reclassification;
@@ -88,9 +185,29 @@ export async function assessStack(
   if (mappings.length > 0) {
     inventory.pipeline_mappings = mappings;
   }
-  const result = await deps.score(inventory, settings.volumeWeighted === true);
-  const errors = [...traces, ...metrics, ...logs].flatMap((collection) => collection.errors);
-  return { result, errors, datasources };
+  return inventory;
+}
+
+function targetsOf(datasources: DatasourcesBySignal): Target[] {
+  return SIGNALS.flatMap((signal) => datasources[signal].map((ref) => ({ ref, signal })));
+}
+
+function orderLike(datasources: DatasourcesBySignal, collections: Collection[]): Collection[] {
+  return targetsOf(datasources).flatMap((target) =>
+    collections.filter((collection) => collection.ref.uid === target.ref.uid && collection.signal === target.signal)
+  );
+}
+
+function progressOf(datasources: DatasourcesBySignal, collections: Collection[]): DatasourceProgress[] {
+  return targetsOf(datasources).map((target) => {
+    const collection = collections.find(
+      (candidate) => candidate.ref.uid === target.ref.uid && candidate.signal === target.signal
+    );
+    if (!collection) {
+      return { ...target, state: 'pending', errors: [] };
+    }
+    return { ...target, state: stateOf(collection), errors: collection.errors, volumeMethod: collection.volumeMethod };
+  });
 }
 
 export function discoverStack(settings: PluginSettings): DatasourcesBySignal {

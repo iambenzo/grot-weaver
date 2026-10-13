@@ -121,13 +121,35 @@ describe('collectTempoInventory', () => {
     expect(errors[0]).toMatchObject({ datasource: 'tempo', message: 'tempo exploded' });
   });
 
+  it('counts span volume from a sample when TraceQL metrics are unavailable', async () => {
+    const { get } = fakeTempo(['/api/metrics/query_range']);
+    const sampling = (async (uid: string, requestPath: string, params: Record<string, string>) =>
+      requestPath === '/api/search'
+        ? { traces: [{ spanSets: [{ matched: params.q.includes('checkout') ? 4 : 1 }, { matched: 2 }] }] }
+        : get(uid, requestPath, params)) as ProxyGet;
+
+    const collection = await collectTempoInventory('tempo', sampling, createLimiter(2), window, [], 7);
+
+    expect(collection.volumeMethod).toBe('sample');
+    expect(collection.errors).toEqual([]);
+    const checkout = collection.datasource.services.find((service) => service.service_name === 'checkout');
+    expect(checkout?.span_count).toBe(6);
+  });
+
+  it('reports metrics as the volume method when TraceQL metrics answer', async () => {
+    const { get } = fakeTempo();
+
+    expect((await collectTempoInventory('tempo', get, createLimiter(2), window)).volumeMethod).toBe('metrics');
+  });
+
   it('returns an empty datasource when service discovery fails', async () => {
-    const { get } = fakeTempo(['resource.service.name/values']);
+    const { get } = fakeTempo(['resource.service.name/values', '/api/metrics/query_range']);
 
-    const { datasource, errors } = await collectTempoInventory('tempo', get, createLimiter(2), window);
+    const collection = await collectTempoInventory('tempo', get, createLimiter(2), window);
 
-    expect(datasource).toEqual({ uid: 'tempo', services: [] });
-    expect(errors).toHaveLength(1);
+    expect(collection.datasource).toEqual({ uid: 'tempo', services: [] });
+    expect(collection.errors).toHaveLength(1);
+    expect(collection.volumeMethod).toBeUndefined();
   });
 });
 

@@ -6,9 +6,11 @@ import { CollectionError, KeyObservation, SDK, SpanGroupSample, TraceDatasource,
 import { applicableRules, sampleSpanGroup } from './spanGroups';
 import { serviceFilterExpression } from './traceql';
 import { queryMetricsRange } from './traceqlMetrics';
+import { guardStep } from './guard';
 
 const SERVICE_NAME_TAG = 'resource.service.name';
 const SERVICE_NAMESPACE_TAG = 'resource.service.namespace';
+const DEFAULT_VOLUME_SAMPLE_LIMIT = 20;
 
 const SDK_TAGS: Record<keyof SDK, string> = {
   name: 'resource.telemetry.sdk.name',
@@ -25,9 +27,16 @@ interface TagsResponse {
   scopes?: Array<{ name: string; tags?: string[] }>;
 }
 
+export type VolumeMethod = 'metrics' | 'sample';
+
 export interface TempoCollection {
   datasource: TraceDatasource;
   errors: CollectionError[];
+  volumeMethod?: VolumeMethod;
+}
+
+interface SearchResponse {
+  traces?: Array<{ spanSets?: Array<{ matched?: number }> }>;
 }
 
 interface CollectorContext {
@@ -54,27 +63,55 @@ export async function collectTempoInventory(
 ): Promise<TempoCollection> {
   const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit };
   const serviceNames = await guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG));
-  const [services, volumes] = await Promise.all([
+  const [services, metricVolumes] = await Promise.all([
     Promise.all((serviceNames ?? []).map((name) => collectService(context, name))),
     spanVolumes(context),
   ]);
+  const volumes = metricVolumes ?? (await sampledVolumes(context, serviceNames ?? []));
   for (const service of services) {
     service.span_count = volumes.get(service.service_name) ?? 0;
   }
-  return { datasource: { uid, services }, errors: context.errors };
+  const collection: TempoCollection = { datasource: { uid, services }, errors: context.errors };
+  if (services.length > 0) {
+    collection.volumeMethod = metricVolumes ? 'metrics' : 'sample';
+  }
+  return collection;
 }
 
-async function spanVolumes(context: CollectorContext): Promise<Map<string, number>> {
+async function spanVolumes(context: CollectorContext): Promise<Map<string, number> | undefined> {
+  let series;
+  try {
+    series = await queryMetricsRange(context, `{ } | count_over_time() by (${SERVICE_NAME_TAG})`);
+  } catch {
+    return undefined;
+  }
   const volumes = new Map<string, number>();
-  const series = await guarded(context, 'span volumes', () =>
-    queryMetricsRange(context, `{ } | count_over_time() by (${SERVICE_NAME_TAG})`)
-  );
-  for (const entry of series ?? []) {
+  for (const entry of series) {
     const name = entry.labels?.find((label) => label.key === SERVICE_NAME_TAG)?.value?.stringValue ?? '';
     const spans = (entry.samples ?? []).reduce((total, sample) => total + (sample.value ?? 0), 0);
     volumes.set(name, (volumes.get(name) ?? 0) + spans);
   }
   return volumes;
+}
+
+async function sampledVolumes(context: CollectorContext, serviceNames: string[]): Promise<Map<string, number>> {
+  const counts = await Promise.all(
+    serviceNames.map(async (name) => {
+      const params = {
+        ...tempoWindowParams(context.window),
+        q: serviceFilter(name),
+        limit: String(context.sampleLimit ?? DEFAULT_VOLUME_SAMPLE_LIMIT),
+      };
+      const response = await guarded(context, `span volume sample for service "${name}"`, () =>
+        context.limit(() => context.get<SearchResponse>(context.uid, '/api/search', params))
+      );
+      const spans = (response?.traces ?? [])
+        .flatMap((trace) => trace.spanSets ?? [])
+        .reduce((total, set) => total + (set.matched ?? 0), 0);
+      return [name, spans] as const;
+    })
+  );
+  return new Map(counts);
 }
 
 async function collectService(context: CollectorContext, serviceName: string): Promise<TraceService> {
@@ -145,25 +182,10 @@ async function scopedTags(context: CollectorContext, scope: 'resource' | 'span',
   return (response.scopes ?? []).filter((entry) => entry.name === scope).flatMap((entry) => entry.tags ?? []);
 }
 
-async function guarded<T>(context: CollectorContext, step: string, task: () => Promise<T>): Promise<T | undefined> {
-  try {
-    return await task();
-  } catch (error) {
-    context.errors.push({ datasource: context.uid, step, message: errorMessage(error) });
-    return undefined;
-  }
+function guarded<T>(context: CollectorContext, step: string, task: () => Promise<T>): Promise<T | undefined> {
+  return guardStep(context.errors, context.uid, step, task);
 }
 
 function observations(keys: string[] | undefined): KeyObservation[] {
   return [...new Set(keys ?? [])].sort().map((key) => ({ key, volume: 0 }));
-}
-
-function errorMessage(error: unknown): string {
-  if (error && typeof error === 'object') {
-    const candidate = error as { data?: { message?: string }; message?: string; status?: number };
-    return (
-      candidate.data?.message ?? candidate.message ?? `request failed with status ${candidate.status ?? 'unknown'}`
-    );
-  }
-  return String(error);
 }

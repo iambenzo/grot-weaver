@@ -2,6 +2,7 @@ import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, prometheusLookback, prometheusWindowParams } from '../window/window';
 import { CollectionError, MetricDatasource, MetricOwner, OwnerLabelKeys } from './types';
+import { guardStep } from './guard';
 
 const TARGET_INFO = 'target_info';
 const OWNER_LABELS = ['job', 'service_name', 'service_namespace', 'otel_scope_name', 'otel_scope_version'];
@@ -224,16 +225,6 @@ function chunk<T>(items: T[], size: number): T[][] {
   return chunks;
 }
 
-async function guarded<T>(context: Context, step: string, task: () => Promise<T>): Promise<T | undefined> {
-  try {
-    return await task();
-  } catch (error) {
-    const candidate = (error ?? {}) as { data?: { error?: string; message?: string }; message?: string };
-    context.errors.push({
-      datasource: context.uid,
-      step,
-      message: candidate.data?.error ?? candidate.data?.message ?? candidate.message ?? String(error),
-    });
-    return undefined;
-  }
+function guarded<T>(context: Context, step: string, task: () => Promise<T>): Promise<T | undefined> {
+  return guardStep(context.errors, context.uid, step, task);
 }

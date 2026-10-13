@@ -13,6 +13,14 @@ export const testIds = {
     services: 'data-testid overview-services',
     sections: 'data-testid overview-owner-sections',
   },
+  status: {
+    progress: 'data-testid status-progress',
+    partial: 'data-testid status-partial',
+    notVisible: 'data-testid status-not-visible',
+    datasourceErrors: 'data-testid status-datasource-errors',
+    limits: 'data-testid status-limits',
+    empty: 'data-testid status-empty',
+  },
   window: {
     widenPrompt: 'data-testid window-widen-prompt',
     widenButton: 'data-testid window-widen-button',

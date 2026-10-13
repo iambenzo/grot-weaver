@@ -113,4 +113,5 @@ export interface CollectionError {
   datasource: string;
   step: string;
   message: string;
+  status?: number;
 }
