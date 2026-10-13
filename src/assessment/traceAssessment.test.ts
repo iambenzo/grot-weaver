@@ -30,6 +30,9 @@ describe('assessTraces', () => {
     expect(inventory.window).toEqual({ start: 10, end: 20 });
     expect(inventory.traces.map((trace) => trace.uid)).toEqual(['a', 'b']);
     expect(weighted).toBe(false);
+
+    await assessTraces([], window, { get, limit: createLimiter(1), score, spanGroupRules: async () => [] }, true);
+    expect((score.mock.calls[1] as unknown as [unknown, boolean])[1]).toBe(true);
   });
 });
 

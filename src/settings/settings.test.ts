@@ -1,4 +1,4 @@
-import { DEFAULT_CONCURRENCY, concurrencyFrom, datasourceTypesFor, readSettings } from './settings';
+import { DEFAULT_CONCURRENCY, concurrencyFrom, datasourceTypesFor, isVolumeWeighted, readSettings } from './settings';
 
 describe('readSettings', () => {
   it.each([
@@ -9,6 +9,8 @@ describe('readSettings', () => {
     [{ defaultWindow: 7 }, {}],
     [{ datasourceTypes: { traces: ['tempo', 'grafana-tempo-datasource'], metrics: 'prometheus' } }, { datasourceTypes: { traces: ['tempo', 'grafana-tempo-datasource'] } }],
     [{ concurrency: 8 }, { concurrency: 8 }],
+    [{ volumeWeighted: true }, { volumeWeighted: true }],
+    [{ volumeWeighted: 'yes' }, {}],
   ])('reads %p', (jsonData, expected) => {
     expect(readSettings(jsonData)).toEqual(expected);
   });
@@ -24,6 +26,13 @@ describe('datasourceTypesFor', () => {
     expect(datasourceTypesFor({ datasourceTypes: { metrics: ['grafana-amazonprometheus-datasource'] } }, 'metrics')).toEqual([
       'grafana-amazonprometheus-datasource',
     ]);
+  });
+});
+
+describe('isVolumeWeighted', () => {
+  it('is off unless explicitly enabled', () => {
+    expect(isVolumeWeighted({})).toBe(false);
+    expect(isVolumeWeighted({ volumeWeighted: true })).toBe(true);
   });
 });
 

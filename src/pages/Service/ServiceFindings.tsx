@@ -10,7 +10,17 @@ import {
   SceneTimeRange,
   sceneGraph,
 } from '@grafana/scenes';
-import { Alert, CollapsableSection, Combobox, ComboboxOption, Field, LoadingPlaceholder, Stack, Text, useStyles2 } from '@grafana/ui';
+import {
+  Alert,
+  CollapsableSection,
+  Combobox,
+  ComboboxOption,
+  Field,
+  LoadingPlaceholder,
+  Stack,
+  Text,
+  useStyles2,
+} from '@grafana/ui';
 import { discoverDatasources, proxyGet } from '../../datasources/proxy';
 import { createLimiter } from '../../datasources/limiter';
 import { scoreInventory } from '../../api/score';
@@ -18,7 +28,7 @@ import { fetchSpanGroupRules } from '../../api/catalogue';
 import { Attribution, Finding, Owner } from '../../api/types';
 import { TraceAssessment, assessTraces, lookupFindingLibraries, sameOwner } from '../../assessment/traceAssessment';
 import { LibraryEvidence } from '../../inventory/traceLibraries';
-import { PluginSettings, concurrencyFrom, datasourceTypesFor } from '../../settings/settings';
+import { PluginSettings, concurrencyFrom, datasourceTypesFor, isVolumeWeighted } from '../../settings/settings';
 import { QueryWindow, toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
@@ -52,7 +62,10 @@ export class ServiceFindings extends SceneObjectBase<ServiceFindingsState> {
   }
 }
 
-type Load = { status: 'loading' } | { status: 'failed'; message: string } | { status: 'ready'; assessment: TraceAssessment; window: QueryWindow };
+type Load =
+  | { status: 'loading' }
+  | { status: 'failed'; message: string }
+  | { status: 'ready'; assessment: TraceAssessment; window: QueryWindow };
 
 function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>) {
   const styles = useStyles2(getStyles);
@@ -80,12 +93,18 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   return (
     <Stack direction="column" gap={2}>
       <CollectionWarnings assessment={assessment} />
-      <WidenWindowPrompt window={load.window} observedItems={assessment.result.findings.length} timeRange={timeRangeObject} />
+      <WidenWindowPrompt
+        window={load.window}
+        observedItems={assessment.result.findings.length}
+        timeRange={timeRangeObject}
+      />
       <Field label="Service" description={`${services.length} services seen in this window`} className={styles.picker}>
         <Combobox
           options={services.map(toOption)}
           value={selected ? ownerValue(selected) : null}
-          onChange={(option: ComboboxOption | null) => model.selectService(services.find((owner) => ownerValue(owner) === option?.value))}
+          onChange={(option: ComboboxOption | null) =>
+            model.selectService(services.find((owner) => ownerValue(owner) === option?.value))
+          }
           placeholder="Choose a service"
           isClearable
           data-testid={testIds.service.picker}
@@ -100,7 +119,17 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   );
 }
 
-function SelectedService({ owner, assessment, window, settings }: { owner: Owner; assessment: TraceAssessment; window: QueryWindow; settings: PluginSettings }) {
+function SelectedService({
+  owner,
+  assessment,
+  window,
+  settings,
+}: {
+  owner: Owner;
+  assessment: TraceAssessment;
+  window: QueryWindow;
+  settings: PluginSettings;
+}) {
   const { conformant, actionable } = useMemo(() => {
     const owned = assessment.result.findings.filter((finding) => sameOwner(finding.owner, owner));
     return {
@@ -118,7 +147,11 @@ function SelectedService({ owner, assessment, window, settings }: { owner: Owner
       ) : (
         <FindingsTable findings={actionable} evidence={evidence} />
       )}
-      <CollapsableSection label={`Conformant names (${conformant.length})`} isOpen={conformantOpen} onToggle={setConformantOpen}>
+      <CollapsableSection
+        label={`Conformant names (${conformant.length})`}
+        isOpen={conformantOpen}
+        onToggle={setConformantOpen}
+      >
         <Stack direction="column" gap={0}>
           {conformant.map((finding) => (
             <code key={`${finding.scope}-${finding.observed}`}>{finding.observed}</code>
@@ -166,12 +199,17 @@ function useTraceAssessment(settings: PluginSettings, window: QueryWindow): Load
     let cancelled = false;
     const datasources = discoverDatasources(datasourceTypesFor(settings, 'traces'));
     const settle = (value: Outcome) => !cancelled && setLoaded({ key: window, value });
-    assessTraces(datasources, window, {
-      get: proxyGet,
-      limit: createLimiter(concurrencyFrom(settings)),
-      score: scoreInventory,
-      spanGroupRules: fetchSpanGroupRules,
-    })
+    assessTraces(
+      datasources,
+      window,
+      {
+        get: proxyGet,
+        limit: createLimiter(concurrencyFrom(settings)),
+        score: scoreInventory,
+        spanGroupRules: fetchSpanGroupRules,
+      },
+      isVolumeWeighted(settings)
+    )
       .then((assessment) => settle({ status: 'ready', assessment, window }))
       .catch((error: unknown) => settle({ status: 'failed', message: messageOf(error) }));
     return () => {
@@ -183,15 +221,21 @@ function useTraceAssessment(settings: PluginSettings, window: QueryWindow): Load
 
 const NO_EVIDENCE = new Map<string, LibraryEvidence>();
 
-function useLibraryEvidence(findings: Finding[], assessment: TraceAssessment, window: QueryWindow, settings: PluginSettings) {
+function useLibraryEvidence(
+  findings: Finding[],
+  assessment: TraceAssessment,
+  window: QueryWindow,
+  settings: PluginSettings
+) {
   const [loaded, setLoaded] = useState<Keyed<Finding[], Map<string, LibraryEvidence>>>();
   useEffect(() => {
     let cancelled = false;
     const datasourceFor = (finding: Finding) =>
       assessment.result.attributions.find((attribution) => sameOwner(attribution.owner, finding.owner))?.datasource;
-    lookupFindingLibraries(findings, datasourceFor, window, { get: proxyGet, limit: createLimiter(concurrencyFrom(settings)) }).then(
-      (found) => !cancelled && setLoaded({ key: findings, value: found })
-    );
+    lookupFindingLibraries(findings, datasourceFor, window, {
+      get: proxyGet,
+      limit: createLimiter(concurrencyFrom(settings)),
+    }).then((found) => !cancelled && setLoaded({ key: findings, value: found }));
     return () => {
       cancelled = true;
     };

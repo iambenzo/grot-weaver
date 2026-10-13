@@ -8,6 +8,7 @@ export interface PluginSettings {
   defaultWindow?: string;
   datasourceTypes?: Partial<DatasourceTypes>;
   concurrency?: number;
+  volumeWeighted?: boolean;
 }
 
 export const DEFAULT_DATASOURCE_TYPES: DatasourceTypes = {
@@ -34,7 +35,14 @@ export function readSettings(jsonData: unknown): PluginSettings {
   if (typeof raw.concurrency === 'number') {
     settings.concurrency = raw.concurrency;
   }
+  if (typeof raw.volumeWeighted === 'boolean') {
+    settings.volumeWeighted = raw.volumeWeighted;
+  }
   return settings;
+}
+
+export function isVolumeWeighted(settings: PluginSettings): boolean {
+  return settings.volumeWeighted === true;
 }
 
 function readTypes(raw: Record<string, unknown>): Partial<DatasourceTypes> {

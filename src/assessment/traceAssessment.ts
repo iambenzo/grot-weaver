@@ -21,12 +21,17 @@ export interface Dependencies {
   spanGroupRules: FetchSpanGroupRules;
 }
 
-export async function assessTraces(datasources: DatasourceRef[], window: QueryWindow, deps: Dependencies): Promise<TraceAssessment> {
+export async function assessTraces(
+  datasources: DatasourceRef[],
+  window: QueryWindow,
+  deps: Dependencies,
+  volumeWeighted = false
+): Promise<TraceAssessment> {
   const rules = await deps.spanGroupRules().catch(() => []);
   const collections = await Promise.all(datasources.map((ds) => collectTempoInventory(ds.uid, deps.get, deps.limit, window, rules)));
   const traces: TraceDatasource[] = collections.map((collection) => collection.datasource);
   const errors = collections.flatMap((collection) => collection.errors);
-  const result = await deps.score({ window: { start: window.startSeconds, end: window.endSeconds }, traces }, false);
+  const result = await deps.score({ window: { start: window.startSeconds, end: window.endSeconds }, traces }, volumeWeighted);
   return { result, errors, datasources };
 }
 

@@ -1,0 +1,35 @@
+OTel Semconv Compliance
+Copyright (C) 2026 iambenzo
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free
+Software Foundation, version 3 only. See LICENSE for the full text.
+
+This program embeds data derived from, and is built with, the following
+projects. Each is licensed under the Apache License, Version 2.0
+(https://www.apache.org/licenses/LICENSE-2.0) and remains under that licence.
+
+- OpenTelemetry Semantic Conventions
+  https://github.com/open-telemetry/semantic-conventions
+  Copyright The OpenTelemetry Authors
+  Source of pkg/catalogue/data/core.json and, through the schema files at
+  https://opentelemetry.io/schemas/, pkg/catalogue/data/renames.json.
+
+- OpenTelemetry Semantic Conventions for Generative AI
+  https://github.com/open-telemetry/semantic-conventions-genai
+  Copyright The OpenTelemetry Authors
+  Source of pkg/catalogue/data/genai.json.
+
+- OpenTelemetry Weaver
+  https://github.com/open-telemetry/weaver
+  Copyright The OpenTelemetry Authors
+  Used at build time (otel/weaver container) to generate the catalogue files
+  from the registries above, with the template in catalogue/templates.
+
+- prometheus/otlptranslator
+  https://github.com/prometheus/otlptranslator
+  Copyright The Prometheus Authors
+  Linked into the backend to compute Prometheus metric and label names.
+
+Other npm and Go dependencies are distributed under their own licences, which
+are listed in package-lock.json and go.sum.
