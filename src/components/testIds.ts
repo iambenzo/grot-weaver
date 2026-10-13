@@ -1,4 +1,8 @@
 export const testIds = {
+  window: {
+    widenPrompt: 'data-testid window-widen-prompt',
+    widenButton: 'data-testid window-widen-button',
+  },
   appConfig: {
     container: 'data-testid ac-container',
     apiKey: 'data-testid ac-api-key',
