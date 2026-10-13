@@ -76,3 +76,15 @@ python3 -I dev/scripts/capture_fixtures.py cloud   # read-only: GET requests thr
 
 The script redacts host, account, subscription and user names, and replaces Loki log lines with `<line>`. Check new captures before committing them.
 
+
+## End-to-end validation on cloud
+
+`dev/validate/cloud.validate.test.ts` runs the plugin's own collectors against cloud and scores the result on the local backend. Every cloud request is a `gcx --context cloud api ... -X GET`, and nothing is written to cloud. It needs the dev stack running and a local Grafana session cookie:
+
+```sh
+J=$PWD/dev/evidence/cloud-raw/local-cookies.txt
+curl -s -c $J -H 'Content-Type: application/json' -d '{"user":"admin","password":"admin"}' localhost:13000/login
+VALIDATE_WINDOW_DAYS=30 LOCAL_GRAFANA_COOKIES=$J npx jest --ci --rootDir . --testMatch '<rootDir>/dev/validate/**/*.test.ts' --forceExit
+```
+
+The inventory and assessment are written to `dev/evidence/cloud-raw/` (git-ignored, because they contain real names). Without `LOCAL_GRAFANA_COOKIES` the suite is skipped.
