@@ -21,6 +21,9 @@ export const testIds = {
     limits: 'data-testid status-limits',
     empty: 'data-testid status-empty',
   },
+  upstream: {
+    banner: 'data-testid upstream-banner',
+  },
   window: {
     widenPrompt: 'data-testid window-widen-prompt',
     widenButton: 'data-testid window-widen-button',

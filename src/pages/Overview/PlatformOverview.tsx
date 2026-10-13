@@ -11,7 +11,8 @@ import {
   StackStatus,
   hasOTelServices,
 } from '../../components/StackStatus/StackStatus';
-import { PluginSettings } from '../../settings/settings';
+import { PluginSettings, isUpstreamCheckEnabled } from '../../settings/settings';
+import { UpstreamBanner } from '../../upstream/UpstreamBanner';
 import { toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
@@ -61,7 +62,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   if (!assessment.partial && !hasOTelServices(result)) {
     return (
       <Stack direction="column" gap={3}>
-        <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} />
+        <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
         {status}
         <EmptyTelemetry result={result} />
         <WidenWindowPrompt window={load.window} observedItems={0} timeRange={timeRangeObject} />
@@ -72,7 +73,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
 
   return (
     <Stack direction="column" gap={3}>
-      <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} />
+      <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
       {status}
       <WidenWindowPrompt window={load.window} observedItems={result.findings.length} timeRange={timeRangeObject} />
       <Stack direction="column" gap={2}>
@@ -109,7 +110,15 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   );
 }
 
-function OverviewHeader({ assessment, windowLabel }: { assessment: StackAssessment; windowLabel: string }) {
+function OverviewHeader({
+  assessment,
+  windowLabel,
+  settings,
+}: {
+  assessment: StackAssessment;
+  windowLabel: string;
+  settings: PluginSettings;
+}) {
   const summaries = assessment.result.datasources ?? [];
   const all = SIGNALS.flatMap((candidate) =>
     assessment.datasources[candidate].map((ds) => ({ ...ds, signal: candidate }))
@@ -137,6 +146,7 @@ function OverviewHeader({ assessment, windowLabel }: { assessment: StackAssessme
           );
         })}
       </Stack>
+      <UpstreamBanner currentVersion={assessment.result.semconv_version} enabled={isUpstreamCheckEnabled(settings)} />
     </Stack>
   );
 }
