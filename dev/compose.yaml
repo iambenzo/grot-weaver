@@ -1,0 +1,94 @@
+name: semconv-lab
+
+x-emitter: &emitter
+  build: ./emitter
+  image: semconv-emitter:local
+  profiles: [emitters]
+  depends_on: [otelcol]
+
+x-via-collector: &via-collector
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otelcol:4318
+  RUN_SECONDS: "60"
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    command: [--config.file=/etc/prometheus/prometheus.yml, --web.enable-otlp-receiver, --web.enable-remote-write-receiver, --web.enable-lifecycle]
+    volumes: [./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro]
+    ports: ["19090:9090"]
+
+  prometheus-alt:
+    image: prom/prometheus:v3.15.0
+    command: [--config.file=/etc/prometheus/prometheus.yml, --web.enable-otlp-receiver, --web.enable-lifecycle, --enable-feature=type-and-unit-labels]
+    volumes: [./config/prometheus-alt.yml:/etc/prometheus/prometheus.yml:ro]
+    ports: ["19091:9090"]
+
+  loki:
+    image: grafana/loki:3.7.8
+    command: [-config.file=/etc/loki/loki.yaml]
+    volumes: [./config/loki.yaml:/etc/loki/loki.yaml:ro]
+    ports: ["13100:3100"]
+
+  tempo:
+    image: grafana/tempo:2.10.8
+    command: [-config.file=/etc/tempo/tempo.yaml]
+    volumes: [./config/tempo.yaml:/etc/tempo/tempo.yaml:ro]
+    ports: ["13200:3200", "19411:9411", "24318:4318"]
+
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.162.0
+    command: [--config=/etc/otelcol/config.yaml]
+    volumes: [./config/otelcol.yaml:/etc/otelcol/config.yaml:ro]
+    ports: ["14318:4318", "15318:5318", "18888:8888"]
+    depends_on: [prometheus, prometheus-alt, loki, tempo]
+
+  node-exporter:
+    image: prom/node-exporter:v1.12.1
+    ports: ["19100:9100"]
+
+  grafana:
+    image: grafana/grafana:13.2.3
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes: [./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/ds.yaml:ro]
+    ports: ["13000:3000"]
+
+  emit-checkout-via-collector:
+    <<: *emitter
+    environment:
+      <<: *via-collector
+      OTEL_SERVICE_NAME: checkout
+      OTEL_RESOURCE_ATTRIBUTES: service.namespace=shop,service.instance.id=checkout-1,service.version=1.2.3,deployment.environment.name=lab
+
+  emit-payments-direct:
+    <<: *emitter
+    environment:
+      OTEL_SERVICE_NAME: payments
+      OTEL_RESOURCE_ATTRIBUTES: service.instance.id=payments-1
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://prometheus:9090/api/v1/otlp/v1/metrics
+      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://loki:3100/otlp/v1/logs
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://tempo:4318/v1/traces
+      RUN_SECONDS: "60"
+
+  emit-noname-via-collector:
+    <<: *emitter
+    environment:
+      <<: *via-collector
+
+  emit-noname-direct:
+    <<: *emitter
+    environment:
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://prometheus:9090/api/v1/otlp/v1/metrics
+      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://loki:3100/otlp/v1/logs
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://tempo:4318/v1/traces
+      RUN_SECONDS: "60"
+
+  emit-inventory-enriched:
+    <<: *emitter
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otelcol:5318
+      OTEL_SERVICE_NAME: inventory
+      OTEL_RESOURCE_ATTRIBUTES: service.namespace=shop,service.instance.id=inventory-1
+      RUN_SECONDS: "60"

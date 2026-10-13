@@ -1,0 +1,12 @@
+templates:
+  - template: compact.json.j2
+    filter: >
+      {
+        attributes: [.groups[] | select(.type == "attribute_group" and (.id | startswith("registry."))) | .attributes[]
+          | {name, type: (if (.type | type) == "object" then "enum" else .type end), stability, deprecated}],
+        metrics: [.groups[] | select(.type == "metric")
+          | {name: .metric_name, instrument, unit, stability, deprecated,
+             attributes: [(.attributes // [])[] | {name, requirement_level}]}]
+      }
+    application_mode: single
+    file_name: compact.json

@@ -1,0 +1,6 @@
+[
+ {"metric":{"name":"http.server.request.duration","unit":"ms","instrument":"histogram","data_points":[{"attributes":[{"name":"http.method","value":"GET"},{"name":"http.response.status_code","value":200}],"count":1,"sum":3.0,"bucket_counts":[1],"explicit_bounds":[]}]}},
+ {"metric":{"name":"container.memory.paging.faults","unit":"{fault}","instrument":"counter","data_points":[{"attributes":[],"value":3}]}},
+ {"attribute":{"name":"db.system.name","value":"postgresql"}},
+ {"attribute":{"name":"myCustomAttr","value":"x"}}
+]

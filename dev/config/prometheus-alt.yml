@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 10s
+otlp:
+  translation_strategy: NoUTF8EscapingWithSuffixes
+  keep_identifying_resource_attributes: true
+  promote_resource_attributes: [service.instance.id, deployment.environment.name, otelcol.pipeline]
+  promote_scope_metadata: true
