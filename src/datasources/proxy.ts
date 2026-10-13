@@ -31,5 +31,6 @@ export const proxyGet: ProxyGet = async <T>(
 export function discoverDatasources(types: string[]): DatasourceRef[] {
   return getDataSourceSrv()
     .getList({ type: types })
+    .filter((settings) => types.includes(settings.type))
     .map((settings) => ({ uid: settings.uid, type: settings.type, name: settings.name }));
 }

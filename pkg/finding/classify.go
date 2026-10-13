@@ -79,6 +79,7 @@ func (c Classifier) Attribute(at Observation, match nameindex.AttributeMatch, sc
 		return withType(result, TypeNotInRegistry)
 	}
 	attribute := *match.Attribute
+	result.Matched = attribute.Name
 	result.Source = attribute.Source
 	result.Bucket = c.AttributeBucket(attribute, scope)
 	if attribute.Deprecated == nil {
@@ -91,6 +92,7 @@ func (c Classifier) Attribute(at Observation, match nameindex.AttributeMatch, sc
 func (c Classifier) Metric(at Observation, match nameindex.MetricMatch) Finding {
 	result := Finding{Signal: SignalMetrics, Owner: at.Owner, Observed: match.Observed, Volume: at.Volume, Confidence: match.Confidence}
 	metric := match.Form.Metric
+	result.Matched = metric.Name
 	result.Source = metric.Source
 	result.Bucket = c.MetricBucket(metric)
 	if metric.Deprecated == nil {
@@ -103,6 +105,7 @@ func (c Classifier) Metric(at Observation, match nameindex.MetricMatch) Finding 
 func (c Classifier) NearMiss(at Observation, miss nameindex.NearMiss) Finding {
 	result := Finding{Signal: SignalMetrics, Owner: at.Owner, Observed: miss.Observed, Volume: at.Volume, Confidence: nameindex.ConfidenceHigh}
 	metric := miss.Metric
+	result.Matched = metric.Name
 	result.Source = metric.Source
 	result.Bucket = c.MetricBucket(metric)
 	if miss.UnitUnknown {

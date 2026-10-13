@@ -76,7 +76,10 @@ export async function probeTraceQLMetrics(context: LookupContext): Promise<boole
 export async function lookupLibraries(context: LookupContext, flagged: FlaggedKey, metricsAvailable: boolean): Promise<LibraryEvidence> {
   if (metricsAvailable) {
     try {
-      return await lookupWithMetrics(context, flagged);
+      const evidence = await lookupWithMetrics(context, flagged);
+      if (evidence.libraries.length > 0) {
+        return evidence;
+      }
     } catch {
       return lookupWithSample(context, flagged);
     }

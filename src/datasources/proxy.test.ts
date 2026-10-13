@@ -11,7 +11,10 @@ jest.mock('@grafana/runtime', () => ({
 
 describe('discoverDatasources', () => {
   it('asks Grafana for the configured types at runtime', () => {
-    getList.mockReturnValue([{ uid: 'traces-a', type: 'tempo', name: 'Traces A', jsonData: {} }]);
+    getList.mockReturnValue([
+      { uid: 'traces-a', type: 'tempo', name: 'Traces A', jsonData: {} },
+      { uid: 'grafana', type: 'datasource', name: '-- Grafana --', jsonData: {} },
+    ]);
 
     expect(discoverDatasources(['tempo', 'custom-tempo'])).toEqual([{ uid: 'traces-a', type: 'tempo', name: 'Traces A' }]);
     expect(getList).toHaveBeenCalledWith({ type: ['tempo', 'custom-tempo'] });

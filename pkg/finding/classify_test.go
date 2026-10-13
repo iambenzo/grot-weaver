@@ -46,6 +46,9 @@ func Test_Classifier_Attribute_bucketsAndTypes(t *testing.T) {
 
 			got := classifier.Attribute(Observation{Owner: checkout, Signal: SignalTraces, Volume: 3}, match, tt.scope)
 
+			if match.Attribute != nil && got.Matched != match.Attribute.Name {
+				t.Errorf("matched = %q, want %q", got.Matched, match.Attribute.Name)
+			}
 			if got.Type != tt.wantType || got.Bucket != tt.wantBucket || got.Expected != tt.wantExpected {
 				t.Errorf("got type %s bucket %s expected %q, want %s %s %q", got.Type, got.Bucket, got.Expected, tt.wantType, tt.wantBucket, tt.wantExpected)
 			}

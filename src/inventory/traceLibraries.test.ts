@@ -49,6 +49,15 @@ describe('lookupLibraries', () => {
     expect(calls[0]).toMatchObject({ path: '/api/search', params: { limit: '20', spss: '3', start: '0', end: '86400' } });
   });
 
+  it('falls back to a sample when TraceQL metrics return no series', async () => {
+    const { context } = fakeTempo();
+    const get = context.get;
+    context.get = (async (uid: string, requestPath: string, params: Record<string, string>) =>
+      requestPath === '/api/metrics/query_range' ? { series: [] } : get(uid, requestPath, params)) as typeof get;
+
+    expect(await lookupLibraries(context, flagged, true)).toMatchObject({ method: 'sample', libraries: [{ spans: 5 }] });
+  });
+
   it('falls back to a sample when a metrics query fails', async () => {
     const { context } = fakeTempo({ status: 400, data: { message: 'empty ring' } });
 

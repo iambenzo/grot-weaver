@@ -68,6 +68,7 @@ type Finding struct {
 	Owner              Owner                 `json:"owner"`
 	Observed           string                `json:"observed"`
 	Scope              catalogue.RenameScope `json:"scope,omitempty"`
+	Matched            string                `json:"matched,omitempty"`
 	Expected           string                `json:"expected,omitempty"`
 	Bucket             Bucket                `json:"bucket,omitempty"`
 	Confidence         nameindex.Confidence  `json:"confidence,omitempty"`
