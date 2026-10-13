@@ -56,9 +56,10 @@ docker compose down --rmi local   # also remove the built emitter image
 
 ## Other contents
 
+The Weaver template that builds the plugin catalogue now lives in `catalogue/templates/`. Regenerate the catalogue with `go run ./cmd/catalogue-gen` from the repo root (Docker required; `-semconv v1.44.0` pins a release).
+
 | Path | What |
 |---|---|
-| `weaver/templates/registry/compact2/` | The Weaver template that builds the plugin catalogue (design doc-1, section 3.2). `compact/` is the earlier attributes-and-metrics-only version |
 | `weaver/livecheck/` | Crafted Weaver live-check input and its report, the evidence for reusing live-check finding ids |
 | `evidence/cloud-raw/` | Raw read-only query dumps from cloud. Ignored by git because they contain real host and account names |
 
