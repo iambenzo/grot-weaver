@@ -3,7 +3,7 @@ package catalogue
 import "testing"
 
 func Test_Summary_countsDeprecatedSeparatelyFromStability(t *testing.T) {
-	loaded := newCatalogue(Manifest{}, Registry{
+	loaded := New(Manifest{}, Registry{
 		Attributes: []Attribute{
 			{Name: "a", Stability: StabilityStable},
 			{Name: "b", Stability: StabilityReleaseCandidate},

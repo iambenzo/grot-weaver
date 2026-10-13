@@ -42,10 +42,10 @@ func Load(fsys fs.FS) (*Catalogue, error) {
 		return nil, err
 	}
 
-	return newCatalogue(manifest, Overlay(core, genAI), renames.inVersionOrder()), nil
+	return New(manifest, Overlay(core, genAI), renames.inVersionOrder()), nil
 }
 
-func newCatalogue(manifest Manifest, registry Registry, renames RenameHistory) *Catalogue {
+func New(manifest Manifest, registry Registry, renames RenameHistory) *Catalogue {
 	return &Catalogue{
 		Manifest:       manifest,
 		Registry:       registry,
