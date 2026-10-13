@@ -14,6 +14,8 @@ const (
 	weaverOutputFile   = "compact.json"
 	containerTemplates = "/templates"
 	containerOutput    = "/out"
+
+	containerWritableMode os.FileMode = 0o777
 )
 
 func generateWithWeaver(ctx context.Context, registry, templatesDir string) ([]byte, error) {
@@ -27,6 +29,9 @@ func generateWithWeaver(ctx context.Context, registry, templatesDir string) ([]b
 		return nil, fmt.Errorf("create weaver output directory: %w", err)
 	}
 	defer func() { _ = os.RemoveAll(outputDir) }()
+	if err := os.Chmod(outputDir, containerWritableMode); err != nil {
+		return nil, fmt.Errorf("open weaver output directory to the container user: %w", err)
+	}
 
 	cmd := exec.CommandContext(ctx, "docker", weaverArgs(registry, absoluteTemplates, outputDir)...)
 	if output, err := cmd.CombinedOutput(); err != nil {
