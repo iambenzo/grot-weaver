@@ -138,3 +138,27 @@ func Test_Inventory_Validate(t *testing.T) {
 }
 
 var scoringDefaults = scoring.Options{}
+
+func Test_Assess_reportsMisplacedAttributesWithoutScoringThem(t *testing.T) {
+	inventory := Inventory{Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{{
+		ServiceName:  "checkout",
+		ResourceKeys: []KeyObservation{{Key: "http.request.method"}},
+	}}}}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	var types []finding.Type
+	for _, ranked := range result.Findings {
+		if ranked.Observed == "http.request.method" {
+			types = append(types, ranked.Type)
+		}
+	}
+	if len(types) != 2 || types[0] == types[1] {
+		t.Fatalf("types = %v, want conformant and misplaced", types)
+	}
+	for _, row := range result.Owners {
+		if row.Owner.Name == "checkout" && row.Scores.NamingStable.Denominator != 1 {
+			t.Errorf("misplaced finding changed the naming score: %+v", row.Scores.NamingStable)
+		}
+	}
+}

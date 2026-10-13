@@ -83,10 +83,18 @@ func (a *Assessor) assessTraceService(datasource string, service TraceService, i
 
 	at := finding.Observation{Owner: owner, Signal: finding.SignalTraces}
 	for _, key := range service.ResourceKeys {
-		into.findings = append(into.findings, a.classifyKey(at, key, service.SpanCount, catalogue.ScopeResources))
+		into.addKeyFindings(a, at, key, service.SpanCount, catalogue.ScopeResources)
 	}
 	for _, key := range service.SpanKeys {
-		into.findings = append(into.findings, a.classifyKey(at, key, service.SpanCount, catalogue.ScopeSpans))
+		into.addKeyFindings(a, at, key, service.SpanCount, catalogue.ScopeSpans)
+	}
+}
+
+func (c *collected) addKeyFindings(a *Assessor, at finding.Observation, key KeyObservation, fallbackVolume float64, scope catalogue.RenameScope) {
+	classified := a.classifyKey(at, key, fallbackVolume, scope)
+	c.findings = append(c.findings, classified)
+	if misplaced, found := a.classifier.Misplacement(classified); found {
+		c.findings = append(c.findings, misplaced)
 	}
 }
 
