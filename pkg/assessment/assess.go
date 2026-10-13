@@ -76,9 +76,9 @@ func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
 		SemconvVersion: a.catalogue.Manifest.Semconv.Version,
 		Window:         inv.Window,
 		Findings:       scoring.RankByImpact(gathered.findings, gathered.totals),
-		Attributions:   gathered.attributions,
-		Metrics:        gathered.metricAttributions,
-		Datasources:    gathered.datasources,
+		Attributions:   nonNil(gathered.attributions),
+		Metrics:        nonNil(gathered.metricAttributions),
+		Datasources:    nonNil(gathered.datasources),
 		Owners:         rows(scores),
 		Namespaces:     rows(scoring.RollUp(servicesOnly(scores), scoring.ByNamespace)),
 		Signals:        rows(scoring.RollUp(servicesOnly(scores), scoring.BySignal)),
@@ -120,6 +120,13 @@ func (a *Assessor) classifyKey(at finding.Observation, key KeyObservation, fallb
 	}
 	match := a.attributes.Match(key.Key, nameindex.Context{Scope: scope})
 	return a.classifier.Attribute(at, match, scope)
+}
+
+func nonNil[T any](items []T) []T {
+	if items == nil {
+		return []T{}
+	}
+	return items
 }
 
 func servicesOnly(scores map[scoring.Key]scoring.Scores) map[scoring.Key]scoring.Scores {

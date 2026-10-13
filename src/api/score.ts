@@ -15,5 +15,18 @@ export const scoreInventory: ScoreInventory = async (inventory, volumeWeighted) 
       showErrorAlert: false,
     })
   );
-  return response.data;
+  return withLists(response.data);
 };
+
+export function withLists(result: AssessmentResult): AssessmentResult {
+  return {
+    ...result,
+    findings: result.findings ?? [],
+    attributions: result.attributions ?? [],
+    metric_attributions: result.metric_attributions ?? [],
+    datasources: result.datasources ?? [],
+    owners: result.owners ?? [],
+    namespaces: result.namespaces ?? [],
+    signals: result.signals ?? [],
+  };
+}

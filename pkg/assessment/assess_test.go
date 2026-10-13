@@ -224,3 +224,15 @@ func Test_SpanGroupSample_validation(t *testing.T) {
 		})
 	}
 }
+
+func Test_Assess_emptyInventoryEncodesEmptyLists(t *testing.T) {
+	encoded, err := json.Marshal(newAssessor(t).Assess(Inventory{}, scoringDefaults))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{"findings", "attributions", "metric_attributions", "datasources", "owners", "namespaces", "signals"} {
+		if !strings.Contains(string(encoded), `"`+field+`":[]`) {
+			t.Errorf("%s is not an empty list in %s", field, encoded)
+		}
+	}
+}
