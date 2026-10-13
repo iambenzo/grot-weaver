@@ -36,9 +36,31 @@ export interface TraceDatasource {
   services: TraceService[];
 }
 
+export interface MetricOwner {
+  metric: string;
+  labels: Record<string, string>;
+  series: number;
+}
+
+export interface MetricDatasource {
+  uid: string;
+  names: string[];
+  target_info: Array<Record<string, string>>;
+  owners: MetricOwner[];
+}
+
+export type ReclassificationAction = 'exclude' | 'pipeline';
+
+export interface ReclassificationRule {
+  pattern: string;
+  action: ReclassificationAction;
+}
+
 export interface Inventory {
   window: Window;
   traces: TraceDatasource[];
+  metrics?: MetricDatasource[];
+  reclassification?: ReclassificationRule[];
 }
 
 export interface CollectionError {

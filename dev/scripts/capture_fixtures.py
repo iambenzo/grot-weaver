@@ -15,6 +15,7 @@ LOKI_SAMPLE_LIMIT = 20
 REDACTIONS = [
     (re.compile(r"ip-10-\d+-\d+-\d+"), "ip-<redacted>"),
     (re.compile(r"\b10\.\d+\.\d+\.\d+\b"), "10.<redacted>"),
+    (re.compile(r"\b10-\d+-\d+-\d+\b"), "10-<redacted>"),
     (re.compile(r"EC2AMAZ-[A-Z0-9]+"), "<windows-host>"),
     (re.compile(r"psql-[a-z0-9-]+"), "<postgres-host>"),
     (re.compile(r"aks-([a-z]+)-\d+-vmss\d*"), r"aks-\1-<node>"),

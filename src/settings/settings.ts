@@ -1,3 +1,5 @@
+import { ReclassificationRule } from '../inventory/types';
+
 export interface DatasourceTypes {
   metrics: string[];
   logs: string[];
@@ -9,6 +11,7 @@ export interface PluginSettings {
   datasourceTypes?: Partial<DatasourceTypes>;
   concurrency?: number;
   volumeWeighted?: boolean;
+  reclassification?: ReclassificationRule[];
 }
 
 export const DEFAULT_DATASOURCE_TYPES: DatasourceTypes = {
@@ -38,7 +41,18 @@ export function readSettings(jsonData: unknown): PluginSettings {
   if (typeof raw.volumeWeighted === 'boolean') {
     settings.volumeWeighted = raw.volumeWeighted;
   }
+  if (Array.isArray(raw.reclassification) && raw.reclassification.every(isRule)) {
+    settings.reclassification = raw.reclassification;
+  }
   return settings;
+}
+
+function isRule(value: unknown): value is ReclassificationRule {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const rule = value as Record<string, unknown>;
+  return typeof rule.pattern === 'string' && (rule.action === 'exclude' || rule.action === 'pipeline');
 }
 
 export function isVolumeWeighted(settings: PluginSettings): boolean {

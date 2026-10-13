@@ -18,8 +18,17 @@ type Window struct {
 }
 
 type Inventory struct {
-	Window Window            `json:"window"`
-	Traces []TraceDatasource `json:"traces"`
+	Window           Window                 `json:"window"`
+	Traces           []TraceDatasource      `json:"traces"`
+	Metrics          []MetricDatasource     `json:"metrics"`
+	Reclassification []ReclassificationRule `json:"reclassification,omitempty"`
+}
+
+func (inv Inventory) ReclassificationRules() []ReclassificationRule {
+	if inv.Reclassification == nil {
+		return DefaultReclassification
+	}
+	return inv.Reclassification
 }
 
 type TraceDatasource struct {
@@ -69,7 +78,15 @@ func (inv Inventory) Validate() error {
 			return err
 		}
 	}
-	return nil
+	if len(inv.Metrics) > MaxDatasources {
+		return fmt.Errorf("%w: %d metric datasources exceeds %d", ErrInvalidInventory, len(inv.Metrics), MaxDatasources)
+	}
+	for _, datasource := range inv.Metrics {
+		if err := datasource.validate(); err != nil {
+			return err
+		}
+	}
+	return validateReclassification(inv.Reclassification)
 }
 
 func (d TraceDatasource) validate() error {

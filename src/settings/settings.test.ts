@@ -11,6 +11,8 @@ describe('readSettings', () => {
     [{ concurrency: 8 }, { concurrency: 8 }],
     [{ volumeWeighted: true }, { volumeWeighted: true }],
     [{ volumeWeighted: 'yes' }, {}],
+    [{ reclassification: [{ pattern: 'acme_*', action: 'exclude' }] }, { reclassification: [{ pattern: 'acme_*', action: 'exclude' }] }],
+    [{ reclassification: [{ pattern: 'acme_*', action: 'drop' }] }, {}],
   ])('reads %p', (jsonData, expected) => {
     expect(readSettings(jsonData)).toEqual(expected);
   });
