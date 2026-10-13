@@ -1,11 +1,62 @@
+export interface DatasourceTypes {
+  metrics: string[];
+  logs: string[];
+  traces: string[];
+}
+
 export interface PluginSettings {
   defaultWindow?: string;
+  datasourceTypes?: Partial<DatasourceTypes>;
+  concurrency?: number;
 }
+
+export const DEFAULT_DATASOURCE_TYPES: DatasourceTypes = {
+  metrics: ['prometheus'],
+  logs: ['loki'],
+  traces: ['tempo'],
+};
+
+export const DEFAULT_CONCURRENCY = 4;
+const MAX_CONCURRENCY = 32;
 
 export function readSettings(jsonData: unknown): PluginSettings {
   if (!jsonData || typeof jsonData !== 'object') {
     return {};
   }
-  const { defaultWindow } = jsonData as Record<string, unknown>;
-  return typeof defaultWindow === 'string' ? { defaultWindow } : {};
+  const raw = jsonData as Record<string, unknown>;
+  const settings: PluginSettings = {};
+  if (typeof raw.defaultWindow === 'string') {
+    settings.defaultWindow = raw.defaultWindow;
+  }
+  if (raw.datasourceTypes && typeof raw.datasourceTypes === 'object') {
+    settings.datasourceTypes = readTypes(raw.datasourceTypes as Record<string, unknown>);
+  }
+  if (typeof raw.concurrency === 'number') {
+    settings.concurrency = raw.concurrency;
+  }
+  return settings;
+}
+
+function readTypes(raw: Record<string, unknown>): Partial<DatasourceTypes> {
+  const types: Partial<DatasourceTypes> = {};
+  for (const signal of ['metrics', 'logs', 'traces'] as const) {
+    const value = raw[signal];
+    if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
+      types[signal] = value;
+    }
+  }
+  return types;
+}
+
+export function datasourceTypesFor(settings: PluginSettings, signal: keyof DatasourceTypes): string[] {
+  const configured = settings.datasourceTypes?.[signal];
+  return configured && configured.length > 0 ? configured : DEFAULT_DATASOURCE_TYPES[signal];
+}
+
+export function concurrencyFrom(settings: PluginSettings): number {
+  const configured = settings.concurrency;
+  if (!configured || !Number.isInteger(configured) || configured < 1) {
+    return DEFAULT_CONCURRENCY;
+  }
+  return Math.min(configured, MAX_CONCURRENCY);
 }
