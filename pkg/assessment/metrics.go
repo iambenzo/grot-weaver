@@ -26,6 +26,7 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 	targets := identity.NewTargetIndex(datasource.TargetInfo)
 	identityFindings := map[finding.Owner][]int{}
 	volumes := map[string]float64{}
+	names := metricNameCollector{into: into, position: map[metricNameKey]int{}}
 	for _, owner := range datasource.Owners {
 		if _, reclassified := Reclassify(owner.Metric, rules); reclassified {
 			continue
@@ -52,12 +53,49 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 			}
 			identityFindings[ownerKey] = positions
 		}
-		into.findings = append(into.findings, a.classifyMetricName(ownerKey, owner, summary.Strategy))
+		names.add(a.classifyMetricName(ownerKey, owner, summary.Strategy))
 		into.totals[finding.SignalMetrics] += owner.Series
 		volumes[ownerMetricKey(ownerKey, owner.Metric)] += owner.Series
 	}
 	into.findings = append(into.findings, a.receiverIntroducedFindings(targets)...)
 	a.assessLabelKeys(datasource, targets, rules, volumes, into)
+}
+
+type metricNameKey struct {
+	owner finding.Owner
+	name  string
+	kind  finding.Type
+}
+
+type metricNameCollector struct {
+	into     *collected
+	position map[metricNameKey]int
+}
+
+func (c *metricNameCollector) add(f finding.Finding) {
+	base, part := nameindex.SplitPart(f.Observed)
+	name := f.Matched
+	if name == "" {
+		name = base
+	}
+	key := metricNameKey{owner: f.Owner, name: name, kind: f.Type}
+	if position, seen := c.position[key]; seen {
+		existing := &c.into.findings[position]
+		existing.Volume += f.Volume
+		if !slices.Contains(existing.Metrics, f.Observed) {
+			existing.Metrics = append(existing.Metrics, f.Observed)
+		}
+		if existing.Library == nil {
+			existing.Library = f.Library
+		}
+		return
+	}
+	f.Metrics = []string{f.Observed}
+	if part != nameindex.PartWhole {
+		f.Observed = base
+	}
+	c.position[key] = len(c.into.findings)
+	c.into.findings = append(c.into.findings, f)
 }
 
 func (a *Assessor) classifyMetricName(owner finding.Owner, row MetricOwner, strategy nameindex.Strategy) finding.Finding {

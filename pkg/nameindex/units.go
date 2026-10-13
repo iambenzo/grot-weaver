@@ -72,7 +72,7 @@ func (i *MetricIndex) NearMiss(observed string) (NearMiss, bool) {
 	if _, exact := i.byStored[observed]; exact {
 		return NearMiss{}, false
 	}
-	stem, part := splitPart(observed)
+	stem, part := SplitPart(observed)
 	stem = strings.TrimSuffix(stem, totalSuffix)
 	for _, suffix := range unitSuffixes {
 		base, found := strings.CutSuffix(stem, "_"+suffix)
@@ -101,7 +101,7 @@ func nearMissFor(observed string, metric catalogue.Metric, part SeriesPart, foun
 	return miss, miss.ExpectedUnit != found
 }
 
-func splitPart(observed string) (string, SeriesPart) {
+func SplitPart(observed string) (string, SeriesPart) {
 	for _, part := range []SeriesPart{PartBucket, PartSum, PartCount} {
 		if stem, found := strings.CutSuffix(observed, "_"+string(part)); found {
 			return stem, part

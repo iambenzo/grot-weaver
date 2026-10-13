@@ -1,7 +1,13 @@
 import { DatasourceRef, ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { collectTempoInventory } from '../inventory/tempo';
-import { FlaggedKey, LibraryEvidence, LookupContext, lookupLibraries, probeTraceQLMetrics } from '../inventory/traceLibraries';
+import {
+  FlaggedKey,
+  LibraryEvidence,
+  LookupContext,
+  lookupLibraries,
+  probeTraceQLMetrics,
+} from '../inventory/traceLibraries';
 import { CollectionError, TraceDatasource } from '../inventory/types';
 import { QueryWindow } from '../window/window';
 import { ScoreInventory } from '../api/score';
@@ -28,10 +34,15 @@ export async function assessTraces(
   volumeWeighted = false
 ): Promise<TraceAssessment> {
   const rules = await deps.spanGroupRules().catch(() => []);
-  const collections = await Promise.all(datasources.map((ds) => collectTempoInventory(ds.uid, deps.get, deps.limit, window, rules)));
+  const collections = await Promise.all(
+    datasources.map((ds) => collectTempoInventory(ds.uid, deps.get, deps.limit, window, rules))
+  );
   const traces: TraceDatasource[] = collections.map((collection) => collection.datasource);
   const errors = collections.flatMap((collection) => collection.errors);
-  const result = await deps.score({ window: { start: window.startSeconds, end: window.endSeconds }, traces }, volumeWeighted);
+  const result = await deps.score(
+    { window: { start: window.startSeconds, end: window.endSeconds }, traces },
+    volumeWeighted
+  );
   return { result, errors, datasources };
 }
 
@@ -40,7 +51,12 @@ export function sameOwner(a: Owner, b: Owner): boolean {
 }
 
 export function isFlaggedTraceKey(finding: Finding): boolean {
-  return finding.signal === 'traces' && finding.level === 'violation' && finding.observed !== '' && finding.scope !== undefined;
+  return (
+    finding.signal === 'traces' &&
+    finding.level === 'violation' &&
+    finding.observed !== '' &&
+    finding.scope !== undefined
+  );
 }
 
 export function findingKey(finding: Finding): string {
@@ -72,7 +88,10 @@ export async function lookupFindingLibraries(
         scope: finding.scope === 'resources' ? 'resource' : 'span',
       };
       try {
-        evidence.set(findingKey(finding), await lookupLibraries(contextFor(uid), flagged, await metricsByDatasource.get(uid)!));
+        evidence.set(
+          findingKey(finding),
+          await lookupLibraries(contextFor(uid), flagged, await metricsByDatasource.get(uid)!)
+        );
       } catch {
         return;
       }

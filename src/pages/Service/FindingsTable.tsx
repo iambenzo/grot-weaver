@@ -1,21 +1,23 @@
 import React from 'react';
 import { css } from '@emotion/css';
 import { dateTimeFormat, GrafanaTheme2 } from '@grafana/data';
-import { Badge, BadgeColor, Column, InteractiveTable, Stack, Text, useStyles2 } from '@grafana/ui';
+import { Badge, BadgeColor, Column, InteractiveTable, LinkButton, Stack, Text, useStyles2 } from '@grafana/ui';
 import { Bucket, Finding, FindingType, RegistrySource } from '../../api/types';
-import { LibraryEvidence } from '../../inventory/traceLibraries';
 import { findingKey } from '../../assessment/traceAssessment';
+import { LibraryInfo } from '../../assessment/libraries';
 import { testIds } from '../../components/testIds';
 
 interface Row {
   id: string;
   finding: Finding;
-  evidence?: LibraryEvidence;
+  library?: LibraryInfo;
+  explore?: string;
 }
 
 interface FindingsTableProps {
   findings: Finding[];
-  evidence: Map<string, LibraryEvidence>;
+  libraryFor: (finding: Finding) => LibraryInfo | undefined;
+  exploreFor: (finding: Finding) => string | undefined;
 }
 
 const TYPE_LABELS: Record<FindingType, { text: string; color: BadgeColor }> = {
@@ -44,15 +46,20 @@ const SOURCE_LABELS: Record<RegistrySource, string> = {
   rename_history: 'rename history',
 };
 
-export function FindingsTable({ findings, evidence }: FindingsTableProps) {
+export function FindingsTable({ findings, libraryFor, exploreFor }: FindingsTableProps) {
   const styles = useStyles2(getStyles);
-  const rows: Row[] = findings.map((finding) => ({ id: findingKey(finding), finding, evidence: evidence.get(findingKey(finding)) }));
+  const rows: Row[] = [...findings].sort(byPriority).map((finding) => ({
+    id: `${findingKey(finding)}|${finding.type}|${finding.expected ?? ''}`,
+    finding,
+    library: libraryFor(finding),
+    explore: exploreFor(finding),
+  }));
 
   const columns: Array<Column<Row>> = [
     { id: 'name', header: 'Found → expected', cell: ({ row }) => <NameCell finding={row.original.finding} /> },
     { id: 'type', header: 'Finding', cell: ({ row }) => <FindingBadges finding={row.original.finding} /> },
-    { id: 'library', header: 'Library or SDK', cell: ({ row }) => <LibraryCell evidence={row.original.evidence} /> },
-    { id: 'seen', header: 'First / last seen', cell: ({ row }) => <SeenCell evidence={row.original.evidence} /> },
+    { id: 'library', header: 'Library or SDK', cell: ({ row }) => <LibraryCell library={row.original.library} /> },
+    { id: 'seen', header: 'First / last seen', cell: ({ row }) => <SeenCell library={row.original.library} /> },
   ];
 
   return (
@@ -61,10 +68,18 @@ export function FindingsTable({ findings, evidence }: FindingsTableProps) {
         columns={columns}
         data={rows}
         getRowId={(row) => row.id}
-        renderExpandedRow={(row) => <FindingDetails finding={row.finding} evidence={row.evidence} />}
+        renderExpandedRow={(row) => (
+          <FindingDetails finding={row.finding} library={row.library} explore={row.explore} />
+        )}
       />
     </div>
   );
+}
+
+const LEVEL_ORDER: Record<string, number> = { violation: 0, improvement: 1, information: 2, '': 3 };
+
+function byPriority(a: Finding, b: Finding): number {
+  return (LEVEL_ORDER[a.level ?? ''] ?? 3) - (LEVEL_ORDER[b.level ?? ''] ?? 3) || b.impact_share - a.impact_share;
 }
 
 const REQUIREMENT_TYPES: FindingType[] = ['required_attribute_not_present', 'recommended_attribute_not_present'];
@@ -73,7 +88,8 @@ function NameCell({ finding }: { finding: Finding }) {
   if (REQUIREMENT_TYPES.includes(finding.type)) {
     return (
       <span>
-        <code>{finding.expected}</code> missing from <code>{finding.observed}</code> spans
+        <code>{finding.expected}</code> missing from <code>{finding.observed}</code>{' '}
+        {finding.signal === 'metrics' ? 'series' : 'spans'}
       </span>
     );
   }
@@ -105,55 +121,81 @@ function FindingBadges({ finding }: { finding: Finding }) {
       <Badge text={type.text} color={type.color} />
       {finding.bucket && <Badge text={BUCKET_LABELS[finding.bucket]} color="purple" />}
       {finding.source && <Badge text={SOURCE_LABELS[finding.source]} color="darkgrey" />}
-      {finding.confidence && finding.confidence !== 'high' && <Badge text={`${finding.confidence} confidence`} color="blue" />}
+      {finding.confidence && finding.confidence !== 'high' && (
+        <Badge text={`${finding.confidence} confidence`} color="blue" />
+      )}
     </Stack>
   );
 }
 
-function LibraryCell({ evidence }: { evidence?: LibraryEvidence }) {
-  if (!evidence) {
-    return <Text color="secondary">—</Text>;
+function LibraryCell({ library }: { library?: LibraryInfo }) {
+  if (!library) {
+    return <Text color="secondary">library unknown</Text>;
   }
-  if (evidence.libraries.length === 0) {
+  if (library.libraries.length === 0) {
     return <Text color="secondary">not found in window</Text>;
   }
   return (
     <Stack direction="column" gap={0}>
-      {evidence.libraries.map((library) => (
-        <span key={`${library.name}@${library.version}`}>
-          {library.name || '(no scope name)'} {library.version}
+      {library.libraries.map((entry) => (
+        <span key={`${entry.name}@${entry.version ?? ''}`}>
+          {library.likely && <Badge text="Likely" color="blue" />} {entry.name || '(no scope name)'} {entry.version}
         </span>
       ))}
       <Text color="secondary" variant="bodySmall">
-        {evidence.confidence} confidence, from {evidence.method === 'metrics' ? 'TraceQL metrics' : 'a span sample'}
+        {library.confidence} confidence, {library.description}
       </Text>
     </Stack>
   );
 }
 
-function SeenCell({ evidence }: { evidence?: LibraryEvidence }) {
-  if (evidence?.firstSeenMs === undefined || evidence.lastSeenMs === undefined) {
+function SeenCell({ library }: { library?: LibraryInfo }) {
+  if (library?.firstSeenMs === undefined || library.lastSeenMs === undefined) {
     return <Text color="secondary">—</Text>;
   }
   return (
     <Stack direction="column" gap={0}>
-      <span>{dateTimeFormat(evidence.firstSeenMs)}</span>
-      <span>{dateTimeFormat(evidence.lastSeenMs)}</span>
+      <span>{dateTimeFormat(library.firstSeenMs)}</span>
+      <span>{dateTimeFormat(library.lastSeenMs)}</span>
     </Stack>
   );
 }
 
-function FindingDetails({ finding, evidence }: { finding: Finding; evidence?: LibraryEvidence }) {
+function FindingDetails({ finding, library, explore }: { finding: Finding; library?: LibraryInfo; explore?: string }) {
   return (
     <Stack direction="column" gap={1}>
       {finding.note && <Text>{finding.note}</Text>}
       {!finding.expected && finding.type === 'deprecated' && (
-        <Text color="secondary">The registry gives no single replacement; the note above explains which name to use where.</Text>
-      )}
-      {evidence && evidence.libraries.some((library) => library.spans !== undefined) && (
         <Text color="secondary">
-          Spans seen: {evidence.libraries.map((library) => `${library.name || '(no scope name)'} ${library.spans}`).join(', ')}
+          The registry gives no single replacement; the note above explains which name to use where.
         </Text>
+      )}
+      {finding.metrics && finding.metrics.length > 0 && (
+        <Text color="secondary">
+          Seen on {finding.metrics.length === 1 ? 'metric' : 'metrics'}: {finding.metrics.join(', ')}
+        </Text>
+      )}
+      {library?.libraries.some((entry) => 'spans' in entry) && (
+        <Text color="secondary">
+          Spans seen:{' '}
+          {library.libraries
+            .map((entry) => `${entry.name || '(no scope name)'} ${(entry as { spans?: number }).spans ?? ''}`)
+            .join(', ')}
+        </Text>
+      )}
+      {explore && (
+        <div>
+          <LinkButton
+            href={explore}
+            icon="compass"
+            variant="secondary"
+            size="sm"
+            target="_blank"
+            data-testid={testIds.service.explore}
+          >
+            Open in Explore
+          </LinkButton>
+        </div>
       )}
     </Stack>
   );

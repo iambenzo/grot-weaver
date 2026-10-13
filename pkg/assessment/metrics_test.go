@@ -3,6 +3,7 @@ package assessment
 import (
 	"encoding/json"
 	"os"
+	"slices"
 	"testing"
 
 	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
@@ -29,7 +30,7 @@ func localTargetInfo(t *testing.T) []map[string]string {
 
 func metricFinding(result Result, owner finding.Owner, observed string) (finding.Finding, bool) {
 	for _, ranked := range result.Findings {
-		if ranked.Owner == owner && ranked.Observed == observed {
+		if ranked.Owner == owner && (ranked.Observed == observed || ranked.Signal == finding.SignalMetrics && ranked.Scope == "" && slices.Contains(ranked.Metrics, observed)) {
 			return ranked.Finding, true
 		}
 	}
@@ -158,5 +159,44 @@ func Test_Assess_metricLibraries(t *testing.T) {
 	}
 	if len(result.Metrics) != 1 || result.Metrics[0].SDK != (identity.SDK{Name: "opentelemetry", Language: "python", Version: "1.45.1"}) {
 		t.Errorf("attribution SDK = %+v", result.Metrics)
+	}
+}
+
+func Test_Assess_histogramPartsCountAsOneName(t *testing.T) {
+	owner := map[string]string{"job": "shop/checkout"}
+	inventory := Inventory{Metrics: []MetricDatasource{{
+		UID:        "prom",
+		TargetInfo: []map[string]string{{"job": "shop/checkout", "telemetry_sdk_name": "opentelemetry"}},
+		Owners: []MetricOwner{
+			{Metric: "http_client_request_duration_milliseconds_bucket", Labels: owner, Series: 10},
+			{Metric: "http_client_request_duration_milliseconds_sum", Labels: owner, Series: 1},
+			{Metric: "http_client_request_duration_milliseconds_count", Labels: owner, Series: 1},
+			{Metric: "shop_latency_bucket", Labels: owner, Series: 4},
+			{Metric: "shop_latency_count", Labels: owner, Series: 1},
+		},
+	}}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	checkout := finding.Owner{Kind: finding.OwnerService, Namespace: "shop", Name: "checkout"}
+	mismatches, customs := 0, 0
+	for _, ranked := range result.Findings {
+		switch ranked.Type {
+		case finding.TypeUnitMismatch:
+			mismatches++
+			if ranked.Volume != 12 || len(ranked.Metrics) != 3 || ranked.Observed != "http_client_request_duration_milliseconds" {
+				t.Errorf("unit mismatch = %+v, want one finding over all three parts", ranked.Finding)
+			}
+		case finding.TypeCustom:
+			customs++
+		}
+	}
+	if mismatches != 1 || customs != 1 {
+		t.Errorf("mismatches %d customs %d, want 1 and 1", mismatches, customs)
+	}
+	for _, row := range result.Owners {
+		if row.Owner == checkout && row.Signal == finding.SignalMetrics && (row.Scores.NamingStable.Denominator != 1 || row.Scores.Custom != 1) {
+			t.Errorf("scores = %+v, want one stable name and one custom", row.Scores)
+		}
 	}
 }

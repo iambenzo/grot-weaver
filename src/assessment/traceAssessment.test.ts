@@ -5,7 +5,16 @@ import { AssessmentResult, Finding } from '../api/types';
 
 const window = { startSeconds: 10, endSeconds: 20 };
 const owner = { kind: 'service' as const, name: 'checkout' };
-const base: Finding = { type: 'deprecated', level: 'violation', signal: 'traces', owner, observed: 'http.method', scope: 'spans', volume: 0, impact_share: 0 };
+const base: Finding = {
+  type: 'deprecated',
+  level: 'violation',
+  signal: 'traces',
+  owner,
+  observed: 'http.method',
+  scope: 'spans',
+  volume: 0,
+  impact_share: 0,
+};
 
 describe('assessTraces', () => {
   it('collects every datasource and scores them together', async () => {
@@ -26,7 +35,10 @@ describe('assessTraces', () => {
       { get, limit: createLimiter(2), score, spanGroupRules: async () => [] }
     );
 
-    const [inventory, weighted] = score.mock.calls[0] as unknown as [{ window: unknown; traces: Array<{ uid: string }> }, boolean];
+    const [inventory, weighted] = score.mock.calls[0] as unknown as [
+      { window: unknown; traces: Array<{ uid: string }> },
+      boolean,
+    ];
     expect(inventory.window).toEqual({ start: 10, end: 20 });
     expect(inventory.traces.map((trace) => trace.uid)).toEqual(['a', 'b']);
     expect(weighted).toBe(false);
