@@ -54,7 +54,21 @@ export interface MetricDatasource {
   target_info: Array<Record<string, string>>;
   owners: MetricOwner[];
   label_keys: OwnerLabelKeys[];
+  strategy_override?: TranslationStrategy;
 }
+
+export type TranslationStrategy =
+  | 'UnderscoreEscapingWithSuffixes'
+  | 'UnderscoreEscapingWithoutSuffixes'
+  | 'NoUTF8EscapingWithSuffixes'
+  | 'NoTranslation';
+
+export const TRANSLATION_STRATEGIES: TranslationStrategy[] = [
+  'UnderscoreEscapingWithSuffixes',
+  'UnderscoreEscapingWithoutSuffixes',
+  'NoUTF8EscapingWithSuffixes',
+  'NoTranslation',
+];
 
 export type ReclassificationAction = 'exclude' | 'pipeline';
 

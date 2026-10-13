@@ -1,4 +1,4 @@
-import { ReclassificationRule } from '../inventory/types';
+import { MetricDatasource, ReclassificationRule, TRANSLATION_STRATEGIES, TranslationStrategy } from '../inventory/types';
 
 export interface DatasourceTypes {
   metrics: string[];
@@ -12,6 +12,7 @@ export interface PluginSettings {
   concurrency?: number;
   volumeWeighted?: boolean;
   reclassification?: ReclassificationRule[];
+  strategyOverrides?: Record<string, TranslationStrategy>;
 }
 
 export const DEFAULT_DATASOURCE_TYPES: DatasourceTypes = {
@@ -44,7 +45,25 @@ export function readSettings(jsonData: unknown): PluginSettings {
   if (Array.isArray(raw.reclassification) && raw.reclassification.every(isRule)) {
     settings.reclassification = raw.reclassification;
   }
+  if (raw.strategyOverrides && typeof raw.strategyOverrides === 'object') {
+    settings.strategyOverrides = readOverrides(raw.strategyOverrides as Record<string, unknown>);
+  }
   return settings;
+}
+
+function readOverrides(raw: Record<string, unknown>): Record<string, TranslationStrategy> {
+  const overrides: Record<string, TranslationStrategy> = {};
+  for (const [uid, strategy] of Object.entries(raw)) {
+    if (TRANSLATION_STRATEGIES.includes(strategy as TranslationStrategy)) {
+      overrides[uid] = strategy as TranslationStrategy;
+    }
+  }
+  return overrides;
+}
+
+export function withStrategyOverride(datasource: MetricDatasource, settings: PluginSettings): MetricDatasource {
+  const override = settings.strategyOverrides?.[datasource.uid];
+  return override ? { ...datasource, strategy_override: override } : datasource;
 }
 
 function isRule(value: unknown): value is ReclassificationRule {

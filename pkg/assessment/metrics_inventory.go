@@ -3,6 +3,9 @@ package assessment
 import (
 	"fmt"
 	"path"
+	"slices"
+
+	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
 )
 
 const (
@@ -18,6 +21,8 @@ type MetricDatasource struct {
 	TargetInfo []map[string]string `json:"target_info"`
 	Owners     []MetricOwner       `json:"owners"`
 	LabelKeys  []OwnerLabelKeys    `json:"label_keys"`
+
+	StrategyOverride nameindex.Strategy `json:"strategy_override,omitempty"`
 }
 
 type OwnerLabelKeys struct {
@@ -82,6 +87,9 @@ func validateReclassification(rules []ReclassificationRule) error {
 func (d MetricDatasource) validate() error {
 	if d.UID == "" {
 		return fmt.Errorf("%w: metric datasource without uid", ErrInvalidInventory)
+	}
+	if d.StrategyOverride != "" && !slices.Contains(nameindex.Strategies, d.StrategyOverride) {
+		return fmt.Errorf("%w: unknown translation strategy %q", ErrInvalidInventory, d.StrategyOverride)
 	}
 	if len(d.Names) > MaxMetricNames || len(d.Owners) > MaxOwnersPerSource || len(d.TargetInfo) > MaxTargetInfoSeries {
 		return fmt.Errorf("%w: metric datasource %s exceeds size limits", ErrInvalidInventory, d.UID)

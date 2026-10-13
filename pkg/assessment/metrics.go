@@ -20,6 +20,8 @@ type MetricAttribution struct {
 }
 
 func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []ReclassificationRule, into *collected) {
+	summary := a.detectStrategy(datasource)
+	into.datasources = append(into.datasources, summary)
 	targets := identity.NewTargetIndex(datasource.TargetInfo)
 	identityFindings := map[finding.Owner][]int{}
 	volumes := map[string]float64{}
@@ -48,7 +50,7 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 			}
 			identityFindings[ownerKey] = positions
 		}
-		into.findings = append(into.findings, a.classifyMetricName(ownerKey, owner))
+		into.findings = append(into.findings, a.classifyMetricName(ownerKey, owner, summary.Strategy))
 		into.totals[finding.SignalMetrics] += owner.Series
 		volumes[ownerMetricKey(ownerKey, owner.Metric)] += owner.Series
 	}
@@ -56,10 +58,10 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 	a.assessLabelKeys(datasource, targets, rules, volumes, into)
 }
 
-func (a *Assessor) classifyMetricName(owner finding.Owner, row MetricOwner) finding.Finding {
+func (a *Assessor) classifyMetricName(owner finding.Owner, row MetricOwner, strategy nameindex.Strategy) finding.Finding {
 	at := finding.Observation{Owner: owner, Signal: finding.SignalMetrics, Volume: row.Series}
 	if match := a.metrics.Match(row.Metric); match.Matched {
-		return a.classifier.Metric(at, match)
+		return a.classifier.Metric(at, preferStrategy(match, strategy))
 	}
 	if miss, found := a.metrics.NearMiss(row.Metric); found {
 		return a.classifier.NearMiss(at, miss)

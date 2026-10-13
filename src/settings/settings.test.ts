@@ -1,4 +1,4 @@
-import { DEFAULT_CONCURRENCY, concurrencyFrom, datasourceTypesFor, isVolumeWeighted, readSettings } from './settings';
+import { DEFAULT_CONCURRENCY, concurrencyFrom, datasourceTypesFor, isVolumeWeighted, readSettings, withStrategyOverride } from './settings';
 
 describe('readSettings', () => {
   it.each([
@@ -13,6 +13,7 @@ describe('readSettings', () => {
     [{ volumeWeighted: 'yes' }, {}],
     [{ reclassification: [{ pattern: 'acme_*', action: 'exclude' }] }, { reclassification: [{ pattern: 'acme_*', action: 'exclude' }] }],
     [{ reclassification: [{ pattern: 'acme_*', action: 'drop' }] }, {}],
+    [{ strategyOverrides: { prom: 'NoTranslation', other: 'Sideways' } }, { strategyOverrides: { prom: 'NoTranslation' } }],
   ])('reads %p', (jsonData, expected) => {
     expect(readSettings(jsonData)).toEqual(expected);
   });
@@ -28,6 +29,16 @@ describe('datasourceTypesFor', () => {
     expect(datasourceTypesFor({ datasourceTypes: { metrics: ['grafana-amazonprometheus-datasource'] } }, 'metrics')).toEqual([
       'grafana-amazonprometheus-datasource',
     ]);
+  });
+});
+
+describe('withStrategyOverride', () => {
+  const datasource = { uid: 'prom', names: [], target_info: [], owners: [], label_keys: [] };
+
+  it('applies the admin override for that datasource only', () => {
+    const settings = { strategyOverrides: { prom: 'UnderscoreEscapingWithoutSuffixes' as const } };
+    expect(withStrategyOverride(datasource, settings).strategy_override).toBe('UnderscoreEscapingWithoutSuffixes');
+    expect(withStrategyOverride({ ...datasource, uid: 'other' }, settings).strategy_override).toBeUndefined();
   });
 });
 

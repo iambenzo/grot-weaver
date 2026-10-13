@@ -35,6 +35,7 @@ type Result struct {
 	Findings       []scoring.RankedFinding `json:"findings"`
 	Attributions   []ServiceAttribution    `json:"attributions"`
 	Metrics        []MetricAttribution     `json:"metric_attributions"`
+	Datasources    []DatasourceSummary     `json:"datasources"`
 	Owners         []ScoreRow              `json:"owners"`
 	Namespaces     []ScoreRow              `json:"namespaces"`
 	Signals        []ScoreRow              `json:"signals"`
@@ -55,6 +56,7 @@ type collected struct {
 	checks             []scoring.ResourceCheck
 	attributions       []ServiceAttribution
 	metricAttributions []MetricAttribution
+	datasources        []DatasourceSummary
 	totals             map[finding.Signal]float64
 }
 
@@ -76,6 +78,7 @@ func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
 		Findings:       scoring.RankByImpact(gathered.findings, gathered.totals),
 		Attributions:   gathered.attributions,
 		Metrics:        gathered.metricAttributions,
+		Datasources:    gathered.datasources,
 		Owners:         rows(scores),
 		Namespaces:     rows(scoring.RollUp(servicesOnly(scores), scoring.ByNamespace)),
 		Signals:        rows(scoring.RollUp(servicesOnly(scores), scoring.BySignal)),
