@@ -1,0 +1,125 @@
+{
+  "metrics": {
+    "completedJobs": 1,
+    "totalJobs": 1
+  },
+  "series": [
+    {
+      "exemplars": [
+        {
+          "labels": [
+            {
+              "key": "trace:id",
+              "value": {
+                "stringValue": "3e9af7aeff0035bc2ec1f463781855"
+              }
+            },
+            {
+              "key": "resource.service.name",
+              "value": {
+                "stringValue": "checkout"
+              }
+            },
+            {
+              "key": "span.http.method",
+              "value": {
+                "stringValue": "POST"
+              }
+            },
+            {
+              "key": "instrumentation:name",
+              "value": {
+                "stringValue": "semconv.emitter.http"
+              }
+            },
+            {
+              "key": "instrumentation:version",
+              "value": {
+                "stringValue": "0.1.0"
+              }
+            }
+          ],
+          "timestampMs": "1791889031210",
+          "value": 60
+        },
+        {
+          "labels": [
+            {
+              "key": "instrumentation:name",
+              "value": {
+                "stringValue": "semconv.emitter.http"
+              }
+            },
+            {
+              "key": "instrumentation:version",
+              "value": {
+                "stringValue": "0.1.0"
+              }
+            },
+            {
+              "key": "trace:id",
+              "value": {
+                "stringValue": "43ff9fa4acf125d0f81a9f60e22fe2c"
+              }
+            },
+            {
+              "key": "resource.service.name",
+              "value": {
+                "stringValue": "checkout"
+              }
+            },
+            {
+              "key": "span.http.method",
+              "value": {
+                "stringValue": "POST"
+              }
+            }
+          ],
+          "timestampMs": "1791889055407",
+          "value": 60
+        }
+      ],
+      "labels": [
+        {
+          "key": "instrumentation:name",
+          "value": {
+            "stringValue": "semconv.emitter.http"
+          }
+        },
+        {
+          "key": "instrumentation:version",
+          "value": {
+            "stringValue": "0.1.0"
+          }
+        }
+      ],
+      "samples": [
+        {
+          "timestampMs": "1791887100000"
+        },
+        {
+          "timestampMs": "1791887400000"
+        },
+        {
+          "timestampMs": "1791887700000"
+        },
+        {
+          "timestampMs": "1791888000000"
+        },
+        {
+          "timestampMs": "1791888300000"
+        },
+        {
+          "timestampMs": "1791888600000"
+        },
+        {
+          "timestampMs": "1791888900000"
+        },
+        {
+          "timestampMs": "1791889200000",
+          "value": 60
+        }
+      ]
+    }
+  ]
+}

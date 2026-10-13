@@ -62,18 +62,19 @@ type Owner struct {
 }
 
 type Finding struct {
-	Type               Type                 `json:"type"`
-	Level              Level                `json:"level,omitempty"`
-	Signal             Signal               `json:"signal"`
-	Owner              Owner                `json:"owner"`
-	Observed           string               `json:"observed"`
-	Expected           string               `json:"expected,omitempty"`
-	Bucket             Bucket               `json:"bucket,omitempty"`
-	Confidence         nameindex.Confidence `json:"confidence,omitempty"`
-	Note               string               `json:"note,omitempty"`
-	Source             catalogue.Source     `json:"source,omitempty"`
-	Volume             float64              `json:"volume"`
-	PipelineIntroduced bool                 `json:"pipeline_introduced,omitempty"`
+	Type               Type                  `json:"type"`
+	Level              Level                 `json:"level,omitempty"`
+	Signal             Signal                `json:"signal"`
+	Owner              Owner                 `json:"owner"`
+	Observed           string                `json:"observed"`
+	Scope              catalogue.RenameScope `json:"scope,omitempty"`
+	Expected           string                `json:"expected,omitempty"`
+	Bucket             Bucket                `json:"bucket,omitempty"`
+	Confidence         nameindex.Confidence  `json:"confidence,omitempty"`
+	Note               string                `json:"note,omitempty"`
+	Source             catalogue.Source      `json:"source,omitempty"`
+	Volume             float64               `json:"volume"`
+	PipelineIntroduced bool                  `json:"pipeline_introduced,omitempty"`
 }
 
 var levels = map[Type]Level{

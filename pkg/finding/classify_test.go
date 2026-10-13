@@ -116,3 +116,14 @@ func Test_Classifier_Metric_andNearMiss(t *testing.T) {
 		t.Errorf("history near miss = %+v", renamed)
 	}
 }
+
+func Test_Classifier_Attribute_recordsScope(t *testing.T) {
+	loaded := embeddedCatalogue(t)
+	match := nameindex.NewAttributeIndex(loaded, nil).Match("service.name", nameindex.Context{Scope: catalogue.ScopeResources})
+
+	got := NewClassifier(loaded).Attribute(Observation{Owner: checkout, Signal: SignalTraces}, match, catalogue.ScopeResources)
+
+	if got.Scope != catalogue.ScopeResources {
+		t.Errorf("scope = %q, want resources", got.Scope)
+	}
+}

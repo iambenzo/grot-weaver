@@ -70,7 +70,7 @@ func bucketForStability(stability catalogue.Stability) Bucket {
 }
 
 func (c Classifier) Attribute(at Observation, match nameindex.AttributeMatch, scope catalogue.RenameScope) Finding {
-	result := Finding{Signal: at.Signal, Owner: at.Owner, Observed: match.Observed, Volume: at.Volume, Confidence: match.Confidence}
+	result := Finding{Signal: at.Signal, Owner: at.Owner, Observed: match.Observed, Scope: scope, Volume: at.Volume, Confidence: match.Confidence}
 	switch match.Classification {
 	case nameindex.ClassCustom:
 		return withType(result, TypeCustom)

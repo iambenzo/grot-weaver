@@ -30,6 +30,14 @@
       "headers": {},
       "request": "/api/datasources/proxy/uid/prom/api/v1/series?match%5B%5D=target_info&start=1791801829&end=1791888229"
     },
+    "tempo/metrics-flagged-key.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/tempo/api/metrics/query_range?q={ resource.service.name = \"checkout\" && span.http.method != nil } | count_over_time() by (instrumentation:name, instrumentation:version)&step=300s (30m window)"
+    },
+    "tempo/search-flagged-key.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/tempo/api/search?q={ resource.service.name = \"checkout\" && span.http.method != nil } | select(instrumentation:name, instrumentation:version)&limit=5&spss=2 (30m window)"
+    },
     "tempo/search-select-scopes.json": {
       "headers": {},
       "request": "/api/datasources/proxy/uid/tempo/api/search?q=%7B+resource.service.name+%21%3D+%22%22+%7D+%7C+select%28instrumentation%3Aname%2C+instrumentation%3Aversion%29&limit=20&spss=3&start=1791801829&end=1791888229"

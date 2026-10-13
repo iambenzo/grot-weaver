@@ -34,9 +34,13 @@ interface CollectorContext {
   errors: CollectionError[];
 }
 
-export function serviceFilter(serviceName: string): string {
+export function serviceFilterExpression(serviceName: string): string {
   const escaped = serviceName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `{ ${SERVICE_NAME_TAG} = "${escaped}" }`;
+  return `${SERVICE_NAME_TAG} = "${escaped}"`;
+}
+
+export function serviceFilter(serviceName: string): string {
+  return `{ ${serviceFilterExpression(serviceName)} }`;
 }
 
 export async function collectTempoInventory(uid: string, get: ProxyGet, limit: Limiter, window: QueryWindow): Promise<TempoCollection> {

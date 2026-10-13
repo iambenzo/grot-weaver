@@ -1,0 +1,439 @@
+{
+  "metrics": {
+    "completedJobs": 3,
+    "inspectedBytes": "135890",
+    "totalJobs": 3
+  },
+  "traces": [
+    {
+      "durationMs": 7,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "http.method",
+                "value": {
+                  "stringValue": "GET"
+                }
+              }
+            ],
+            "durationNanos": "7480375",
+            "spanID": "cd9be7c3b0c92332",
+            "startTimeUnixNano": "1791888999942490094"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                }
+              ],
+              "durationNanos": "7480375",
+              "spanID": "cd9be7c3b0c92332",
+              "startTimeUnixNano": "1791888999942490094"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888999942490094",
+      "traceID": "20c08a99a562776b30871543c2ac3799"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "http.method",
+                "value": {
+                  "stringValue": "GET"
+                }
+              }
+            ],
+            "durationNanos": "6866916",
+            "spanID": "4e59a5d155675bef",
+            "startTimeUnixNano": "1791888998934931427"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                }
+              ],
+              "durationNanos": "6866916",
+              "spanID": "4e59a5d155675bef",
+              "startTimeUnixNano": "1791888998934931427"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888998934931427",
+      "traceID": "823e890451182210c86b29b22e0ddaa8"
+    },
+    {
+      "durationMs": 7,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "http.method",
+                "value": {
+                  "stringValue": "POST"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "7198917",
+            "spanID": "086b2cbdf2947b11",
+            "startTimeUnixNano": "1791888997925621718"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "7198917",
+              "spanID": "086b2cbdf2947b11",
+              "startTimeUnixNano": "1791888997925621718"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888997925621718",
+      "traceID": "541fbed964c353b0d146ecf26d056d71"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "http.method",
+                "value": {
+                  "stringValue": "POST"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6118417",
+            "spanID": "bb54c865584e29be",
+            "startTimeUnixNano": "1791888996918553634"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6118417",
+              "spanID": "bb54c865584e29be",
+              "startTimeUnixNano": "1791888996918553634"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888996918553634",
+      "traceID": "5a95ba589cf327ea972e761adb78bd4c"
+    },
+    {
+      "durationMs": 5,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "http.method",
+                "value": {
+                  "stringValue": "POST"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5808042",
+            "spanID": "385cd3d587a5a560",
+            "startTimeUnixNano": "1791888995911703217"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5808042",
+              "spanID": "385cd3d587a5a560",
+              "startTimeUnixNano": "1791888995911703217"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888995911703217",
+      "traceID": "4812e7d90e34da9593658134802c2166"
+    }
+  ]
+}
