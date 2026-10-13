@@ -4,7 +4,7 @@ import { QueryWindow, prometheusLookback, prometheusWindowParams } from '../wind
 import { CollectionError, MetricDatasource, MetricOwner } from './types';
 
 const TARGET_INFO = 'target_info';
-const OWNER_LABELS = ['job', 'service_name', 'service_namespace'];
+const OWNER_LABELS = ['job', 'service_name', 'service_namespace', 'otel_scope_name', 'otel_scope_version'];
 const NAMES_PER_BATCH = 40;
 const REGEX_META = /[.*+?^${}()|[\]\\]/g;
 

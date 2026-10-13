@@ -77,7 +77,9 @@ describe('queries', () => {
   });
 
   it('counts owners over the whole window with last_over_time', () => {
-    expect(ownersQuery(['up'], window)).toBe('count by (__name__, job, service_name, service_namespace) (last_over_time({__name__=~"up"}[86400s]))');
+    expect(ownersQuery(['up'], window)).toBe(
+      'count by (__name__, job, service_name, service_namespace, otel_scope_name, otel_scope_version) (last_over_time({__name__=~"up"}[86400s]))'
+    );
   });
 
   it('asks for instances only on series without job or service_name', () => {

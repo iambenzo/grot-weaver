@@ -15,8 +15,13 @@ func Test_Reclassify_defaults(t *testing.T) {
 		{metric: "traces_spanmetrics_calls_total", want: ActionExclude, found: true},
 		{metric: "traces_service_graph_request_total", want: ActionExclude, found: true},
 		{metric: "traces_target_info", want: ActionExclude, found: true},
+		{metric: "target_info", want: ActionExclude, found: true},
 		{metric: "otelcol_receiver_accepted_spans_total", want: ActionPipeline, found: true},
 		{metric: "alloy_build_info", want: ActionPipeline, found: true},
+		{metric: "otelcol.resourcedetection.detector.duration_bucket", want: ActionPipeline, found: true},
+		{metric: "up", want: ActionExclude, found: true},
+		{metric: "scrape_duration_seconds", want: ActionExclude, found: true},
+		{metric: "upstream_requests_total"},
 		{metric: "http_server_request_duration_seconds_bucket"},
 		{metric: "traces_target_info_extra"},
 	}

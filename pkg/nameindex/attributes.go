@@ -14,6 +14,7 @@ type Confidence string
 const (
 	ConfidenceHigh   Confidence = "high"
 	ConfidenceMedium Confidence = "medium"
+	ConfidenceLow    Confidence = "low"
 )
 
 type Form string

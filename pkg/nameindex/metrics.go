@@ -2,6 +2,7 @@ package nameindex
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/prometheus/otlptranslator"
 
@@ -43,8 +44,9 @@ type MetricMatch struct {
 }
 
 type MetricIndex struct {
-	byStored map[string][]MetricForm
-	byBare   map[string][]catalogue.Metric
+	byStored   map[string][]MetricForm
+	byBare     map[string][]catalogue.Metric
+	namespaces []string
 }
 
 func NewMetricIndex(c *catalogue.Catalogue) *MetricIndex {
@@ -52,7 +54,13 @@ func NewMetricIndex(c *catalogue.Catalogue) *MetricIndex {
 	for _, metric := range metricsWithHistory(c) {
 		index.add(metric)
 	}
+	slices.Sort(index.namespaces)
+	index.namespaces = slices.Compact(index.namespaces)
 	return index
+}
+
+func (i *MetricIndex) InRegistryNamespace(observed string) bool {
+	return hasAnyRoot(observed, i.namespaces)
 }
 
 func metricsWithHistory(c *catalogue.Catalogue) []catalogue.Metric {
@@ -74,6 +82,9 @@ func metricsWithHistory(c *catalogue.Catalogue) []catalogue.Metric {
 }
 
 func (i *MetricIndex) add(metric catalogue.Metric) {
+	if namespace, _, found := strings.Cut(metric.Name, "."); found {
+		i.namespaces = append(i.namespaces, namespace)
+	}
 	for _, strategy := range Strategies {
 		namer := otlptranslator.NewMetricNamer("", strategy)
 		base, err := namer.Build(otlptranslator.Metric{Name: metric.Name, Unit: metric.Unit, Type: metricType(metric.Instrument)})

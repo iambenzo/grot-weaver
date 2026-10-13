@@ -42,8 +42,13 @@ var DefaultReclassification = []ReclassificationRule{
 	{Pattern: "traces_spanmetrics_*", Action: ActionExclude},
 	{Pattern: "traces_service_graph_*", Action: ActionExclude},
 	{Pattern: "traces_target_info", Action: ActionExclude},
+	{Pattern: "target_info", Action: ActionExclude},
+	{Pattern: "up", Action: ActionExclude},
+	{Pattern: "scrape_*", Action: ActionExclude},
 	{Pattern: "otelcol_*", Action: ActionPipeline},
+	{Pattern: "otelcol.*", Action: ActionPipeline},
 	{Pattern: "alloy_*", Action: ActionPipeline},
+	{Pattern: "alloy.*", Action: ActionPipeline},
 }
 
 func Reclassify(metric string, rules []ReclassificationRule) (ReclassificationAction, bool) {

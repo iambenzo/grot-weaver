@@ -14,6 +14,7 @@ import (
 type Assessor struct {
 	catalogue  *catalogue.Catalogue
 	attributes *nameindex.AttributeIndex
+	metrics    *nameindex.MetricIndex
 	classifier finding.Classifier
 }
 
@@ -33,6 +34,7 @@ type Result struct {
 	Window         Window                  `json:"window"`
 	Findings       []scoring.RankedFinding `json:"findings"`
 	Attributions   []ServiceAttribution    `json:"attributions"`
+	Metrics        []MetricAttribution     `json:"metric_attributions"`
 	Owners         []ScoreRow              `json:"owners"`
 	Namespaces     []ScoreRow              `json:"namespaces"`
 	Signals        []ScoreRow              `json:"signals"`
@@ -42,16 +44,18 @@ func NewAssessor(c *catalogue.Catalogue, customNamespaces []string) *Assessor {
 	return &Assessor{
 		catalogue:  c,
 		attributes: nameindex.NewAttributeIndex(c, customNamespaces),
+		metrics:    nameindex.NewMetricIndex(c),
 		classifier: finding.NewClassifier(c),
 	}
 }
 
 type collected struct {
-	findings     []finding.Finding
-	requirements []scoring.RequirementCheck
-	checks       []scoring.ResourceCheck
-	attributions []ServiceAttribution
-	totals       map[finding.Signal]float64
+	findings           []finding.Finding
+	requirements       []scoring.RequirementCheck
+	checks             []scoring.ResourceCheck
+	attributions       []ServiceAttribution
+	metricAttributions []MetricAttribution
+	totals             map[finding.Signal]float64
 }
 
 func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
@@ -61,6 +65,9 @@ func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
 			a.assessTraceService(datasource.UID, service, &gathered)
 		}
 	}
+	for _, datasource := range inv.Metrics {
+		a.assessMetricDatasource(datasource, inv.ReclassificationRules(), &gathered)
+	}
 
 	scores := scoring.Score(gathered.findings, gathered.requirements, gathered.checks, options)
 	return Result{
@@ -68,9 +75,10 @@ func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
 		Window:         inv.Window,
 		Findings:       scoring.RankByImpact(gathered.findings, gathered.totals),
 		Attributions:   gathered.attributions,
+		Metrics:        gathered.metricAttributions,
 		Owners:         rows(scores),
-		Namespaces:     rows(scoring.RollUp(scores, scoring.ByNamespace)),
-		Signals:        rows(scoring.RollUp(scores, scoring.BySignal)),
+		Namespaces:     rows(scoring.RollUp(servicesOnly(scores), scoring.ByNamespace)),
+		Signals:        rows(scoring.RollUp(servicesOnly(scores), scoring.BySignal)),
 	}
 }
 
@@ -109,6 +117,16 @@ func (a *Assessor) classifyKey(at finding.Observation, key KeyObservation, fallb
 	}
 	match := a.attributes.Match(key.Key, nameindex.Context{Scope: scope})
 	return a.classifier.Attribute(at, match, scope)
+}
+
+func servicesOnly(scores map[scoring.Key]scoring.Scores) map[scoring.Key]scoring.Scores {
+	services := map[scoring.Key]scoring.Scores{}
+	for key, value := range scores {
+		if key.Owner.Kind == finding.OwnerService {
+			services[key] = value
+		}
+	}
+	return services
 }
 
 func rows(scores map[scoring.Key]scoring.Scores) []ScoreRow {
