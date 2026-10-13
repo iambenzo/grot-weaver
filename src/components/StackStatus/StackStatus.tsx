@@ -67,10 +67,12 @@ export function StackStatus({ progress, partial, labels, onRetry }: StackStatusP
       {(partial || pending.length > 0) && (
         <Alert severity="info" title="Partial results" data-testid={testIds.status.partial}>
           <Stack direction="column" gap={1}>
-            <Text>
-              Scores cover {progress.length - pending.length} of {progress.length} datasources so far and update as the
-              rest arrive. {loadingText({ labels })}
-            </Text>
+            <div aria-live="polite">
+              <Text>
+                Scores cover {progress.length - pending.length} of {progress.length} datasources so far and update as
+                the rest arrive. {loadingText({ labels })}
+              </Text>
+            </div>
             <DatasourceProgressList progress={progress} />
           </Stack>
         </Alert>

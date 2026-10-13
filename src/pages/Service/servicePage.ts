@@ -25,7 +25,11 @@ export function servicePage(settings: PluginSettings): SceneAppPage {
 function serviceScene(settings: PluginSettings): EmbeddedScene {
   return new EmbeddedScene({
     $timeRange: createTimeRange(settings),
-    controls: [new SceneControlsSpacer(), createTimePicker(), new SceneRefreshPicker({ isOnCanvas: true })],
+    controls: [
+      new SceneControlsSpacer(),
+      createTimePicker(),
+      new SceneRefreshPicker({ isOnCanvas: true, withText: true }),
+    ],
     body: new SceneFlexLayout({
       direction: 'column',
       children: [new SceneFlexItem({ body: new ServiceFindings({ settings }) })],

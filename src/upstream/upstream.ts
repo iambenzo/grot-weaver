@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 export const LATEST_RELEASE_URL = 'https://api.github.com/repos/open-telemetry/semantic-conventions/releases/latest';
 const CACHE_KEY = 'iambenzo-semconvcompliance-app.upstream-release';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const DISMISSED_KEY = 'iambenzo-semconvcompliance-app.upstream-dismissed';
 
 export interface UpstreamRelease {
   tag: string;
@@ -60,6 +61,25 @@ export function useUpstreamRelease(enabled: boolean): UpstreamRelease | undefine
     };
   }, [enabled]);
   return enabled ? release : undefined;
+}
+
+export function useDismissedRelease(): [string | undefined, (tag: string) => void] {
+  const [dismissed, setDismissed] = useState<string | undefined>(() => {
+    try {
+      return safeLocalStorage()?.getItem(DISMISSED_KEY) ?? undefined;
+    } catch {
+      return undefined;
+    }
+  });
+  const dismiss = (tag: string) => {
+    setDismissed(tag);
+    try {
+      safeLocalStorage()?.setItem(DISMISSED_KEY, tag);
+    } catch {
+      return;
+    }
+  };
+  return [dismissed, dismiss];
 }
 
 function browserDependencies(): UpstreamCheckDependencies {

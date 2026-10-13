@@ -9,7 +9,9 @@ export function HopCandidates({ hops }: { hops?: ServiceHops }) {
   }
   return (
     <Stack direction="column" gap={1} data-testid={testIds.service.hops}>
-      <Text element="h4">Candidate pipeline hops</Text>
+      <Text element="h2" variant="h4">
+        Candidate pipeline hops
+      </Text>
       <Text color="secondary" variant="bodySmall">
         Inferred from collector self-metrics, resource attributes and names. A plain collector leaves no trace in the
         data, so these are candidates, not confirmed hops.

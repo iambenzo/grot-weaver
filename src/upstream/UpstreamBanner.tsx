@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, LinkButton, Stack, Text } from '@grafana/ui';
-import { isNewerRelease, useUpstreamRelease } from './upstream';
+import { isNewerRelease, useDismissedRelease, useUpstreamRelease } from './upstream';
 import { testIds } from '../components/testIds';
 
 interface UpstreamBannerProps {
@@ -10,7 +10,8 @@ interface UpstreamBannerProps {
 
 export function UpstreamBanner({ currentVersion, enabled }: UpstreamBannerProps) {
   const release = useUpstreamRelease(enabled);
-  if (!release || !isNewerRelease(release.tag, currentVersion)) {
+  const [dismissed, dismiss] = useDismissedRelease();
+  if (!release || !isNewerRelease(release.tag, currentVersion) || dismissed === release.tag) {
     return null;
   }
   return (
@@ -18,6 +19,7 @@ export function UpstreamBanner({ currentVersion, enabled }: UpstreamBannerProps)
       severity="info"
       title={`Semantic conventions ${release.tag} is available`}
       data-testid={testIds.upstream.banner}
+      onRemove={() => dismiss(release.tag)}
     >
       <Stack direction="column" gap={1}>
         <Text>

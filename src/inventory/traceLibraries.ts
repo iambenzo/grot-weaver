@@ -9,7 +9,7 @@ const INSTRUMENTATION_VERSION = 'instrumentation:version';
 const DEFAULT_SAMPLE_LIMIT = 20;
 const SPANS_PER_SPAN_SET = '3';
 const PROBE_WINDOW_SECONDS = 3600;
-const MAX_LOOKUP_SLICES = 8;
+const MAX_LOOKUP_SLICES = 12;
 
 export type LookupMethod = 'metrics' | 'sample';
 

@@ -87,7 +87,9 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
         ))}
       </Stack>
       <Stack direction="column" gap={1}>
-        <Text element="h3">Top violations</Text>
+        <Text element="h2" variant="h3">
+          Top violations
+        </Text>
         <TabsBar>
           {SIGNALS.map((candidate) => (
             <Tab
@@ -102,7 +104,9 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
         <TopViolations groups={groups.filter((group) => group.signal === signal)} />
       </Stack>
       <Stack direction="column" gap={1}>
-        <Text element="h3">Services, worst first</Text>
+        <Text element="h2" variant="h3">
+          Services, worst first
+        </Text>
         <ServicesTable rows={serviceRows(result)} range={range} />
       </Stack>
       <OwnerSections result={result} />

@@ -73,6 +73,19 @@ describe('lookupLibraries', () => {
     });
   });
 
+  it('keeps TraceQL metrics for a 24h window on a Tempo capped at 3h', async () => {
+    const { context } = fakeTempo();
+    const get = context.get;
+    context.get = (async (uid: string, requestPath: string, params: Record<string, string>) => {
+      if (requestPath === '/api/metrics/query_range' && Number(params.end) - Number(params.start) > 3 * 3600) {
+        throw { status: 400, data: 'metrics query time range exceeds the maximum allowed duration of 3h0m0s' };
+      }
+      return get(uid, requestPath, params);
+    }) as typeof get;
+
+    expect((await lookupLibraries(context, flagged, true)).method).toBe('metrics');
+  });
+
   it('falls back to a sample when a metrics query fails', async () => {
     const { context } = fakeTempo({ status: 400, data: { message: 'empty ring' } });
 
