@@ -10,6 +10,7 @@ func Test_parseConfig(t *testing.T) {
 		name        string
 		args        []string
 		wantVersion string
+		wantGenAI   string
 		wantFailure bool
 	}{
 		{name: "defaults to latest", args: nil, wantVersion: latestVersion},
@@ -18,6 +19,7 @@ func Test_parseConfig(t *testing.T) {
 		{name: "rejects url injection", args: []string{"-semconv", "v1.44.0.zip[model]#"}, wantFailure: true},
 		{name: "rejects short genai commit", args: []string{"-genai-commit", "5293eff"}, wantFailure: true},
 		{name: "rejects non-hex genai commit", args: []string{"-genai-commit", "main"}, wantFailure: true},
+		{name: "accepts auto genai commit", args: []string{"-genai-commit", "auto"}, wantVersion: latestVersion, wantGenAI: "auto"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -34,8 +36,12 @@ func Test_parseConfig(t *testing.T) {
 			if cfg.semconvVersion != tt.wantVersion {
 				t.Errorf("version = %q, want %q", cfg.semconvVersion, tt.wantVersion)
 			}
-			if cfg.genAICommit != pinnedGenAICommit {
-				t.Errorf("genai commit = %q, want pinned %q", cfg.genAICommit, pinnedGenAICommit)
+			wantGenAI := tt.wantGenAI
+			if wantGenAI == "" {
+				wantGenAI = pinnedGenAICommit
+			}
+			if cfg.genAICommit != wantGenAI {
+				t.Errorf("genai commit = %q, want %q", cfg.genAICommit, wantGenAI)
 			}
 		})
 	}

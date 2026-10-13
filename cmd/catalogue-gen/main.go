@@ -38,6 +38,7 @@ type config struct {
 	genAICommit    string
 	outputDir      string
 	templatesDir   string
+	summaryPath    string
 }
 
 type generatedFile struct {
@@ -69,19 +70,24 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
-	committedAt, err := github.commitDate(ctx, genAIRepository, cfg.genAICommit)
+	previous := loadPrevious(cfg.outputDir)
+	genAI, err := resolveGenAICommit(ctx, github, httpClient, cfg.genAICommit, version, previousGenAICommit(previous))
+	if err != nil {
+		return err
+	}
+	committedAt, err := github.commitDate(ctx, genAIRepository, genAI.commit)
 	if err != nil {
 		return fmt.Errorf("look up genai commit: %w", err)
 	}
 
 	coreRegistry := fmt.Sprintf(coreRegistryTemplate, version)
-	genAIRegistry := fmt.Sprintf(genAIRegistryFormat, cfg.genAICommit)
+	genAIRegistry := fmt.Sprintf(genAIRegistryFormat, genAI.commit)
 
 	core, err := generateCatalogue(ctx, coreRegistry, cfg.templatesDir)
 	if err != nil {
 		return fmt.Errorf("core catalogue: %w", err)
 	}
-	genAI, err := generateCatalogue(ctx, genAIRegistry, cfg.templatesDir)
+	genAICatalogue, err := generateCatalogue(ctx, genAIRegistry, cfg.templatesDir)
 	if err != nil {
 		return fmt.Errorf("genai catalogue: %w", err)
 	}
@@ -99,7 +105,7 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 
 	manifestJSON, err := marshalIndented(catalogue.Manifest{
 		Semconv:        catalogue.SemconvSource{Version: version, Registry: coreRegistry, SchemaURL: schemaURL},
-		GenAI:          catalogue.GenAISource{Commit: cfg.genAICommit, CommittedAt: committedAt, Registry: genAIRegistry},
+		GenAI:          catalogue.GenAISource{Commit: genAI.commit, CommittedAt: committedAt, Registry: genAIRegistry},
 		WeaverImage:    weaverImage,
 		TemplateSHA256: templateHash,
 	})
@@ -107,25 +113,62 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 		return fmt.Errorf("encode manifest: %w", err)
 	}
 
-	err = writeFiles(cfg.outputDir,
-		generatedFile{name: catalogue.CoreFile, content: core},
-		generatedFile{name: catalogue.GenAIFile, content: genAI},
-		generatedFile{name: catalogue.RenamesFile, content: renames},
-		generatedFile{name: catalogue.ManifestFile, content: manifestJSON},
-	)
-	if err != nil {
+	files := []generatedFile{
+		{name: catalogue.CoreFile, content: core},
+		{name: catalogue.GenAIFile, content: genAICatalogue},
+		{name: catalogue.RenamesFile, content: renames},
+		{name: catalogue.ManifestFile, content: manifestJSON},
+	}
+	if cfg.summaryPath != "" {
+		if err := writeSummary(cfg.summaryPath, previous, files, genAI.reason); err != nil {
+			return err
+		}
+	}
+	if err := writeFiles(cfg.outputDir, files...); err != nil {
 		return err
 	}
 
-	_, err = fmt.Fprintf(stdout, "wrote %s: semconv %s, genai %s\n", cfg.outputDir, version, cfg.genAICommit)
+	_, err = fmt.Fprintf(stdout, "wrote %s: semconv %s, genai %s (%s)\n", cfg.outputDir, version, genAI.commit, genAI.reason)
 	return err
+}
+
+func loadPrevious(outputDir string) *catalogue.Catalogue {
+	previous, err := catalogue.Load(os.DirFS(outputDir))
+	if err != nil {
+		return nil
+	}
+	return previous
+}
+
+func previousGenAICommit(previous *catalogue.Catalogue) string {
+	if previous == nil {
+		return ""
+	}
+	return previous.Manifest.GenAI.Commit
+}
+
+func writeSummary(path string, previous *catalogue.Catalogue, files []generatedFile, genAIReason string) error {
+	staging, err := os.MkdirTemp("", "catalogue-next-")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = os.RemoveAll(staging) }()
+	if err := writeFiles(staging, files...); err != nil {
+		return err
+	}
+	next, err := catalogue.Load(os.DirFS(staging))
+	if err != nil {
+		return fmt.Errorf("load generated catalogue: %w", err)
+	}
+	return os.WriteFile(path, []byte(summariseChanges(previous, next, genAIReason)), 0o644)
 }
 
 func parseConfig(args []string) (config, error) {
 	flags := flag.NewFlagSet("catalogue-gen", flag.ContinueOnError)
 	cfg := config{}
 	flags.StringVar(&cfg.semconvVersion, "semconv", latestVersion, "semantic-conventions release tag, or \"latest\"")
-	flags.StringVar(&cfg.genAICommit, "genai-commit", pinnedGenAICommit, "semantic-conventions-genai commit SHA")
+	flags.StringVar(&cfg.genAICommit, "genai-commit", pinnedGenAICommit, "semantic-conventions-genai commit SHA, or \"auto\" for the latest commit compatible with the core version")
+	flags.StringVar(&cfg.summaryPath, "summary", "", "write a markdown summary of catalogue changes to this file")
 	flags.StringVar(&cfg.outputDir, "out", defaultOutputDir, "directory that receives the catalogue files")
 	flags.StringVar(&cfg.templatesDir, "templates", defaultTemplatesDir, "Weaver templates directory")
 	if err := flags.Parse(args); err != nil {
@@ -134,8 +177,8 @@ func parseConfig(args []string) (config, error) {
 	if cfg.semconvVersion != latestVersion && !releaseTagPattern.MatchString(cfg.semconvVersion) {
 		return config{}, fmt.Errorf("semconv version %q is not a release tag like v1.44.0", cfg.semconvVersion)
 	}
-	if !commitPattern.MatchString(cfg.genAICommit) {
-		return config{}, fmt.Errorf("genai commit %q is not a full 40-character SHA", cfg.genAICommit)
+	if cfg.genAICommit != autoCommit && !commitPattern.MatchString(cfg.genAICommit) {
+		return config{}, fmt.Errorf("genai commit %q is not a full 40-character SHA or \"auto\"", cfg.genAICommit)
 	}
 	return cfg, nil
 }
