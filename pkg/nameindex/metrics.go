@@ -44,10 +44,11 @@ type MetricMatch struct {
 
 type MetricIndex struct {
 	byStored map[string][]MetricForm
+	byBare   map[string][]catalogue.Metric
 }
 
 func NewMetricIndex(c *catalogue.Catalogue) *MetricIndex {
-	index := &MetricIndex{byStored: map[string][]MetricForm{}}
+	index := &MetricIndex{byStored: map[string][]MetricForm{}, byBare: map[string][]catalogue.Metric{}}
 	for _, metric := range metricsWithHistory(c) {
 		index.add(metric)
 	}
@@ -82,6 +83,9 @@ func (i *MetricIndex) add(metric catalogue.Metric) {
 		for _, part := range partsFor(metric.Instrument) {
 			i.record(storedName(base, part), metric, part, strategy)
 		}
+		if !strategy.ShouldAddSuffixes() {
+			i.recordBare(base, metric)
+		}
 	}
 }
 
@@ -96,6 +100,12 @@ func (i *MetricIndex) record(stored string, metric catalogue.Metric, part Series
 		}
 	}
 	i.byStored[stored] = append(forms, MetricForm{Metric: metric, Part: part, Strategies: []Strategy{strategy}})
+}
+
+func (i *MetricIndex) recordBare(base string, metric catalogue.Metric) {
+	if !slices.ContainsFunc(i.byBare[base], func(m catalogue.Metric) bool { return m.Name == metric.Name }) {
+		i.byBare[base] = append(i.byBare[base], metric)
+	}
 }
 
 func (i *MetricIndex) Match(observed string) MetricMatch {
