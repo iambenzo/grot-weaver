@@ -1,101 +1,102 @@
 package plugin
 
 import (
-	"bytes"
 	"context"
-	"github.com/grafana/grafana-plugin-sdk-go/backend"
+	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
+
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
+
+	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
 )
 
-// mockCallResourceResponseSender implements backend.CallResourceResponseSender
-// for use in tests.
-type mockCallResourceResponseSender struct {
+type capturingSender struct {
 	response *backend.CallResourceResponse
 }
 
-// Send sets the received *backend.CallResourceResponse to s.response
-func (s *mockCallResourceResponseSender) Send(response *backend.CallResourceResponse) error {
+func (s *capturingSender) Send(response *backend.CallResourceResponse) error {
 	s.response = response
 	return nil
 }
 
-// TestCallResource tests CallResource calls, using backend.CallResourceRequest and backend.CallResourceResponse.
-// This ensures the httpadapter for CallResource works correctly.
-func TestCallResource(t *testing.T) {
-	// Initialize app
-	inst, err := NewApp(context.Background(), backend.AppInstanceSettings{})
+func newTestApp(t *testing.T) *App {
+	t.Helper()
+	instance, err := NewApp(context.Background(), backend.AppInstanceSettings{})
 	if err != nil {
-		t.Fatalf("new app: %s", err)
+		t.Fatalf("new app: %v", err)
 	}
-	if inst == nil {
-		t.Fatal("inst must not be nil")
-	}
-	app, ok := inst.(*App)
+	app, ok := instance.(*App)
 	if !ok {
-		t.Fatal("inst must be of type *App")
+		t.Fatalf("instance is %T, want *App", instance)
 	}
+	return app
+}
 
-	// Set up and run test cases
-	for _, tc := range []struct {
-		name string
+func callResource(t *testing.T, app *App, method, path string) *backend.CallResourceResponse {
+	t.Helper()
+	var sender capturingSender
+	if err := app.CallResource(context.Background(), &backend.CallResourceRequest{Method: method, Path: path}, &sender); err != nil {
+		t.Fatalf("call resource: %v", err)
+	}
+	if sender.response == nil {
+		t.Fatal("no response")
+	}
+	return sender.response
+}
 
-		method string
-		path   string
-		body   []byte
-
-		expStatus int
-		expBody   []byte
+func Test_CallResource_routes(t *testing.T) {
+	app := newTestApp(t)
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		wantStatus int
 	}{
-		{
-			name:      "get ping 200",
-			method:    http.MethodGet,
-			path:      "ping",
-			expStatus: http.StatusOK,
-		},
-		{
-			name:      "get echo 405",
-			method:    http.MethodGet,
-			path:      "echo",
-			expStatus: http.StatusMethodNotAllowed,
-		},
-		{
-			name:      "post echo 200",
-			method:    http.MethodPost,
-			path:      "echo",
-			body:      []byte(`{"message":"ok"}`),
-			expStatus: http.StatusOK,
-			expBody:   []byte(`{"message":"ok"}`),
-		},
-		{
-			name:      "get non existing handler 404",
-			method:    http.MethodGet,
-			path:      "not_found",
-			expStatus: http.StatusNotFound,
-		},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			// Request by calling CallResource. This tests the httpadapter.
-			var r mockCallResourceResponseSender
-			err = app.CallResource(context.Background(), &backend.CallResourceRequest{
-				Method: tc.method,
-				Path:   tc.path,
-				Body:   tc.body,
-			}, &r)
-			if err != nil {
-				t.Fatalf("CallResource error: %s", err)
-			}
-			if r.response == nil {
-				t.Fatal("no response received from CallResource")
-			}
-			if tc.expStatus > 0 && tc.expStatus != r.response.Status {
-				t.Errorf("response status should be %d, got %d", tc.expStatus, r.response.Status)
-			}
-			if len(tc.expBody) > 0 {
-				if tb := bytes.TrimSpace(r.response.Body); !bytes.Equal(tb, tc.expBody) {
-					t.Errorf("response body should be %s, got %s", tc.expBody, tb)
-				}
+		{name: "catalogue summary", method: http.MethodGet, path: "catalogue", wantStatus: http.StatusOK},
+		{name: "catalogue rejects post", method: http.MethodPost, path: "catalogue", wantStatus: http.StatusMethodNotAllowed},
+		{name: "unknown route", method: http.MethodGet, path: "not_found", wantStatus: http.StatusNotFound},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := callResource(t, app, tt.method, tt.path).Status; got != tt.wantStatus {
+				t.Errorf("status = %d, want %d", got, tt.wantStatus)
 			}
 		})
+	}
+}
+
+func Test_CallResource_catalogueReturnsStampCountsAndStability(t *testing.T) {
+	response := callResource(t, newTestApp(t), http.MethodGet, "catalogue")
+
+	var summary catalogue.Summary
+	if err := json.Unmarshal(response.Body, &summary); err != nil {
+		t.Fatalf("decode: %v\n%s", err, response.Body)
+	}
+	manifest := summary.Manifest
+	if manifest.Semconv.Version == "" || manifest.GenAI.Commit == "" || manifest.WeaverImage == "" || manifest.TemplateSHA256 == "" {
+		t.Errorf("manifest stamp incomplete: %+v", manifest)
+	}
+	if summary.Counts.Attributes == 0 || summary.Counts.Metrics == 0 || summary.Counts.Spans == 0 {
+		t.Errorf("counts empty: %+v", summary.Counts)
+	}
+	attributes := summary.Stability.Attributes
+	total := attributes.Stable + attributes.ReleaseCandidate + attributes.Development + attributes.Alpha + attributes.Deprecated
+	if total != summary.Counts.Attributes {
+		t.Errorf("attribute stability breakdown sums to %d, want %d", total, summary.Counts.Attributes)
+	}
+}
+
+func Test_CheckHealth_reportsCatalogueVersion(t *testing.T) {
+	app := newTestApp(t)
+
+	result, err := app.CheckHealth(context.Background(), &backend.CheckHealthRequest{})
+
+	if err != nil || result.Status != backend.HealthStatusOk {
+		t.Fatalf("health = %+v, err %v", result, err)
+	}
+	if !strings.Contains(result.Message, app.catalogue.Manifest.Semconv.Version) {
+		t.Errorf("message %q does not name the semconv version", result.Message)
 	}
 }
