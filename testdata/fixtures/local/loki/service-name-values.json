@@ -1,0 +1,15 @@
+{
+  "data": [
+    "a1",
+    "checkout",
+    "explicit-svc",
+    "inventory",
+    "legacy-batch",
+    "legacy-web",
+    "ns/legacy-ns-job",
+    "payments",
+    "unknown_service",
+    "unknown_service:python"
+  ],
+  "status": "success"
+}

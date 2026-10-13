@@ -1,0 +1,2489 @@
+{
+  "metrics": {
+    "completedJobs": 3,
+    "inspectedBytes": "62224",
+    "totalJobs": 3
+  },
+  "traces": [
+    {
+      "durationMs": 6,
+      "rootServiceName": "inventory",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "inventory": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "inventory"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6534375",
+            "spanID": "531d35ecec6b4c27",
+            "startTimeUnixNano": "1791888196084200805"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "inventory"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6683708",
+            "spanID": "6f6499fe35f5c9bf",
+            "startTimeUnixNano": "1791888196084178722"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "inventory"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6534375",
+              "spanID": "531d35ecec6b4c27",
+              "startTimeUnixNano": "1791888196084200805"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "inventory"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6683708",
+              "spanID": "6f6499fe35f5c9bf",
+              "startTimeUnixNano": "1791888196084178722"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888196084178722",
+      "traceID": "60e951c0975015317ed64227966365b7"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "unknown_service:python",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "unknown_service:python": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "6266042",
+            "spanID": "0dab4e6227457833",
+            "startTimeUnixNano": "1791888195844057555"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6452959",
+            "spanID": "4522b1ac3ffeab33",
+            "startTimeUnixNano": "1791888195844020763"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "6266042",
+              "spanID": "0dab4e6227457833",
+              "startTimeUnixNano": "1791888195844057555"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6452959",
+              "spanID": "4522b1ac3ffeab33",
+              "startTimeUnixNano": "1791888195844020763"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888195844020763",
+      "traceID": "b116f5772fe00bff7421ffd06ae17cae"
+    },
+    {
+      "durationMs": 5,
+      "rootServiceName": "unknown_service:python",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "unknown_service:python": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              }
+            ],
+            "durationNanos": "5074833",
+            "spanID": "d56097b0c8e55db0",
+            "startTimeUnixNano": "1791888195606063555"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              }
+            ],
+            "durationNanos": "5248125",
+            "spanID": "8ef0b34ccd1a35d1",
+            "startTimeUnixNano": "1791888195606038472"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                }
+              ],
+              "durationNanos": "5074833",
+              "spanID": "d56097b0c8e55db0",
+              "startTimeUnixNano": "1791888195606063555"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                }
+              ],
+              "durationNanos": "5248125",
+              "spanID": "8ef0b34ccd1a35d1",
+              "startTimeUnixNano": "1791888195606038472"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888195606038472",
+      "traceID": "d1dd593a44ddd73865af22f24a2266e6"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "payments",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "payments": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "payments"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5934083",
+            "spanID": "611e62a77f88b50a",
+            "startTimeUnixNano": "1791888195366974222"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "payments"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6097417",
+            "spanID": "2773b49c21baa22a",
+            "startTimeUnixNano": "1791888195366951138"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "payments"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5934083",
+              "spanID": "611e62a77f88b50a",
+              "startTimeUnixNano": "1791888195366974222"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "payments"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6097417",
+              "spanID": "2773b49c21baa22a",
+              "startTimeUnixNano": "1791888195366951138"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888195366951138",
+      "traceID": "3a695bfa3e92891a2745aef4336a8adb"
+    },
+    {
+      "durationMs": 7,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "7311458",
+            "spanID": "e706aff700fa73ec",
+            "startTimeUnixNano": "1791888195294051680"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "7441875",
+            "spanID": "62f4d9b2951c0dc8",
+            "startTimeUnixNano": "1791888195294024138"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "7311458",
+              "spanID": "e706aff700fa73ec",
+              "startTimeUnixNano": "1791888195294051680"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "7441875",
+              "spanID": "62f4d9b2951c0dc8",
+              "startTimeUnixNano": "1791888195294024138"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888195294024138",
+      "traceID": "34e0b8b9a9b958728a261d43e032c203"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "unknown_service:python",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "unknown_service:python": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "6123375",
+            "spanID": "5deca9d30890961c",
+            "startTimeUnixNano": "1791888194836260971"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              }
+            ],
+            "durationNanos": "6284709",
+            "spanID": "6b41ea9a37ec2784",
+            "startTimeUnixNano": "1791888194836230221"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "6123375",
+              "spanID": "5deca9d30890961c",
+              "startTimeUnixNano": "1791888194836260971"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                }
+              ],
+              "durationNanos": "6284709",
+              "spanID": "6b41ea9a37ec2784",
+              "startTimeUnixNano": "1791888194836230221"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888194836230221",
+      "traceID": "99d8fc8df8608777815da1aaf329169a"
+    },
+    {
+      "durationMs": 7,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6857709",
+            "spanID": "c712d89407661ad0",
+            "startTimeUnixNano": "1791888194282456304"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "7142459",
+            "spanID": "af24ce5e8affdee3",
+            "startTimeUnixNano": "1791888194282404554"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6857709",
+              "spanID": "c712d89407661ad0",
+              "startTimeUnixNano": "1791888194282456304"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "7142459",
+              "spanID": "af24ce5e8affdee3",
+              "startTimeUnixNano": "1791888194282404554"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888194282404554",
+      "traceID": "299d169a87f5bb6ecca04ae676cd7471"
+    },
+    {
+      "durationMs": 5,
+      "rootServiceName": "inventory",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "inventory": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "inventory"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5760250",
+            "spanID": "44624653a0e39831",
+            "startTimeUnixNano": "1791888194068254096"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "inventory"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "5903791",
+            "spanID": "236c839940c292b1",
+            "startTimeUnixNano": "1791888194068226138"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "inventory"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5760250",
+              "spanID": "44624653a0e39831",
+              "startTimeUnixNano": "1791888194068254096"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "inventory"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "5903791",
+              "spanID": "236c839940c292b1",
+              "startTimeUnixNano": "1791888194068226138"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888194068226138",
+      "traceID": "cebf4defa75bca9e916af81859db8afe"
+    },
+    {
+      "durationMs": 5,
+      "rootServiceName": "unknown_service:python",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "unknown_service:python": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5797875",
+            "spanID": "dacabddb79eb0b8a",
+            "startTimeUnixNano": "1791888193829130887"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5935541",
+            "spanID": "5c2872c2bc64f61c",
+            "startTimeUnixNano": "1791888193829107596"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5797875",
+              "spanID": "dacabddb79eb0b8a",
+              "startTimeUnixNano": "1791888193829130887"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5935541",
+              "spanID": "5c2872c2bc64f61c",
+              "startTimeUnixNano": "1791888193829107596"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888193829107596",
+      "traceID": "9c27f9b1e705469e8a3a396da6d037ed"
+    },
+    {
+      "durationMs": 5,
+      "rootServiceName": "unknown_service:python",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "unknown_service:python": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              }
+            ],
+            "durationNanos": "5608583",
+            "spanID": "2f698015e82fd2ec",
+            "startTimeUnixNano": "1791888193591328054"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5818083",
+            "spanID": "8fc5be1d7321a5cf",
+            "startTimeUnixNano": "1791888193591269429"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                }
+              ],
+              "durationNanos": "5608583",
+              "spanID": "2f698015e82fd2ec",
+              "startTimeUnixNano": "1791888193591328054"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5818083",
+              "spanID": "8fc5be1d7321a5cf",
+              "startTimeUnixNano": "1791888193591269429"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888193591269429",
+      "traceID": "357357300bba680e08b6f5cbd5bd4ca"
+    },
+    {
+      "durationMs": 5,
+      "rootServiceName": "payments",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "payments": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "payments"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5080375",
+            "spanID": "7d97b151021274f3",
+            "startTimeUnixNano": "1791888193350977971"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "payments"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "5201625",
+            "spanID": "3d7a2a559325660f",
+            "startTimeUnixNano": "1791888193350956971"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "payments"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5080375",
+              "spanID": "7d97b151021274f3",
+              "startTimeUnixNano": "1791888193350977971"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "payments"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "5201625",
+              "spanID": "3d7a2a559325660f",
+              "startTimeUnixNano": "1791888193350956971"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888193350956971",
+      "traceID": "27ef766f770892ced077733930242219"
+    },
+    {
+      "durationMs": 7,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "7154917",
+            "spanID": "aa715feacaa06fd9",
+            "startTimeUnixNano": "1791888193273167512"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              }
+            ],
+            "durationNanos": "7268125",
+            "spanID": "0aec55435f7232b8",
+            "startTimeUnixNano": "1791888193273144512"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "7154917",
+              "spanID": "aa715feacaa06fd9",
+              "startTimeUnixNano": "1791888193273167512"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                }
+              ],
+              "durationNanos": "7268125",
+              "spanID": "0aec55435f7232b8",
+              "startTimeUnixNano": "1791888193273144512"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888193273144512",
+      "traceID": "7195416afb58e9ac1cecc40c902e4d13"
+    },
+    {
+      "durationMs": 7,
+      "rootServiceName": "unknown_service:python",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "unknown_service:python": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "7111459",
+            "spanID": "c2fe2f01d925b205",
+            "startTimeUnixNano": "1791888192820980845"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              }
+            ],
+            "durationNanos": "7254666",
+            "spanID": "8c98d8392ec70f7b",
+            "startTimeUnixNano": "1791888192820960554"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "7111459",
+              "spanID": "c2fe2f01d925b205",
+              "startTimeUnixNano": "1791888192820980845"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                }
+              ],
+              "durationNanos": "7254666",
+              "spanID": "8c98d8392ec70f7b",
+              "startTimeUnixNano": "1791888192820960554"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888192820960554",
+      "traceID": "e5f61ef652a8b22cc67b7d5fed90982"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "unknown_service:python",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "unknown_service:python": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6836750",
+            "spanID": "47f33dfac78cd571",
+            "startTimeUnixNano": "1791888192583429012"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "6973417",
+            "spanID": "4aab37d98579dc37",
+            "startTimeUnixNano": "1791888192583403220"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6836750",
+              "spanID": "47f33dfac78cd571",
+              "startTimeUnixNano": "1791888192583429012"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "6973417",
+              "spanID": "4aab37d98579dc37",
+              "startTimeUnixNano": "1791888192583403220"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888192583403220",
+      "traceID": "d005dfb7e5de3197c730137d4cde1ef7"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "payments",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "payments": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "payments"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6149083",
+            "spanID": "c1bcceb63b6a3b4f",
+            "startTimeUnixNano": "1791888192344188762"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "payments"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "6309208",
+            "spanID": "3fd65ff8cc0cd2db",
+            "startTimeUnixNano": "1791888192344164762"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "payments"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6149083",
+              "spanID": "c1bcceb63b6a3b4f",
+              "startTimeUnixNano": "1791888192344188762"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "payments"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "6309208",
+              "spanID": "3fd65ff8cc0cd2db",
+              "startTimeUnixNano": "1791888192344164762"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888192344164762",
+      "traceID": "d5d4aa73a9df776f564ee7f4443b8283"
+    },
+    {
+      "durationMs": 7,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              }
+            ],
+            "durationNanos": "7203167",
+            "spanID": "37c4d157445576c8",
+            "startTimeUnixNano": "1791888192263129595"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              }
+            ],
+            "durationNanos": "7325208",
+            "spanID": "31b490ac2b93e500",
+            "startTimeUnixNano": "1791888192263107095"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                }
+              ],
+              "durationNanos": "7203167",
+              "spanID": "37c4d157445576c8",
+              "startTimeUnixNano": "1791888192263129595"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                }
+              ],
+              "durationNanos": "7325208",
+              "spanID": "31b490ac2b93e500",
+              "startTimeUnixNano": "1791888192263107095"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888192263107095",
+      "traceID": "b7d4ac0bb04aab0423dc5fd7edfff874"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "inventory",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "inventory": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "inventory"
+                }
+              }
+            ],
+            "durationNanos": "6499958",
+            "spanID": "0e07133638181574",
+            "startTimeUnixNano": "1791888192053478512"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "inventory"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6618125",
+            "spanID": "106e548b2ba46a13",
+            "startTimeUnixNano": "1791888192053454262"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "inventory"
+                  }
+                }
+              ],
+              "durationNanos": "6499958",
+              "spanID": "0e07133638181574",
+              "startTimeUnixNano": "1791888192053478512"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "inventory"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6618125",
+              "spanID": "106e548b2ba46a13",
+              "startTimeUnixNano": "1791888192053454262"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888192053454262",
+      "traceID": "33576166d985370a69c65a0b4c086b91"
+    },
+    {
+      "durationMs": 5,
+      "rootServiceName": "unknown_service:python",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "unknown_service:python": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5470208",
+            "spanID": "260e8963f8769c7d",
+            "startTimeUnixNano": "1791888191576542553"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "unknown_service:python"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5646417",
+            "spanID": "633459938a820d40",
+            "startTimeUnixNano": "1791888191576515428"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5470208",
+              "spanID": "260e8963f8769c7d",
+              "startTimeUnixNano": "1791888191576542553"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "unknown_service:python"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5646417",
+              "spanID": "633459938a820d40",
+              "startTimeUnixNano": "1791888191576515428"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888191576515428",
+      "traceID": "1c573904b493eddf2be79ef4fc798da2"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "payments",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "payments": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "payments"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "5996166",
+            "spanID": "056992869ee03c75",
+            "startTimeUnixNano": "1791888191337125595"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "payments"
+                }
+              }
+            ],
+            "durationNanos": "6158167",
+            "spanID": "c6cfe7a6926b4002",
+            "startTimeUnixNano": "1791888191337098928"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "payments"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "5996166",
+              "spanID": "056992869ee03c75",
+              "startTimeUnixNano": "1791888191337125595"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "payments"
+                  }
+                }
+              ],
+              "durationNanos": "6158167",
+              "spanID": "c6cfe7a6926b4002",
+              "startTimeUnixNano": "1791888191337098928"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888191337098928",
+      "traceID": "b3da84354739f34caddf91c8fac47c28"
+    },
+    {
+      "durationMs": 6,
+      "rootServiceName": "checkout",
+      "rootTraceName": "GET /orders/{id}",
+      "serviceStats": {
+        "checkout": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6077417",
+            "spanID": "6e686aae65b18896",
+            "startTimeUnixNano": "1791888191256025761"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "checkout"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "semconv.emitter.http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": "0.1.0"
+                }
+              }
+            ],
+            "durationNanos": "6251250",
+            "spanID": "48438efe3c5e0a0b",
+            "startTimeUnixNano": "1791888191255998845"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6077417",
+              "spanID": "6e686aae65b18896",
+              "startTimeUnixNano": "1791888191256025761"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "checkout"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "semconv.emitter.http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": "0.1.0"
+                  }
+                }
+              ],
+              "durationNanos": "6251250",
+              "spanID": "48438efe3c5e0a0b",
+              "startTimeUnixNano": "1791888191255998845"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791888191255998845",
+      "traceID": "bbfbd606f6926698f7d9f1e17c4e069a"
+    }
+  ]
+}

@@ -1,0 +1,725 @@
+{
+  "data": {
+    "encodingFlags": [
+      "categorize-labels"
+    ],
+    "result": [
+      {
+        "stream": {
+          "deployment_environment_name": "lab",
+          "service_instance_id": "checkout-1",
+          "service_name": "checkout",
+          "service_namespace": "shop"
+        },
+        "values": [
+          [
+            "1791888228570557696",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "73",
+                "detected_level": "error",
+                "error_type": "500",
+                "exception_type": "OrderError",
+                "flags": "3",
+                "observed_timestamp": "1791888228570586459",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "17",
+                "severity_text": "ERROR",
+                "span_id": "99c25f3942762d29",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "defa7dc9bc0596b4842b6a670b43a8d8"
+              }
+            }
+          ],
+          [
+            "1791888228570310912",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "GET",
+                "http_request_method": "GET",
+                "observed_timestamp": "1791888228570401875",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "99c25f3942762d29",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "defa7dc9bc0596b4842b6a670b43a8d8"
+              }
+            }
+          ],
+          [
+            "1791888227562470912",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888227562510708",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "d2c7cfbf9f862d45",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "3b9b30e666278d7cae09cbe5de39e716"
+              }
+            }
+          ],
+          [
+            "1791888226554142464",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888226554256014",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "3d7e123c03103015",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "4a8752ff17ef7c83e824a0b8548fcde5"
+              }
+            }
+          ],
+          [
+            "1791888225544594176",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "GET",
+                "http_request_method": "GET",
+                "observed_timestamp": "1791888225544616888",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "35e499ab971d74fb",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "440cdd525c2851c4c00db5dd006932bc"
+              }
+            }
+          ],
+          [
+            "1791888224537732864",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888224537817846",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "1bf7afb524e102d4",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "2246987f04b54e2ef70f9ddf0ab1893c"
+              }
+            }
+          ],
+          [
+            "1791888223529299456",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "73",
+                "detected_level": "error",
+                "error_type": "500",
+                "exception_type": "OrderError",
+                "flags": "3",
+                "observed_timestamp": "1791888223529327346",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "17",
+                "severity_text": "ERROR",
+                "span_id": "62e0e3c2ed11ec8c",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "4d8e9544422267dbadd0bed31761d636"
+              }
+            }
+          ],
+          [
+            "1791888223529017344",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "GET",
+                "http_request_method": "GET",
+                "observed_timestamp": "1791888223529120721",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "62e0e3c2ed11ec8c",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "4d8e9544422267dbadd0bed31761d636"
+              }
+            }
+          ],
+          [
+            "1791888222519027200",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "73",
+                "detected_level": "error",
+                "error_type": "500",
+                "exception_type": "OrderError",
+                "flags": "3",
+                "observed_timestamp": "1791888222519058970",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "17",
+                "severity_text": "ERROR",
+                "span_id": "8aebfbb258d99700",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "19e46078a157873a871f2b1cbeddcd5e"
+              }
+            }
+          ],
+          [
+            "1791888222518766336",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888222518858553",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "8aebfbb258d99700",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "19e46078a157873a871f2b1cbeddcd5e"
+              }
+            }
+          ],
+          [
+            "1791888221511833344",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888221511918261",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "215361b9e6a69b1f",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "e5bb5e675312bcae723bdab7e0cc22ff"
+              }
+            }
+          ],
+          [
+            "1791888220504490752",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "GET",
+                "http_request_method": "GET",
+                "observed_timestamp": "1791888220504602844",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "83a926ad0b769714",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "7d1db03785db90f5ea4393601be3ee18"
+              }
+            }
+          ],
+          [
+            "1791888219496493824",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888219496520927",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "39180f62a8295c77",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "9476373bf0414c939649ff5a90fa0ca4"
+              }
+            }
+          ],
+          [
+            "1791888218488960512",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888218489049343",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "8a682e789ef079a3",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "e432570c740241ee55ccd714923d1a19"
+              }
+            }
+          ],
+          [
+            "1791888217480818688",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "73",
+                "detected_level": "error",
+                "error_type": "500",
+                "exception_type": "OrderError",
+                "flags": "3",
+                "observed_timestamp": "1791888217480833759",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "17",
+                "severity_text": "ERROR",
+                "span_id": "e6f0edc3620b23f7",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "9b249818df709485eed9e64c13c2797b"
+              }
+            }
+          ],
+          [
+            "1791888217480698880",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888217480741509",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "e6f0edc3620b23f7",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "9b249818df709485eed9e64c13c2797b"
+              }
+            }
+          ],
+          [
+            "1791888216469004032",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "73",
+                "detected_level": "error",
+                "error_type": "500",
+                "exception_type": "OrderError",
+                "flags": "3",
+                "observed_timestamp": "1791888216469037259",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "17",
+                "severity_text": "ERROR",
+                "span_id": "a062791793870274",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "cc8530a8dcc881aabf1155528d1c09a1"
+              }
+            }
+          ],
+          [
+            "1791888216468762112",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888216468848676",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "a062791793870274",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "cc8530a8dcc881aabf1155528d1c09a1"
+              }
+            }
+          ],
+          [
+            "1791888215460689664",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "GET",
+                "http_request_method": "GET",
+                "observed_timestamp": "1791888215460745383",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "93f469468ce5cb16",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "0b4ed194ac84bd4473b64cf5603e8b50"
+              }
+            }
+          ],
+          [
+            "1791888214453840896",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791888214453928716",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "65cf10f68128a403",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "72b90010eb97132e9ff3a3cde7c879c8"
+              }
+            }
+          ]
+        ]
+      }
+    ],
+    "resultType": "streams",
+    "stats": {
+      "cache": {
+        "chunk": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "index": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "instantMetricResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "labelResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "result": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "seriesResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "statsResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "volumeResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        }
+      },
+      "index": {
+        "bloomFilterTime": 0,
+        "chunkRefsLookupTime": 0,
+        "postFilterChunks": 0,
+        "shardsDuration": 0,
+        "totalChunks": 0,
+        "totalStreams": 0,
+        "usedBloomFilters": false
+      },
+      "ingester": {
+        "recvWaitTime": 0.001277,
+        "store": {
+          "chunk": {
+            "compressedBytes": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "decompressedStructuredMetadataBytes": 0,
+            "headChunkBytes": 7968,
+            "headChunkLines": 51,
+            "headChunkStructuredMetadataBytes": 7240,
+            "postFilterLines": 51,
+            "totalDuplicates": 0
+          },
+          "chunkRefsFetchTime": 38125,
+          "chunksDownloadTime": 0,
+          "congestionControlLatency": 0,
+          "dataobj": {
+            "pageBatches": 0,
+            "pagesDownloaded": 0,
+            "pagesDownloadedBytes": 0,
+            "pagesScanned": 0,
+            "postFilterRows": 0,
+            "postPredicateDecompressedBytes": 0,
+            "postPredicateRows": 0,
+            "postPredicateStructuredMetadataBytes": 0,
+            "prePredicateDecompressedBytes": 0,
+            "prePredicateDecompressedRows": 0,
+            "prePredicateDecompressedStructuredMetadataBytes": 0,
+            "totalPageDownloadTime": 0,
+            "totalRowsAvailable": 0
+          },
+          "pipelineWrapperFilteredLines": 0,
+          "queryReferencedStructuredMetadata": false,
+          "queryUsedV2Engine": false,
+          "totalChunksDownloaded": 0,
+          "totalChunksRef": 0
+        },
+        "totalBatches": 1,
+        "totalChunksMatched": 1,
+        "totalLinesSent": 20,
+        "totalReached": 1
+      },
+      "querier": {
+        "querierExecTime": 0.004227,
+        "store": {
+          "chunk": {
+            "compressedBytes": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "decompressedStructuredMetadataBytes": 0,
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "headChunkStructuredMetadataBytes": 0,
+            "postFilterLines": 0,
+            "totalDuplicates": 0
+          },
+          "chunkRefsFetchTime": 0,
+          "chunksDownloadTime": 0,
+          "congestionControlLatency": 0,
+          "dataobj": {
+            "pageBatches": 0,
+            "pagesDownloaded": 0,
+            "pagesDownloadedBytes": 0,
+            "pagesScanned": 0,
+            "postFilterRows": 0,
+            "postPredicateDecompressedBytes": 0,
+            "postPredicateRows": 0,
+            "postPredicateStructuredMetadataBytes": 0,
+            "prePredicateDecompressedBytes": 0,
+            "prePredicateDecompressedRows": 0,
+            "prePredicateDecompressedStructuredMetadataBytes": 0,
+            "totalPageDownloadTime": 0,
+            "totalRowsAvailable": 0
+          },
+          "pipelineWrapperFilteredLines": 0,
+          "queryReferencedStructuredMetadata": false,
+          "queryUsedV2Engine": false,
+          "totalChunksDownloaded": 0,
+          "totalChunksRef": 0
+        }
+      },
+      "summary": {
+        "bytesProcessedPerSecond": 1977007,
+        "execTime": 0.00403,
+        "linesProcessedPerSecond": 12654,
+        "queueTime": 9.8e-05,
+        "shards": 1,
+        "splits": 1,
+        "subqueries": 0,
+        "totalBytesProcessed": 7968,
+        "totalEntriesReturned": 20,
+        "totalLinesProcessed": 51,
+        "totalPostFilterLines": 51,
+        "totalStructuredMetadataBytesProcessed": 7240
+      }
+    }
+  },
+  "status": "success"
+}

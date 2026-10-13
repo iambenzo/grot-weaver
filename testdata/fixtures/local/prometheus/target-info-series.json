@@ -1,0 +1,74 @@
+{
+  "data": [
+    {
+      "__name__": "target_info",
+      "instance": "otelcol:8888",
+      "job": "otelcol",
+      "service.instance.id": "otelcol-local-1",
+      "service.name": "otelcol-contrib",
+      "service.version": "0.162.0"
+    },
+    {
+      "__name__": "target_info",
+      "instance": "node-exporter:9100",
+      "job": "node-via-otelcol-otlp",
+      "server_address": "node-exporter",
+      "server_port": "9100",
+      "url_scheme": "http"
+    },
+    {
+      "__name__": "target_info",
+      "instance": "payments-1",
+      "job": "payments",
+      "telemetry_sdk_language": "python",
+      "telemetry_sdk_name": "opentelemetry",
+      "telemetry_sdk_version": "1.45.1"
+    },
+    {
+      "__name__": "target_info",
+      "deployment_environment_name": "lab",
+      "instance": "checkout-1",
+      "job": "shop/checkout",
+      "service_version": "1.2.3",
+      "telemetry_sdk_language": "python",
+      "telemetry_sdk_name": "opentelemetry",
+      "telemetry_sdk_version": "1.45.1"
+    },
+    {
+      "__name__": "target_info",
+      "instance": "05bfe68a-c123-432a-a196-338622290c49",
+      "job": "unknown_service:python",
+      "telemetry_sdk_language": "python",
+      "telemetry_sdk_name": "opentelemetry",
+      "telemetry_sdk_version": "1.45.1"
+    },
+    {
+      "__name__": "target_info",
+      "instance": "f68fdffe-7b30-45e6-b125-178db46d93f4",
+      "job": "unknown_service:python",
+      "telemetry_sdk_language": "python",
+      "telemetry_sdk_name": "opentelemetry",
+      "telemetry_sdk_version": "1.45.1"
+    },
+    {
+      "__name__": "target_info",
+      "host_name": "5f0c06b92502",
+      "instance": "inventory-1",
+      "job": "shop/inventory",
+      "os_type": "linux",
+      "otelcol_pipeline": "enriched",
+      "telemetry_sdk_language": "python",
+      "telemetry_sdk_name": "opentelemetry",
+      "telemetry_sdk_version": "1.45.1"
+    },
+    {
+      "__name__": "target_info",
+      "instance": "node-exporter:9100",
+      "job": "node-via-otelcol-prw",
+      "server_address": "node-exporter",
+      "server_port": "9100",
+      "url_scheme": "http"
+    }
+  ],
+  "status": "success"
+}

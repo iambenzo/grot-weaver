@@ -1,0 +1,30 @@
+{
+  "metrics": {
+    "inspectedBytes": "60015"
+  },
+  "tagValues": [
+    {
+      "type": "string"
+    },
+    {
+      "type": "string",
+      "value": "zipkin-svc"
+    },
+    {
+      "type": "string",
+      "value": "unknown_service:python"
+    },
+    {
+      "type": "string",
+      "value": "payments"
+    },
+    {
+      "type": "string",
+      "value": "checkout"
+    },
+    {
+      "type": "string",
+      "value": "inventory"
+    }
+  ]
+}

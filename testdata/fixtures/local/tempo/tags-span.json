@@ -1,0 +1,25 @@
+{
+  "metrics": {
+    "inspectedBytes": "62744"
+  },
+  "scopes": [
+    {
+      "name": "span",
+      "tags": [
+        "db.statement",
+        "db.system",
+        "db.system.name",
+        "http.method",
+        "http.path",
+        "http.request.method",
+        "http.response.status_code",
+        "http.route",
+        "http.status_code",
+        "net.host.ip",
+        "net.peer.name",
+        "server.address",
+        "url.scheme"
+      ]
+    }
+  ]
+}

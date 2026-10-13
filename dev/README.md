@@ -64,3 +64,15 @@ The Weaver template that builds the plugin catalogue now lives in `catalogue/tem
 | `evidence/cloud-raw/` | Raw read-only query dumps from cloud. Ignored by git because they contain real host and account names |
 
 Findings: Backlog doc-3 (local experiments). The other evidence is in doc-2 (cloud), doc-4 (Weaver) and doc-5 (docs).
+
+## Test fixtures
+
+`testdata/fixtures/{local,cloud}/` holds raw datasource API responses, fetched through Grafana's datasource proxy, the same way the plugin frontend fetches them. Each target has a `manifest.json` that records the request, the headers and the 24h window.
+
+```sh
+python3 -I dev/scripts/capture_fixtures.py local   # needs the stack and emitters running
+python3 -I dev/scripts/capture_fixtures.py cloud   # read-only: GET requests through gcx --context cloud
+```
+
+The script redacts host, account, subscription and user names, and replaces Loki log lines with `<line>`. Check new captures before committing them.
+

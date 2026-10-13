@@ -1,0 +1,206 @@
+{
+  "data": {
+    "result": [
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "otelcol:8888",
+          "job": "otelcol"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "node-exporter:9100",
+          "job": "node-via-otelcol-otlp"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "payments-1",
+          "job": "payments"
+        },
+        "value": [
+          1791888229,
+          "64"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "payments-1",
+          "job": "payments"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "payments-1",
+          "job": "payments"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "checkout-1",
+          "job": "shop/checkout"
+        },
+        "value": [
+          1791888229,
+          "64"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "checkout-1",
+          "job": "shop/checkout"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "checkout-1",
+          "job": "shop/checkout"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "05bfe68a-c123-432a-a196-338622290c49",
+          "job": "unknown_service:python"
+        },
+        "value": [
+          1791888229,
+          "64"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "05bfe68a-c123-432a-a196-338622290c49",
+          "job": "unknown_service:python"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "05bfe68a-c123-432a-a196-338622290c49",
+          "job": "unknown_service:python"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "f68fdffe-7b30-45e6-b125-178db46d93f4",
+          "job": "unknown_service:python"
+        },
+        "value": [
+          1791888229,
+          "64"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "f68fdffe-7b30-45e6-b125-178db46d93f4",
+          "job": "unknown_service:python"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "f68fdffe-7b30-45e6-b125-178db46d93f4",
+          "job": "unknown_service:python"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "inventory-1",
+          "job": "shop/inventory"
+        },
+        "value": [
+          1791888229,
+          "64"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "inventory-1",
+          "job": "shop/inventory"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "inventory-1",
+          "job": "shop/inventory"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "node-exporter:9100",
+          "job": "node-via-otelcol-prw"
+        },
+        "value": [
+          1791888229,
+          "1"
+        ]
+      }
+    ],
+    "resultType": "vector"
+  },
+  "status": "success"
+}

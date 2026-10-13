@@ -1,0 +1,13 @@
+{
+  "data": [
+    "__name__",
+    "http_request_method",
+    "http_response_status_code",
+    "http_route",
+    "instance",
+    "job",
+    "le",
+    "url_scheme"
+  ],
+  "status": "success"
+}

@@ -1,0 +1,23 @@
+{
+  "metrics": {
+    "inspectedBytes": "61519"
+  },
+  "scopes": [
+    {
+      "name": "resource",
+      "tags": [
+        "deployment.environment.name",
+        "host.name",
+        "os.type",
+        "otelcol.pipeline",
+        "service.instance.id",
+        "service.name",
+        "service.namespace",
+        "service.version",
+        "telemetry.sdk.language",
+        "telemetry.sdk.name",
+        "telemetry.sdk.version"
+      ]
+    }
+  ]
+}
