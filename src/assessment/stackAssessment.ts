@@ -1,6 +1,7 @@
 import { DatasourceRef, ProxyGet, discoverDatasources } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { VolumeMethod, collectTempoInventory } from '../inventory/tempo';
+import { KeysMethod } from '../inventory/traceKeys';
 import { collectPrometheusInventory, LabelProgress, NamesNeedingLabels } from '../inventory/prometheus';
 import { collectLokiInventory } from '../inventory/loki';
 import { CollectionError, Inventory, LogDatasource, MetricDatasource, TraceDatasource } from '../inventory/types';
@@ -29,6 +30,7 @@ export interface DatasourceProgress {
   state: DatasourceState;
   errors: CollectionError[];
   volumeMethod?: VolumeMethod;
+  keysMethod?: KeysMethod;
 }
 
 export interface Collection {
@@ -39,6 +41,7 @@ export interface Collection {
   metrics?: MetricDatasource;
   logs?: LogDatasource;
   volumeMethod?: VolumeMethod;
+  keysMethod?: KeysMethod;
 }
 
 export interface StackAssessment {
@@ -150,6 +153,7 @@ async function collect(
       errors: collected.errors,
       traces: collected.datasource,
       volumeMethod: collected.volumeMethod,
+      keysMethod: collected.keysMethod,
     };
   }
   if (signal === 'metrics') {
@@ -206,7 +210,13 @@ function progressOf(datasources: DatasourcesBySignal, collections: Collection[])
     if (!collection) {
       return { ...target, state: 'pending', errors: [] };
     }
-    return { ...target, state: stateOf(collection), errors: collection.errors, volumeMethod: collection.volumeMethod };
+    return {
+      ...target,
+      state: stateOf(collection),
+      errors: collection.errors,
+      volumeMethod: collection.volumeMethod,
+      keysMethod: collection.keysMethod,
+    };
   });
 }
 

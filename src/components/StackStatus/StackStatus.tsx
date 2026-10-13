@@ -126,6 +126,12 @@ export function FeatureLimits({ progress, result }: { progress: DatasourceProgre
     ...progress
       .filter((entry) => entry.volumeMethod === 'sample')
       .map((entry) => `${entry.ref.name}: volume from sample, TraceQL metrics are unavailable`),
+    ...progress
+      .filter((entry) => entry.keysMethod === 'sample')
+      .map(
+        (entry) =>
+          `${entry.ref.name}: keys from sample, Tempo ignores the per-service tag filter so rare attributes can be missed`
+      ),
     ...(result.datasources ?? [])
       .filter((summary) => !summary.unit_checkable)
       .map((summary) => `${nameOf(progress, summary.uid)}: unit not checkable, metric names carry no unit suffix`),

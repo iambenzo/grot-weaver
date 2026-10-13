@@ -6,6 +6,7 @@ import { CollectionError, KeyObservation, SDK, SpanGroupSample, TraceDatasource,
 import { applicableRules, sampleSpanGroup } from './spanGroups';
 import { serviceFilterExpression } from './traceql';
 import { queryMetricsRange } from './traceqlMetrics';
+import { KeysMethod, isTagFilterIgnored, sampleServiceKeys } from './traceKeys';
 import { guardStep } from './guard';
 
 const SERVICE_NAME_TAG = 'resource.service.name';
@@ -33,6 +34,7 @@ export interface TempoCollection {
   datasource: TraceDatasource;
   errors: CollectionError[];
   volumeMethod?: VolumeMethod;
+  keysMethod?: KeysMethod;
 }
 
 interface SearchResponse {
@@ -62,9 +64,13 @@ export async function collectTempoInventory(
   sampleLimit?: number
 ): Promise<TempoCollection> {
   const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit };
-  const serviceNames = await guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG));
+  const [serviceNames, filterIgnored] = await Promise.all([
+    guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG)),
+    isTagFilterIgnored(context).catch(() => false),
+  ]);
+  const keysMethod: KeysMethod = filterIgnored ? 'sample' : 'tags';
   const [services, metricVolumes] = await Promise.all([
-    Promise.all((serviceNames ?? []).map((name) => collectService(context, name))),
+    Promise.all((serviceNames ?? []).map((name) => collectService(context, name, keysMethod))),
     spanVolumes(context),
   ]);
   const volumes = metricVolumes ?? (await sampledVolumes(context, serviceNames ?? []));
@@ -74,6 +80,7 @@ export async function collectTempoInventory(
   const collection: TempoCollection = { datasource: { uid, services }, errors: context.errors };
   if (services.length > 0) {
     collection.volumeMethod = metricVolumes ? 'metrics' : 'sample';
+    collection.keysMethod = keysMethod;
   }
   return collection;
 }
@@ -114,15 +121,19 @@ async function sampledVolumes(context: CollectorContext, serviceNames: string[])
   return new Map(counts);
 }
 
-async function collectService(context: CollectorContext, serviceName: string): Promise<TraceService> {
+async function collectService(
+  context: CollectorContext,
+  serviceName: string,
+  keysMethod: KeysMethod
+): Promise<TraceService> {
   const filter = serviceFilter(serviceName);
   const step = (what: string) => `${what} for service "${serviceName}"`;
-  const [resourceKeys, spanKeys, namespaces, sdk] = await Promise.all([
-    guarded(context, step('resource keys'), () => scopedTags(context, 'resource', filter)),
-    guarded(context, step('span keys'), () => scopedTags(context, 'span', filter)),
+  const [keys, namespaces, sdk] = await Promise.all([
+    collectKeys(context, serviceName, filter, keysMethod, step),
     guarded(context, step('namespace'), () => tagValues(context, SERVICE_NAMESPACE_TAG, filter)),
     collectSDK(context, filter, step),
   ]);
+  const { resourceKeys, spanKeys } = keys;
   const spanGroups = await collectSpanGroups(context, serviceName, spanKeys ?? [], step);
   return {
     service_name: serviceName,
@@ -133,6 +144,24 @@ async function collectService(context: CollectorContext, serviceName: string): P
     span_groups: spanGroups,
     sdk,
   };
+}
+
+async function collectKeys(
+  context: CollectorContext,
+  serviceName: string,
+  filter: string,
+  keysMethod: KeysMethod,
+  step: (what: string) => string
+): Promise<{ resourceKeys?: string[]; spanKeys?: string[] }> {
+  if (keysMethod === 'sample') {
+    const sampled = await guarded(context, step('sampled keys'), () => sampleServiceKeys(context, serviceName, filter));
+    return { resourceKeys: sampled?.resource, spanKeys: sampled?.span };
+  }
+  const [resourceKeys, spanKeys] = await Promise.all([
+    guarded(context, step('resource keys'), () => scopedTags(context, 'resource', filter)),
+    guarded(context, step('span keys'), () => scopedTags(context, 'span', filter)),
+  ]);
+  return { resourceKeys, spanKeys };
 }
 
 async function collectSpanGroups(

@@ -76,7 +76,7 @@ describe('StackStatus', () => {
 
 describe('FeatureLimits', () => {
   it('names sampled span volume and uncheckable units', () => {
-    const sampled = { ...tempo, state: 'ok' as const, volumeMethod: 'sample' as const };
+    const sampled = { ...tempo, state: 'ok' as const, volumeMethod: 'sample' as const, keysMethod: 'sample' as const };
     const summaries = result({
       datasources: [{ uid: 'prom', strategy: 'UnderscoreEscapingWithoutSuffixes', unit_checkable: false }],
     } as unknown as Partial<AssessmentResult>);
@@ -85,6 +85,7 @@ describe('FeatureLimits', () => {
 
     const limits = screen.getByTestId(testIds.status.limits);
     expect(limits).toHaveTextContent('Tempo: volume from sample');
+    expect(limits).toHaveTextContent('Tempo: keys from sample');
     expect(limits).toHaveTextContent('Prometheus: unit not checkable');
   });
 

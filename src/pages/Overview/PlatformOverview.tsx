@@ -138,14 +138,16 @@ function OverviewHeader({
           const strategy = summary
             ? `, ${summary.strategy}${summary.mixed ? ' (mixed)' : ''}${summary.unit_checkable ? '' : ', unit not checkable'}`
             : '';
-          const sampled = assessment.progress.some(
-            (entry) => entry.ref.uid === ds.uid && entry.volumeMethod === 'sample'
-          );
+          const entry = assessment.progress.find((candidate) => candidate.ref.uid === ds.uid);
+          const limits = [
+            entry?.volumeMethod === 'sample' ? 'volume from sample' : '',
+            entry?.keysMethod === 'sample' ? 'keys from sample' : '',
+          ].filter(Boolean);
           return (
             <Badge
               key={ds.uid}
               color="darkgrey"
-              text={`${ds.name} (${SIGNAL_LABELS[ds.signal].toLowerCase()}${strategy}${sampled ? ', volume from sample' : ''})`}
+              text={`${ds.name} (${SIGNAL_LABELS[ds.signal].toLowerCase()}${strategy}${limits.map((limit) => `, ${limit}`).join('')})`}
             />
           );
         })}

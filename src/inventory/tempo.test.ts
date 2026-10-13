@@ -25,6 +25,9 @@ function fakeTempo(failPaths: string[] = []): { get: ProxyGet; calls: Call[] } {
       return readFixture('service-names.json');
     }
     if (requestPath === '/api/v2/search/tags') {
+      if (params.q?.includes('semconv-compliance-filter-probe')) {
+        return { scopes: [] };
+      }
       return readFixture(params.scope === 'resource' ? 'tags-resource.json' : 'tags-span.json');
     }
     if (requestPath === '/api/metrics/query_range') {
@@ -140,6 +143,41 @@ describe('collectTempoInventory', () => {
     const { get } = fakeTempo();
 
     expect((await collectTempoInventory('tempo', get, createLimiter(2), window)).volumeMethod).toBe('metrics');
+  });
+
+  it('samples keys from traces when the tag filter is ignored', async () => {
+    const { get } = fakeTempo();
+    const otlp = (service: string, spanKey: string) => ({
+      resource: { attributes: [{ key: 'service.name', value: { stringValue: service } }, { key: 'k8s.pod.name' }] },
+      scopeSpans: [{ spans: [{ attributes: [{ key: spanKey }] }] }],
+    });
+    const ignoring = (async (uid: string, requestPath: string, params: Record<string, string>) => {
+      if (requestPath === '/api/v2/search/tags') {
+        return readFixture(params.scope === 'resource' ? 'tags-resource.json' : 'tags-span.json');
+      }
+      if (requestPath === '/api/search' && !params.spss) {
+        return { traces: [{ traceID: 'abc' }] };
+      }
+      if (requestPath === '/api/v2/traces/abc') {
+        return {
+          trace: { resourceSpans: [otlp('checkout', 'http.request.method'), otlp('payments', 'net.peer.name')] },
+        };
+      }
+      return get(uid, requestPath, params);
+    }) as ProxyGet;
+
+    const collection = await collectTempoInventory('tempo', ignoring, createLimiter(2), window);
+
+    expect(collection.keysMethod).toBe('sample');
+    const checkout = collection.datasource.services.find((service) => service.service_name === 'checkout');
+    expect(checkout?.span_keys.map((key) => key.key)).toEqual(['http.request.method']);
+    expect(checkout?.resource_keys.map((key) => key.key)).toEqual(['k8s.pod.name', 'service.name']);
+  });
+
+  it('uses tag search when the filter is honoured', async () => {
+    const { get } = fakeTempo();
+
+    expect((await collectTempoInventory('tempo', get, createLimiter(2), window)).keysMethod).toBe('tags');
   });
 
   it('returns an empty datasource when service discovery fails', async () => {

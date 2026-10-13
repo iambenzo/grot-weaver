@@ -152,4 +152,22 @@ describe('progress, partial results and retry', () => {
     expect(retried.collections.map((collection) => collection.ref.uid)).toEqual(['prom', 'tempo', 'loki']);
     expect(second.partials).toEqual([]);
   });
+
+  it('reports how Tempo keys and volumes were collected', async () => {
+    const { deps } = fakeStack([]);
+    const get = deps.get;
+    deps.get = (async (uid: string, requestPath: string, params: Record<string, string>) => {
+      if (uid === 'tempo' && requestPath.endsWith('resource.service.name/values')) {
+        return { tagValues: [{ type: 'string', value: 'checkout' }] };
+      }
+      return get(uid, requestPath, params);
+    }) as ProxyGet;
+
+    const assessment = await assessStack(datasources, window, {}, deps);
+
+    expect(assessment.progress.find((entry) => entry.ref.uid === 'tempo')).toMatchObject({
+      keysMethod: 'tags',
+      volumeMethod: 'metrics',
+    });
+  });
 });
