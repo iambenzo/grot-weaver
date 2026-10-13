@@ -21,6 +21,11 @@ export const testIds = {
     limits: 'data-testid status-limits',
     empty: 'data-testid status-empty',
   },
+  fix: {
+    tabs: 'data-testid fix-tabs',
+    summary: 'data-testid fix-summary',
+    ownerSummary: 'data-testid fix-owner-summary',
+  },
   upstream: {
     banner: 'data-testid upstream-banner',
   },

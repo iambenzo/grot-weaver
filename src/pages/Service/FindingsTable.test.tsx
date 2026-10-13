@@ -38,10 +38,16 @@ const library: LibraryInfo = {
   description: 'from TraceQL metrics',
 };
 const none = () => undefined;
+const evidence = { url: '/explore?x', query: '{ span.http.method != nil }', datasource: 'Tempo' };
+const fetchFix = jest.fn(async () => ({
+  pipeline_rule: { available: false, reason: 'No rule.' },
+  guidance: {},
+}));
+const shared = { semconvVersion: 'v1.44.0', fetchFix };
 
 describe('FindingsTable', () => {
   it('shows found and expected names, badges, library and first/last seen', () => {
-    render(<FindingsTable findings={[renamed]} libraryFor={() => library} exploreFor={() => '/explore?x'} />);
+    render(<FindingsTable findings={[renamed]} libraryFor={() => library} evidenceFor={() => evidence} {...shared} />);
 
     expect(screen.getByText('http.method')).toBeInTheDocument();
     expect(screen.getByText('http.request.method')).toBeInTheDocument();
@@ -54,38 +60,42 @@ describe('FindingsTable', () => {
     expect(screen.getByText('2026-10-13 09:00:00')).toBeInTheDocument();
   });
 
-  it('offers Open in Explore in the expanded row', () => {
-    render(<FindingsTable findings={[renamed]} libraryFor={() => library} exploreFor={() => '/explore?x'} />);
+  it('offers Open in Explore in the expanded row', async () => {
+    render(<FindingsTable findings={[renamed]} libraryFor={() => library} evidenceFor={() => evidence} {...shared} />);
 
     fireEvent.click(screen.getByRole('button', { name: /toggle row expanded/i }));
 
     expect(screen.getByRole('link', { name: /open in explore/i })).toHaveAttribute('href', '/explore?x');
+    expect(await screen.findByText(/could not be identified|Identified/)).toBeInTheDocument();
   });
 
   it('marks a likely library and says the library is unknown otherwise', () => {
     const likely = { ...library, likely: true, confidence: 'medium' as const, description: 'likely: from traces' };
-    const { unmount } = render(<FindingsTable findings={[renamed]} libraryFor={() => likely} exploreFor={none} />);
+    const { unmount } = render(
+      <FindingsTable findings={[renamed]} libraryFor={() => likely} evidenceFor={none} {...shared} />
+    );
     expect(screen.getByText('Likely')).toBeInTheDocument();
     unmount();
 
-    render(<FindingsTable findings={[renamed]} libraryFor={none} exploreFor={none} />);
+    render(<FindingsTable findings={[renamed]} libraryFor={none} evidenceFor={none} {...shared} />);
     expect(screen.getByText('library unknown')).toBeInTheDocument();
   });
 
   it('shows the stored form next to the registry name', () => {
-    render(<FindingsTable findings={[noReplacement]} libraryFor={none} exploreFor={none} />);
+    render(<FindingsTable findings={[noReplacement]} libraryFor={none} evidenceFor={none} {...shared} />);
 
     const row = screen.getByText('net_peer_name').closest('tr') as HTMLElement;
     expect(within(row).getByText('net.peer.name')).toBeInTheDocument();
     expect(within(row).getByText('Experimental')).toBeInTheDocument();
   });
 
-  it('shows the registry note verbatim when there is no single replacement', () => {
-    render(<FindingsTable findings={[noReplacement]} libraryFor={none} exploreFor={none} />);
+  it('shows the registry note verbatim when there is no single replacement', async () => {
+    render(<FindingsTable findings={[noReplacement]} libraryFor={none} evidenceFor={none} {...shared} />);
 
     fireEvent.click(screen.getByRole('button', { name: /toggle row expanded/i }));
 
     expect(screen.getByText(noReplacement.note as string)).toBeInTheDocument();
+    expect(await screen.findByText(/no one definition to link/)).toBeInTheDocument();
   });
 
   it('describes a missing required attribute by group', () => {
@@ -100,7 +110,7 @@ describe('FindingsTable', () => {
       confidence: 'medium',
     };
 
-    render(<FindingsTable findings={[missing]} libraryFor={none} exploreFor={none} />);
+    render(<FindingsTable findings={[missing]} libraryFor={none} evidenceFor={none} {...shared} />);
 
     expect(screen.getByText('url.scheme').closest('span')?.textContent).toBe(
       'url.scheme missing from span.http.server spans'
@@ -125,7 +135,7 @@ describe('FindingsTable', () => {
       expected: 'client.address',
     };
 
-    render(<FindingsTable findings={[improvement, metricMissing]} libraryFor={none} exploreFor={none} />);
+    render(<FindingsTable findings={[improvement, metricMissing]} libraryFor={none} evidenceFor={none} {...shared} />);
 
     const rows = screen
       .getAllByRole('row')

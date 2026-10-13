@@ -21,6 +21,7 @@ import {
   TabsBar,
   Text,
   useStyles2,
+  ClipboardButton,
 } from '@grafana/ui';
 import { proxyGet } from '../../datasources/proxy';
 import { createLimiter } from '../../datasources/limiter';
@@ -36,6 +37,8 @@ import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
 import { FindingsTable } from './FindingsTable';
 import { Keyed, useStackAssessment } from '../../assessment/useStackAssessment';
+import { ownerSummary } from '../../fix/summary';
+import { identifiedLibrary } from '../../fix/fixOptions';
 import {
   EmptyTelemetry,
   FeatureLimits,
@@ -183,9 +186,13 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
   const actionable = forSignal.filter((finding) => finding.type !== 'conformant');
   const typeOf = (uid: string) =>
     SIGNALS.flatMap((candidate) => assessment.datasources[candidate]).find((ds) => ds.uid === uid)?.type;
-  const exploreFor = (finding: Finding) => {
+  const nameOf = (uid: string) =>
+    SIGNALS.flatMap((candidate) => assessment.datasources[candidate]).find((ds) => ds.uid === uid)?.name ?? uid;
+  const evidenceFor = (finding: Finding) => {
     const target = evidenceTarget(finding, assessment.result, typeOf);
-    return target ? exploreUrl(target, range.from, range.to) : undefined;
+    return target
+      ? { url: exploreUrl(target, range.from, range.to), query: target.query, datasource: nameOf(target.uid) }
+      : undefined;
   };
   const counts = (candidate: Signal) =>
     owned.filter((finding) => finding.signal === candidate && finding.type !== 'conformant').length;
@@ -214,11 +221,37 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
           title={`No ${SIGNAL_LABELS[signal].toLowerCase()} findings for this service in this window`}
         />
       ) : (
-        <FindingsTable
-          findings={actionable}
-          libraryFor={(finding) => libraryInfo(finding, evidence, owned)}
-          exploreFor={exploreFor}
-        />
+        <Stack direction="column" gap={1}>
+          <div>
+            <ClipboardButton
+              size="sm"
+              variant="secondary"
+              icon="copy"
+              getText={() =>
+                ownerSummary(
+                  identity.owner,
+                  actionable
+                    .filter((finding) => finding.level === 'violation')
+                    .map((finding) => ({
+                      finding,
+                      library: identifiedLibrary(finding, libraryInfo(finding, evidence, owned)),
+                      evidence: evidenceFor(finding),
+                    })),
+                  assessment.result.semconv_version
+                )
+              }
+              data-testid={testIds.fix.ownerSummary}
+            >
+              Copy summary of violations for the owner
+            </ClipboardButton>
+          </div>
+          <FindingsTable
+            findings={actionable}
+            libraryFor={(finding) => libraryInfo(finding, evidence, owned)}
+            evidenceFor={evidenceFor}
+            semconvVersion={assessment.result.semconv_version}
+          />
+        </Stack>
       )}
       <HopCandidates hops={(assessment.result.hops ?? []).find((hops) => sameOwner(hops.owner, identity.owner))} />
       <CollapsableSection

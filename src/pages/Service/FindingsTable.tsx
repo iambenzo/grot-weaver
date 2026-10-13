@@ -6,18 +6,23 @@ import { Bucket, Finding, FindingType, RegistrySource } from '../../api/types';
 import { findingKey } from '../../assessment/traceAssessment';
 import { LibraryInfo } from '../../assessment/libraries';
 import { testIds } from '../../components/testIds';
+import { Evidence } from '../../fix/summary';
+import { FetchFixOptions } from '../../fix/fixOptions';
+import { FixTabs } from './FixTabs';
 
 interface Row {
   id: string;
   finding: Finding;
   library?: LibraryInfo;
-  explore?: string;
+  evidence?: Evidence;
 }
 
 interface FindingsTableProps {
   findings: Finding[];
   libraryFor: (finding: Finding) => LibraryInfo | undefined;
-  exploreFor: (finding: Finding) => string | undefined;
+  evidenceFor: (finding: Finding) => Evidence | undefined;
+  semconvVersion: string;
+  fetchFix?: FetchFixOptions;
 }
 
 const TYPE_LABELS: Record<FindingType, { text: string; color: BadgeColor }> = {
@@ -46,13 +51,13 @@ const SOURCE_LABELS: Record<RegistrySource, string> = {
   rename_history: 'rename history',
 };
 
-export function FindingsTable({ findings, libraryFor, exploreFor }: FindingsTableProps) {
+export function FindingsTable({ findings, libraryFor, evidenceFor, semconvVersion, fetchFix }: FindingsTableProps) {
   const styles = useStyles2(getStyles);
   const rows: Row[] = [...findings].sort(byPriority).map((finding) => ({
     id: `${findingKey(finding)}|${finding.type}|${finding.expected ?? ''}`,
     finding,
     library: libraryFor(finding),
-    explore: exploreFor(finding),
+    evidence: evidenceFor(finding),
   }));
 
   const columns: Array<Column<Row>> = [
@@ -69,7 +74,13 @@ export function FindingsTable({ findings, libraryFor, exploreFor }: FindingsTabl
         data={rows}
         getRowId={(row) => row.id}
         renderExpandedRow={(row) => (
-          <FindingDetails finding={row.finding} library={row.library} explore={row.explore} />
+          <FindingDetails
+            finding={row.finding}
+            library={row.library}
+            evidence={row.evidence}
+            semconvVersion={semconvVersion}
+            fetchFix={fetchFix}
+          />
         )}
       />
     </div>
@@ -161,9 +172,17 @@ function SeenCell({ library }: { library?: LibraryInfo }) {
   );
 }
 
-function FindingDetails({ finding, library, explore }: { finding: Finding; library?: LibraryInfo; explore?: string }) {
+interface FindingDetailsProps {
+  finding: Finding;
+  library?: LibraryInfo;
+  evidence?: Evidence;
+  semconvVersion: string;
+  fetchFix?: FetchFixOptions;
+}
+
+function FindingDetails({ finding, library, evidence, semconvVersion, fetchFix }: FindingDetailsProps) {
   return (
-    <Stack direction="column" gap={1}>
+    <Stack direction="column" gap={2}>
       {finding.note && <Text>{finding.note}</Text>}
       {!finding.expected && finding.type === 'deprecated' && (
         <Text color="secondary">
@@ -183,10 +202,10 @@ function FindingDetails({ finding, library, explore }: { finding: Finding; libra
             .join(', ')}
         </Text>
       )}
-      {explore && (
+      {evidence && (
         <div>
           <LinkButton
-            href={explore}
+            href={evidence.url}
             icon="compass"
             variant="secondary"
             size="sm"
@@ -197,6 +216,13 @@ function FindingDetails({ finding, library, explore }: { finding: Finding; libra
           </LinkButton>
         </div>
       )}
+      <FixTabs
+        finding={finding}
+        library={library}
+        evidence={evidence}
+        semconvVersion={semconvVersion}
+        fetchFix={fetchFix}
+      />
     </Stack>
   );
 }
