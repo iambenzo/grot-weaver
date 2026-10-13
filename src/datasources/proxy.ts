@@ -7,7 +7,12 @@ export interface DatasourceRef {
   name: string;
 }
 
-export type ProxyGet = <T>(uid: string, path: string, params: Record<string, string>, headers?: Record<string, string>) => Promise<T>;
+export type ProxyGet = <T>(
+  uid: string,
+  path: string,
+  params: Record<string, string>,
+  headers?: Record<string, string>
+) => Promise<T>;
 
 export const proxyGet: ProxyGet = async <T>(
   uid: string,

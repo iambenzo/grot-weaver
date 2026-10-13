@@ -16,7 +16,9 @@ describe('discoverDatasources', () => {
       { uid: 'grafana', type: 'datasource', name: '-- Grafana --', jsonData: {} },
     ]);
 
-    expect(discoverDatasources(['tempo', 'custom-tempo'])).toEqual([{ uid: 'traces-a', type: 'tempo', name: 'Traces A' }]);
+    expect(discoverDatasources(['tempo', 'custom-tempo'])).toEqual([
+      { uid: 'traces-a', type: 'tempo', name: 'Traces A' },
+    ]);
     expect(getList).toHaveBeenCalledWith({ type: ['tempo', 'custom-tempo'] });
   });
 });
@@ -25,7 +27,9 @@ describe('proxyGet', () => {
   it('calls the datasource proxy as the signed-in user without error toasts', async () => {
     fetch.mockReturnValue(of({ data: { ok: true } }));
 
-    await expect(proxyGet('ds/1', '/api/v2/search/tags', { scope: 'span' }, { 'X-Test': '1' })).resolves.toEqual({ ok: true });
+    await expect(proxyGet('ds/1', '/api/v2/search/tags', { scope: 'span' }, { 'X-Test': '1' })).resolves.toEqual({
+      ok: true,
+    });
     expect(fetch).toHaveBeenCalledWith({
       url: '/api/datasources/proxy/uid/ds%2F1/api/v2/search/tags',
       params: { scope: 'span' },

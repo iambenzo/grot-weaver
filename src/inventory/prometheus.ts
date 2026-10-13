@@ -73,7 +73,11 @@ export async function collectPrometheusInventory(
   ]);
   const owners = await collectOwners(context, names ?? []);
   const needing = new Set((await guarded(context, 'metric matches', () => namesNeedingLabels(names ?? []))) ?? []);
-  const labelKeys = await collectLabelKeys(context, owners.filter((owner) => needing.has(owner.metric)), onLabelProgress);
+  const labelKeys = await collectLabelKeys(
+    context,
+    owners.filter((owner) => needing.has(owner.metric)),
+    onLabelProgress
+  );
   return {
     datasource: { uid, names: names ?? [], target_info: targetInfo ?? [], owners, label_keys: labelKeys },
     errors: context.errors,
@@ -86,17 +90,26 @@ export function ownerSelector(owner: MetricOwner): Record<string, string> | unde
 }
 
 export function labelsMatcher(metric: string, selector: Record<string, string>): string {
-  const matchers = [`__name__="${promqlString(metric)}"`, ...Object.entries(selector).map(([key, value]) => `${key}="${promqlString(value)}"`)];
+  const matchers = [
+    `__name__="${promqlString(metric)}"`,
+    ...Object.entries(selector).map(([key, value]) => `${key}="${promqlString(value)}"`),
+  ];
   return `{${matchers.join(', ')}}`;
 }
 
-async function collectLabelKeys(context: Context, owners: MetricOwner[], onProgress: (progress: LabelProgress) => void): Promise<OwnerLabelKeys[]> {
+async function collectLabelKeys(
+  context: Context,
+  owners: MetricOwner[],
+  onProgress: (progress: LabelProgress) => void
+): Promise<OwnerLabelKeys[]> {
   const pairs = uniquePairs(owners);
   let done = 0;
   onProgress({ done, total: pairs.length });
   const sets = await Promise.all(
     pairs.map(async ({ metric, selector }) => {
-      const keys = await guarded(context, `label keys for ${metric}`, () => labelNames(context, labelsMatcher(metric, selector)));
+      const keys = await guarded(context, `label keys for ${metric}`, () =>
+        labelNames(context, labelsMatcher(metric, selector))
+      );
       done++;
       onProgress({ done, total: pairs.length });
       return keys ? { metric, selector, keys } : undefined;
@@ -118,34 +131,46 @@ function uniquePairs(owners: MetricOwner[]): Array<{ metric: string; selector: R
 
 async function labelNames(context: Context, matcher: string): Promise<string[]> {
   const params = { ...prometheusWindowParams(context.window), 'match[]': matcher };
-  const response = await context.limit(() => context.get<PrometheusResponse<string[]>>(context.uid, '/api/v1/labels', params));
+  const response = await context.limit(() =>
+    context.get<PrometheusResponse<string[]>>(context.uid, '/api/v1/labels', params)
+  );
   return [...response.data].sort();
 }
 
 async function metricNames(context: Context): Promise<string[]> {
   const response = await context.limit(() =>
-    context.get<PrometheusResponse<string[]>>(context.uid, '/api/v1/label/__name__/values', prometheusWindowParams(context.window))
+    context.get<PrometheusResponse<string[]>>(
+      context.uid,
+      '/api/v1/label/__name__/values',
+      prometheusWindowParams(context.window)
+    )
   );
   return [...response.data].sort();
 }
 
 async function targetInfoSeries(context: Context): Promise<Array<Record<string, string>>> {
   const params = { ...prometheusWindowParams(context.window), 'match[]': TARGET_INFO };
-  const response = await context.limit(() => context.get<PrometheusResponse<Array<Record<string, string>>>>(context.uid, '/api/v1/series', params));
+  const response = await context.limit(() =>
+    context.get<PrometheusResponse<Array<Record<string, string>>>>(context.uid, '/api/v1/series', params)
+  );
   return response.data.map(({ __name__, ...labels }) => labels);
 }
 
 async function collectOwners(context: Context, names: string[]): Promise<MetricOwner[]> {
   const batches = chunk(names, NAMES_PER_BATCH);
   const owned = await Promise.all(
-    batches.map((batch, index) => guarded(context, `owners batch ${index + 1}/${batches.length}`, () => ownersForBatch(context, batch)))
+    batches.map((batch, index) =>
+      guarded(context, `owners batch ${index + 1}/${batches.length}`, () => ownersForBatch(context, batch))
+    )
   );
   return owned.flatMap((owners) => owners ?? []);
 }
 
 async function ownersForBatch(context: Context, batch: string[]): Promise<MetricOwner[]> {
   const owners = (await instantQuery(context, ownersQuery(batch, context.window))).map(toOwner);
-  const anonymous = owners.filter((owner) => !owner.labels.job && !owner.labels.service_name).map((owner) => owner.metric);
+  const anonymous = owners
+    .filter((owner) => !owner.labels.job && !owner.labels.service_name)
+    .map((owner) => owner.metric);
   if (anonymous.length === 0) {
     return owners;
   }
@@ -179,7 +204,11 @@ async function guarded<T>(context: Context, step: string, task: () => Promise<T>
     return await task();
   } catch (error) {
     const candidate = (error ?? {}) as { data?: { error?: string; message?: string }; message?: string };
-    context.errors.push({ datasource: context.uid, step, message: candidate.data?.error ?? candidate.data?.message ?? candidate.message ?? String(error) });
+    context.errors.push({
+      datasource: context.uid,
+      step,
+      message: candidate.data?.error ?? candidate.data?.message ?? candidate.message ?? String(error),
+    });
     return undefined;
   }
 }

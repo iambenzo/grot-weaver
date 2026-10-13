@@ -5,7 +5,7 @@ import { attributeSelector, serviceFilterExpression } from './traceql';
 
 const INSTRUMENTATION_NAME = 'instrumentation:name';
 const INSTRUMENTATION_VERSION = 'instrumentation:version';
-const SAMPLE_LIMIT = '20';
+const DEFAULT_SAMPLE_LIMIT = 20;
 const SPANS_PER_SPAN_SET = '3';
 const STEPS_PER_WINDOW = 20;
 const MIN_STEP_SECONDS = 60;
@@ -50,8 +50,8 @@ export interface LookupContext {
   get: ProxyGet;
   limit: Limiter;
   window: QueryWindow;
+  sampleLimit?: number;
 }
-
 
 export function flaggedKeyFilter(flagged: FlaggedKey): string {
   return `{ ${serviceFilterExpression(flagged.serviceName)} && ${attributeSelector(flagged.scope, flagged.key)} != nil }`;
@@ -59,14 +59,24 @@ export function flaggedKeyFilter(flagged: FlaggedKey): string {
 
 export async function probeTraceQLMetrics(context: LookupContext): Promise<boolean> {
   try {
-    await context.limit(() => context.get<MetricsResponse>(context.uid, '/api/metrics/query_range', metricsParams(context.window, '{ } | count_over_time()')));
+    await context.limit(() =>
+      context.get<MetricsResponse>(
+        context.uid,
+        '/api/metrics/query_range',
+        metricsParams(context.window, '{ } | count_over_time()')
+      )
+    );
     return true;
   } catch {
     return false;
   }
 }
 
-export async function lookupLibraries(context: LookupContext, flagged: FlaggedKey, metricsAvailable: boolean): Promise<LibraryEvidence> {
+export async function lookupLibraries(
+  context: LookupContext,
+  flagged: FlaggedKey,
+  metricsAvailable: boolean
+): Promise<LibraryEvidence> {
   if (metricsAvailable) {
     try {
       const evidence = await lookupWithMetrics(context, flagged);
@@ -99,11 +109,18 @@ async function lookupWithMetrics(context: LookupContext, flagged: FlaggedKey): P
 
 async function lookupWithSample(context: LookupContext, flagged: FlaggedKey): Promise<LibraryEvidence> {
   const query = `${flaggedKeyFilter(flagged)} | select(${INSTRUMENTATION_NAME}, ${INSTRUMENTATION_VERSION})`;
-  const params = { ...tempoWindowParams(context.window), q: query, limit: SAMPLE_LIMIT, spss: SPANS_PER_SPAN_SET };
+  const params = {
+    ...tempoWindowParams(context.window),
+    q: query,
+    limit: String(context.sampleLimit ?? DEFAULT_SAMPLE_LIMIT),
+    spss: SPANS_PER_SPAN_SET,
+  };
   const response = await context.limit(() => context.get<SearchResponse>(context.uid, '/api/search', params));
   const evidence: LibraryEvidence = { libraries: [], confidence: 'medium', method: 'sample' };
   const seen = new Map<string, Library>();
-  for (const span of (response.traces ?? []).flatMap((trace) => (trace.spanSets ?? []).flatMap((set) => set.spans ?? []))) {
+  for (const span of (response.traces ?? []).flatMap((trace) =>
+    (trace.spanSets ?? []).flatMap((set) => set.spans ?? [])
+  )) {
     const library = libraryFrom(span.attributes ?? []);
     const id = `${library.name}@${library.version}`;
     const existing = seen.get(id) ?? { ...library, spans: 0 };

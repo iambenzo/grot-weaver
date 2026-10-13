@@ -31,7 +31,11 @@ describe('lookupLibraries', () => {
 
     const evidence = await lookupLibraries(context, flagged, true);
 
-    expect(evidence).toMatchObject({ method: 'metrics', confidence: 'high', libraries: [{ name: 'semconv.emitter.http', version: '0.1.0' }] });
+    expect(evidence).toMatchObject({
+      method: 'metrics',
+      confidence: 'high',
+      libraries: [{ name: 'semconv.emitter.http', version: '0.1.0' }],
+    });
     expect(evidence.libraries[0].spans).toBeGreaterThan(0);
     expect(evidence.firstSeenMs).toBeLessThanOrEqual(evidence.lastSeenMs ?? 0);
     expect(calls[0].params.q).toBe(
@@ -45,9 +49,16 @@ describe('lookupLibraries', () => {
 
     const evidence = await lookupLibraries(context, flagged, false);
 
-    expect(evidence).toMatchObject({ method: 'sample', confidence: 'medium', libraries: [{ name: 'semconv.emitter.http', version: '0.1.0', spans: 5 }] });
+    expect(evidence).toMatchObject({
+      method: 'sample',
+      confidence: 'medium',
+      libraries: [{ name: 'semconv.emitter.http', version: '0.1.0', spans: 5 }],
+    });
     expect(evidence.firstSeenMs).toBeDefined();
-    expect(calls[0]).toMatchObject({ path: '/api/search', params: { limit: '20', spss: '3', start: '0', end: '86400' } });
+    expect(calls[0]).toMatchObject({
+      path: '/api/search',
+      params: { limit: '20', spss: '3', start: '0', end: '86400' },
+    });
   });
 
   it('falls back to a sample when TraceQL metrics return no series', async () => {
@@ -56,7 +67,10 @@ describe('lookupLibraries', () => {
     context.get = (async (uid: string, requestPath: string, params: Record<string, string>) =>
       requestPath === '/api/metrics/query_range' ? { series: [] } : get(uid, requestPath, params)) as typeof get;
 
-    expect(await lookupLibraries(context, flagged, true)).toMatchObject({ method: 'sample', libraries: [{ spans: 5 }] });
+    expect(await lookupLibraries(context, flagged, true)).toMatchObject({
+      method: 'sample',
+      libraries: [{ spans: 5 }],
+    });
   });
 
   it('falls back to a sample when a metrics query fails', async () => {
@@ -86,6 +100,8 @@ describe('selectors', () => {
   });
 
   it('combines the service and key filters', () => {
-    expect(flaggedKeyFilter({ serviceName: '', key: 'net.peer.name', scope: 'span' })).toBe('{ resource.service.name = "" && span.net.peer.name != nil }');
+    expect(flaggedKeyFilter({ serviceName: '', key: 'net.peer.name', scope: 'span' })).toBe(
+      '{ resource.service.name = "" && span.net.peer.name != nil }'
+    );
   });
 });

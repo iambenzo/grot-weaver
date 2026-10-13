@@ -1,4 +1,4 @@
-import { DatasourceRef, ProxyGet } from '../datasources/proxy';
+import { DatasourceRef, ProxyGet, discoverDatasources } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { collectTempoInventory } from '../inventory/tempo';
 import { collectPrometheusInventory, LabelProgress, NamesNeedingLabels } from '../inventory/prometheus';
@@ -8,7 +8,15 @@ import { QueryWindow } from '../window/window';
 import { ScoreInventory } from '../api/score';
 import { FetchSpanGroupRules } from '../api/catalogue';
 import { AssessmentResult, Owner, Signal } from '../api/types';
-import { PluginSettings, withStrategyOverride } from '../settings/settings';
+import {
+  DEFAULT_LOG_SAMPLE_LIMIT,
+  DEFAULT_TRACE_SAMPLE_LIMIT,
+  PluginSettings,
+  datasourceTypesFor,
+  isExcluded,
+  sampleLimit,
+  withStrategyOverride,
+} from '../settings/settings';
 
 export type DatasourcesBySignal = Record<Signal, DatasourceRef[]>;
 
@@ -35,13 +43,34 @@ export async function assessStack(
 ): Promise<StackAssessment> {
   const rules = await deps.spanGroupRules().catch(() => []);
   const [traces, metrics, logs] = await Promise.all([
-    Promise.all(datasources.traces.map((ds) => collectTempoInventory(ds.uid, deps.get, deps.limit, window, rules))),
+    Promise.all(
+      datasources.traces.map((ds) =>
+        collectTempoInventory(
+          ds.uid,
+          deps.get,
+          deps.limit,
+          window,
+          rules,
+          sampleLimit(settings.traceSampleLimit, DEFAULT_TRACE_SAMPLE_LIMIT)
+        )
+      )
+    ),
     Promise.all(
       datasources.metrics.map((ds) =>
         collectPrometheusInventory(ds.uid, deps.get, deps.limit, window, deps.namesNeedingLabels, deps.onLabelProgress)
       )
     ),
-    Promise.all(datasources.logs.map((ds) => collectLokiInventory(ds.uid, deps.get, deps.limit, window))),
+    Promise.all(
+      datasources.logs.map((ds) =>
+        collectLokiInventory(
+          ds.uid,
+          deps.get,
+          deps.limit,
+          window,
+          sampleLimit(settings.logSampleLimit, DEFAULT_LOG_SAMPLE_LIMIT)
+        )
+      )
+    ),
   ]);
   const inventory: Inventory = {
     window: { start: window.startSeconds, end: window.endSeconds },
@@ -52,9 +81,18 @@ export async function assessStack(
   if (settings.reclassification) {
     inventory.reclassification = settings.reclassification;
   }
+  if (settings.customNamespaces && settings.customNamespaces.length > 0) {
+    inventory.custom_namespaces = settings.customNamespaces;
+  }
   const result = await deps.score(inventory, settings.volumeWeighted === true);
   const errors = [...traces, ...metrics, ...logs].flatMap((collection) => collection.errors);
   return { result, errors, datasources };
+}
+
+export function discoverStack(settings: PluginSettings): DatasourcesBySignal {
+  const discover = (signal: Signal) =>
+    discoverDatasources(datasourceTypesFor(settings, signal)).filter((ds) => !isExcluded(settings, ds.uid));
+  return { metrics: discover('metrics'), traces: discover('traces'), logs: discover('logs') };
 }
 
 export interface ServiceIdentity {

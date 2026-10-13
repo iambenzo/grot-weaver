@@ -1,29 +1,15 @@
-import { TimeOption, TimeRange } from '@grafana/data';
+import { TimeRange } from '@grafana/data';
 import { SceneTimePicker, SceneTimeRange } from '@grafana/scenes';
 import { PluginSettings } from '../settings/settings';
+import { WINDOW_PRESETS, defaultWindowFrom } from './presets';
 
-export const DEFAULT_WINDOW = 'now-24h';
-export const WIDENED_WINDOW = 'now-7d';
 const NOW = 'now';
 const NANOSECONDS_PER_SECOND = BigInt(1_000_000_000);
 const SPARSE_THRESHOLD = 3;
 
-export const WINDOW_PRESETS: TimeOption[] = [
-  { from: 'now-1h', to: NOW, display: 'Last 1 hour' },
-  { from: 'now-6h', to: NOW, display: 'Last 6 hours' },
-  { from: 'now-24h', to: NOW, display: 'Last 24 hours' },
-  { from: 'now-7d', to: NOW, display: 'Last 7 days' },
-  { from: 'now-30d', to: NOW, display: 'Last 30 days' },
-];
-
 export interface QueryWindow {
   startSeconds: number;
   endSeconds: number;
-}
-
-export function defaultWindowFrom(settings: PluginSettings): string {
-  const configured = settings.defaultWindow;
-  return WINDOW_PRESETS.some((preset) => preset.from === configured) ? (configured as string) : DEFAULT_WINDOW;
 }
 
 export function createTimeRange(settings: PluginSettings): SceneTimeRange {

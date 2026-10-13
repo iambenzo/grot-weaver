@@ -63,6 +63,19 @@ type collected struct {
 }
 
 func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
+	if len(inv.CustomNamespaces) > 0 {
+		return a.withCustomNamespaces(inv.CustomNamespaces).assess(inv, options)
+	}
+	return a.assess(inv, options)
+}
+
+func (a *Assessor) withCustomNamespaces(namespaces []string) *Assessor {
+	scoped := *a
+	scoped.attributes = nameindex.NewAttributeIndex(a.catalogue, namespaces)
+	return &scoped
+}
+
+func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
 	gathered := collected{totals: map[finding.Signal]float64{}}
 	for _, datasource := range inv.Traces {
 		for _, service := range datasource.Services {

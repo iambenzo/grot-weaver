@@ -1,4 +1,11 @@
-import { EmbeddedScene, SceneAppPage, SceneControlsSpacer, SceneFlexItem, SceneFlexLayout, SceneRefreshPicker } from '@grafana/scenes';
+import {
+  EmbeddedScene,
+  SceneAppPage,
+  SceneControlsSpacer,
+  SceneFlexItem,
+  SceneFlexLayout,
+  SceneRefreshPicker,
+} from '@grafana/scenes';
 import { ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/utils.routing';
 import { PluginSettings } from '../../settings/settings';

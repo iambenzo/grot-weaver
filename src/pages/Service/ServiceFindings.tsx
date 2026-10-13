@@ -23,14 +23,14 @@ import {
   Text,
   useStyles2,
 } from '@grafana/ui';
-import { discoverDatasources, proxyGet } from '../../datasources/proxy';
+import { proxyGet } from '../../datasources/proxy';
 import { createLimiter } from '../../datasources/limiter';
 import { scoreInventory } from '../../api/score';
 import { fetchMetricsNeedingLabels, fetchSpanGroupRules } from '../../api/catalogue';
 import { Finding, Owner, Signal } from '../../api/types';
 import { lookupFindingLibraries, sameOwner } from '../../assessment/traceAssessment';
 import {
-  DatasourcesBySignal,
+  discoverStack,
   ServiceIdentity,
   StackAssessment,
   assessStack,
@@ -41,7 +41,7 @@ import { evidenceTarget, exploreUrl } from '../../assessment/explore';
 import { libraryInfo } from '../../assessment/libraries';
 import { LabelProgress } from '../../inventory/prometheus';
 import { LibraryEvidence } from '../../inventory/traceLibraries';
-import { PluginSettings, concurrencyFrom, datasourceTypesFor } from '../../settings/settings';
+import { PluginSettings, concurrencyFrom } from '../../settings/settings';
 import { QueryWindow, toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
@@ -271,21 +271,13 @@ interface Keyed<K, V> {
   value: V;
 }
 
-function discoverAll(settings: PluginSettings): DatasourcesBySignal {
-  return {
-    metrics: discoverDatasources(datasourceTypesFor(settings, 'metrics')),
-    traces: discoverDatasources(datasourceTypesFor(settings, 'traces')),
-    logs: discoverDatasources(datasourceTypesFor(settings, 'logs')),
-  };
-}
-
 function useStackAssessment(settings: PluginSettings, window: QueryWindow): Load {
   const [loaded, setLoaded] = useState<Keyed<QueryWindow, Outcome>>();
   const [progress, setProgress] = useState<Keyed<QueryWindow, LabelProgress>>();
   useEffect(() => {
     let cancelled = false;
     const settle = (value: Outcome) => !cancelled && setLoaded({ key: window, value });
-    assessStack(discoverAll(settings), window, settings, {
+    assessStack(discoverStack(settings), window, settings, {
       get: proxyGet,
       limit: createLimiter(concurrencyFrom(settings)),
       score: scoreInventory,

@@ -1,4 +1,9 @@
-import { MetricDatasource, ReclassificationRule, TRANSLATION_STRATEGIES, TranslationStrategy } from '../inventory/types';
+import {
+  MetricDatasource,
+  ReclassificationRule,
+  TRANSLATION_STRATEGIES,
+  TranslationStrategy,
+} from '../inventory/types';
 
 export interface DatasourceTypes {
   metrics: string[];
@@ -13,7 +18,22 @@ export interface PluginSettings {
   volumeWeighted?: boolean;
   reclassification?: ReclassificationRule[];
   strategyOverrides?: Record<string, TranslationStrategy>;
+  excludedDatasources?: string[];
+  traceSampleLimit?: number;
+  logSampleLimit?: number;
+  upstreamCheck?: boolean;
+  pipelineMappings?: PipelineMapping[];
+  customNamespaces?: string[];
 }
+
+export interface PipelineMapping {
+  match: string;
+  pipeline: string;
+}
+
+export const DEFAULT_TRACE_SAMPLE_LIMIT = 20;
+export const DEFAULT_LOG_SAMPLE_LIMIT = 20;
+const MAX_SAMPLE_LIMIT = 500;
 
 export const DEFAULT_DATASOURCE_TYPES: DatasourceTypes = {
   metrics: ['prometheus'],
@@ -48,7 +68,52 @@ export function readSettings(jsonData: unknown): PluginSettings {
   if (raw.strategyOverrides && typeof raw.strategyOverrides === 'object') {
     settings.strategyOverrides = readOverrides(raw.strategyOverrides as Record<string, unknown>);
   }
+  if (isStringList(raw.excludedDatasources)) {
+    settings.excludedDatasources = raw.excludedDatasources;
+  }
+  if (isStringList(raw.customNamespaces)) {
+    settings.customNamespaces = raw.customNamespaces;
+  }
+  if (typeof raw.traceSampleLimit === 'number') {
+    settings.traceSampleLimit = raw.traceSampleLimit;
+  }
+  if (typeof raw.logSampleLimit === 'number') {
+    settings.logSampleLimit = raw.logSampleLimit;
+  }
+  if (typeof raw.upstreamCheck === 'boolean') {
+    settings.upstreamCheck = raw.upstreamCheck;
+  }
+  if (Array.isArray(raw.pipelineMappings) && raw.pipelineMappings.every(isMapping)) {
+    settings.pipelineMappings = raw.pipelineMappings;
+  }
   return settings;
+}
+
+function isStringList(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function isMapping(value: unknown): value is PipelineMapping {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const mapping = value as Record<string, unknown>;
+  return typeof mapping.match === 'string' && typeof mapping.pipeline === 'string';
+}
+
+export function sampleLimit(configured: number | undefined, fallback: number): number {
+  if (!configured || !Number.isInteger(configured) || configured < 1) {
+    return fallback;
+  }
+  return Math.min(configured, MAX_SAMPLE_LIMIT);
+}
+
+export function isUpstreamCheckEnabled(settings: PluginSettings): boolean {
+  return settings.upstreamCheck !== false;
+}
+
+export function isExcluded(settings: PluginSettings, uid: string): boolean {
+  return (settings.excludedDatasources ?? []).includes(uid);
 }
 
 function readOverrides(raw: Record<string, unknown>): Record<string, TranslationStrategy> {

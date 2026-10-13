@@ -36,8 +36,8 @@ interface CollectorContext {
   window: QueryWindow;
   errors: CollectionError[];
   spanGroupRules: SpanGroupRule[];
+  sampleLimit?: number;
 }
-
 
 export function serviceFilter(serviceName: string): string {
   return `{ ${serviceFilterExpression(serviceName)} }`;
@@ -48,9 +48,10 @@ export async function collectTempoInventory(
   get: ProxyGet,
   limit: Limiter,
   window: QueryWindow,
-  spanGroupRules: SpanGroupRule[] = []
+  spanGroupRules: SpanGroupRule[] = [],
+  sampleLimit?: number
 ): Promise<TempoCollection> {
-  const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules };
+  const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit };
   const serviceNames = await guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG));
   const services = await Promise.all((serviceNames ?? []).map((name) => collectService(context, name)));
   return { datasource: { uid, services }, errors: context.errors };
@@ -140,7 +141,9 @@ function observations(keys: string[] | undefined): KeyObservation[] {
 function errorMessage(error: unknown): string {
   if (error && typeof error === 'object') {
     const candidate = error as { data?: { message?: string }; message?: string; status?: number };
-    return candidate.data?.message ?? candidate.message ?? `request failed with status ${candidate.status ?? 'unknown'}`;
+    return (
+      candidate.data?.message ?? candidate.message ?? `request failed with status ${candidate.status ?? 'unknown'}`
+    );
   }
   return String(error);
 }

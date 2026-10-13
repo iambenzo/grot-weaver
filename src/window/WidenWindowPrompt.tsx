@@ -1,7 +1,8 @@
 import React from 'react';
 import { Alert, Button } from '@grafana/ui';
 import { SceneTimeRange } from '@grafana/scenes';
-import { QueryWindow, shouldOfferWiden, WIDENED_WINDOW } from './window';
+import { QueryWindow, shouldOfferWiden } from './window';
+import { WIDENED_WINDOW } from './presets';
 import { testIds } from '../components/testIds';
 
 interface WidenWindowPromptProps {

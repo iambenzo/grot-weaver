@@ -5,7 +5,7 @@ import { QueryWindow, tempoWindowParams } from '../window/window';
 import { attributeSelector, serviceFilterExpression } from './traceql';
 import { SpanGroupSample } from './types';
 
-const SAMPLE_LIMIT = '20';
+const DEFAULT_SAMPLE_LIMIT = 20;
 const SPANS_PER_SPAN_SET = '3';
 
 interface SearchResponse {
@@ -17,6 +17,7 @@ export interface SamplerContext {
   get: ProxyGet;
   limit: Limiter;
   window: QueryWindow;
+  sampleLimit?: number;
 }
 
 export function applicableRules(rules: SpanGroupRule[], spanKeys: string[]): SpanGroupRule[] {
@@ -25,13 +26,24 @@ export function applicableRules(rules: SpanGroupRule[], spanKeys: string[]): Spa
 }
 
 export function spanGroupQuery(serviceName: string, rule: SpanGroupRule): string {
-  const attributes = [...new Set([...rule.required, ...rule.recommended])].map((name) => attributeSelector('span', name));
+  const attributes = [...new Set([...rule.required, ...rule.recommended])].map((name) =>
+    attributeSelector('span', name)
+  );
   const filter = `{ ${serviceFilterExpression(serviceName)} && kind = ${rule.span_kind} && ${attributeSelector('span', rule.identifying)} != nil }`;
   return `${filter} | select(${attributes.join(', ')})`;
 }
 
-export async function sampleSpanGroup(context: SamplerContext, serviceName: string, rule: SpanGroupRule): Promise<SpanGroupSample> {
-  const params = { ...tempoWindowParams(context.window), q: spanGroupQuery(serviceName, rule), limit: SAMPLE_LIMIT, spss: SPANS_PER_SPAN_SET };
+export async function sampleSpanGroup(
+  context: SamplerContext,
+  serviceName: string,
+  rule: SpanGroupRule
+): Promise<SpanGroupSample> {
+  const params = {
+    ...tempoWindowParams(context.window),
+    q: spanGroupQuery(serviceName, rule),
+    limit: String(context.sampleLimit ?? DEFAULT_SAMPLE_LIMIT),
+    spss: SPANS_PER_SPAN_SET,
+  };
   const response = await context.limit(() => context.get<SearchResponse>(context.uid, '/api/search', params));
   const spans = (response.traces ?? []).flatMap((trace) => (trace.spanSets ?? []).flatMap((set) => set.spans ?? []));
   const present: Record<string, number> = {};

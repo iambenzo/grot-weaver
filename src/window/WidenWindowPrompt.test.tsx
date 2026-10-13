@@ -18,7 +18,9 @@ describe('WidenWindowPrompt', () => {
 
   it('stays hidden when the window has enough telemetry', () => {
     const timeRange = new SceneTimeRange({ from: 'now-24h', to: 'now' });
-    render(<WidenWindowPrompt window={{ startSeconds: 0, endSeconds: day }} observedItems={10} timeRange={timeRange} />);
+    render(
+      <WidenWindowPrompt window={{ startSeconds: 0, endSeconds: day }} observedItems={10} timeRange={timeRange} />
+    );
 
     expect(screen.queryByTestId(testIds.window.widenPrompt)).toBeNull();
   });

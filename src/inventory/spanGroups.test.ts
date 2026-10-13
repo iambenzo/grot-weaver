@@ -11,7 +11,14 @@ const httpServer: SpanGroupRule = {
   recommended: ['http.route'],
   stability: 'stable',
 };
-const dbClient: SpanGroupRule = { ...httpServer, id: 'span.db.client', span_kind: 'client', identifying: 'db.system.name', required: ['db.system.name'], recommended: [] };
+const dbClient: SpanGroupRule = {
+  ...httpServer,
+  id: 'span.db.client',
+  span_kind: 'client',
+  identifying: 'db.system.name',
+  required: ['db.system.name'],
+  recommended: [],
+};
 
 const span = (...keys: string[]) => ({ attributes: keys.map((key) => ({ key, value: { stringValue: 'x' } })) });
 
@@ -34,12 +41,34 @@ describe('sampleSpanGroup', () => {
     const calls: Array<Record<string, string>> = [];
     const get = (async (_uid: string, _path: string, params: Record<string, string>) => {
       calls.push(params);
-      return { traces: [{ spanSets: [{ spans: [span('http.request.method', 'url.path', 'url.scheme'), span('http.request.method', 'url.path', 'service.name')] }] }, { spanSets: [{ spans: [span('http.request.method')] }] }] };
+      return {
+        traces: [
+          {
+            spanSets: [
+              {
+                spans: [
+                  span('http.request.method', 'url.path', 'url.scheme'),
+                  span('http.request.method', 'url.path', 'service.name'),
+                ],
+              },
+            ],
+          },
+          { spanSets: [{ spans: [span('http.request.method')] }] },
+        ],
+      };
     }) as ProxyGet;
 
-    const sample = await sampleSpanGroup({ uid: 'tempo', get, limit: createLimiter(1), window: { startSeconds: 1, endSeconds: 2 } }, 'checkout', httpServer);
+    const sample = await sampleSpanGroup(
+      { uid: 'tempo', get, limit: createLimiter(1), window: { startSeconds: 1, endSeconds: 2 } },
+      'checkout',
+      httpServer
+    );
 
-    expect(sample).toEqual({ group: 'span.http.server', sampled: 3, present: { 'http.request.method': 3, 'url.path': 2, 'url.scheme': 1 } });
+    expect(sample).toEqual({
+      group: 'span.http.server',
+      sampled: 3,
+      present: { 'http.request.method': 3, 'url.path': 2, 'url.scheme': 1 },
+    });
     expect(calls[0]).toMatchObject({ limit: '20', spss: '3', start: '1', end: '2' });
   });
 });

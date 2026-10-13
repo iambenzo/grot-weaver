@@ -23,7 +23,10 @@ type Inventory struct {
 	Metrics          []MetricDatasource     `json:"metrics"`
 	Logs             []LogDatasource        `json:"logs"`
 	Reclassification []ReclassificationRule `json:"reclassification,omitempty"`
+	CustomNamespaces []string               `json:"custom_namespaces,omitempty"`
 }
+
+const MaxCustomNamespaces = 200
 
 func (inv Inventory) ReclassificationRules() []ReclassificationRule {
 	if inv.Reclassification == nil {
@@ -93,6 +96,14 @@ func (inv Inventory) Validate() error {
 	for _, datasource := range inv.Logs {
 		if err := datasource.validate(); err != nil {
 			return err
+		}
+	}
+	if len(inv.CustomNamespaces) > MaxCustomNamespaces {
+		return fmt.Errorf("%w: %d custom namespaces exceeds %d", ErrInvalidInventory, len(inv.CustomNamespaces), MaxCustomNamespaces)
+	}
+	for _, namespace := range inv.CustomNamespaces {
+		if namespace == "" || len(namespace) > MaxNameLength {
+			return fmt.Errorf("%w: empty or overlong custom namespace", ErrInvalidInventory)
 		}
 	}
 	return validateReclassification(inv.Reclassification)

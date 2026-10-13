@@ -62,20 +62,34 @@ describe('collectTempoInventory', () => {
     await collectTempoInventory('tempo', get, createLimiter(2), window);
 
     const tagCalls = calls.filter((call) => call.path === '/api/v2/search/tags');
-    expect(tagCalls).toContainEqual({ path: '/api/v2/search/tags', params: { start: '100', end: '200', scope: 'span', q: '{ resource.service.name = "checkout" }' } });
+    expect(tagCalls).toContainEqual({
+      path: '/api/v2/search/tags',
+      params: { start: '100', end: '200', scope: 'span', q: '{ resource.service.name = "checkout" }' },
+    });
     expect(tagCalls.some((call) => call.params.q === '{ resource.service.name = "" }')).toBe(true);
   });
 
   it('adds span group samples to each service', async () => {
     const { get } = fakeTempo();
-    const rule: SpanGroupRule = { id: 'span.http.server', span_kind: 'server', identifying: 'http.request.method', required: ['http.request.method'], recommended: [], stability: 'stable' };
+    const rule: SpanGroupRule = {
+      id: 'span.http.server',
+      span_kind: 'server',
+      identifying: 'http.request.method',
+      required: ['http.request.method'],
+      recommended: [],
+      stability: 'stable',
+    };
     const sampling = (async (uid: string, requestPath: string, params: Record<string, string>) =>
-      requestPath === '/api/search' ? { traces: [{ spanSets: [{ spans: [{ attributes: [{ key: 'http.request.method' }] }] }] }] } : get(uid, requestPath, params)) as ProxyGet;
+      requestPath === '/api/search'
+        ? { traces: [{ spanSets: [{ spans: [{ attributes: [{ key: 'http.request.method' }] }] }] }] }
+        : get(uid, requestPath, params)) as ProxyGet;
 
     const { datasource } = await collectTempoInventory('tempo', sampling, createLimiter(2), window, [rule]);
 
     const checkout = datasource.services.find((service) => service.service_name === 'checkout');
-    expect(checkout?.span_groups).toEqual([{ group: 'span.http.server', sampled: 1, present: { 'http.request.method': 1 } }]);
+    expect(checkout?.span_groups).toEqual([
+      { group: 'span.http.server', sampled: 1, present: { 'http.request.method': 1 } },
+    ]);
   });
 
   it('records a failing step and keeps the rest', async () => {

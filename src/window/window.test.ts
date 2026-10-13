@@ -1,10 +1,8 @@
 import { dateTime } from '@grafana/data';
+import { DEFAULT_WINDOW, WINDOW_PRESETS, defaultWindowFrom } from './presets';
 import {
-  DEFAULT_WINDOW,
-  WINDOW_PRESETS,
   createTimePicker,
   createTimeRange,
-  defaultWindowFrom,
   lokiWindowParams,
   prometheusLookback,
   prometheusWindowParams,

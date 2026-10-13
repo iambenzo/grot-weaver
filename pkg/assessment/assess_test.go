@@ -236,3 +236,25 @@ func Test_Assess_emptyInventoryEncodesEmptyLists(t *testing.T) {
 		}
 	}
 }
+
+func Test_Assess_customNamespacesFromTheRequest(t *testing.T) {
+	inventory := func(namespaces []string) Inventory {
+		return Inventory{CustomNamespaces: namespaces, Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{{
+			ServiceName: "checkout",
+			SpanKeys:    []KeyObservation{{Key: "http.colour"}},
+		}}}}}
+	}
+	assessor := newAssessor(t)
+	checkout := "checkout"
+
+	without, _ := findingFor(assessor.Assess(inventory(nil), scoringDefaults), checkout, "http.colour")
+	with, _ := findingFor(assessor.Assess(inventory([]string{"http"}), scoringDefaults), checkout, "http.colour")
+
+	if without.Type != finding.TypeNotInRegistry || with.Type != finding.TypeCustom {
+		t.Errorf("without %s, with %s; want not_in_registry then custom", without.Type, with.Type)
+	}
+	again, _ := findingFor(assessor.Assess(inventory(nil), scoringDefaults), checkout, "http.colour")
+	if again.Type != finding.TypeNotInRegistry {
+		t.Error("a request's custom namespaces leaked into the shared assessor")
+	}
+}

@@ -6,11 +6,7 @@
   "backend": true,
   "executable": "gpx_semconv_compliance",
   "info": {
-    "keywords": [
-      "app",
-      "opentelemetry",
-      "semantic conventions"
-    ],
+    "keywords": ["app", "opentelemetry", "semantic conventions"],
     "description": "Scores how well telemetry conforms to OpenTelemetry semantic conventions and shows where to fix it.",
     "author": {
       "name": "iambenzo"

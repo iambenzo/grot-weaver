@@ -104,6 +104,7 @@ export interface Inventory {
   metrics?: MetricDatasource[];
   logs?: LogDatasource[];
   reclassification?: ReclassificationRule[];
+  custom_namespaces?: string[];
 }
 
 export interface CollectionError {

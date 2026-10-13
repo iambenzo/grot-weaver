@@ -6,7 +6,4 @@ apps:
     org_name: 'iambenzo'
     disabled: false
     jsonData:
-      apiUrl: http://default-url.com
-      isApiKeySet: true
-    secureJsonData:
-      apiKey: secret-key
+      defaultWindow: now-24h

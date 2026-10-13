@@ -11,8 +11,8 @@ export const testIds = {
   },
   appConfig: {
     container: 'data-testid ac-container',
-    apiKey: 'data-testid ac-api-key',
-    apiUrl: 'data-testid ac-api-url',
+    excluded: 'data-testid ac-excluded-datasources',
+    defaultWindow: 'data-testid ac-default-window',
     submit: 'data-testid ac-submit-form',
   },
 };

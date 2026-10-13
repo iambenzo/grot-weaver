@@ -4,12 +4,18 @@ import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { collectLokiInventory, streamSelector } from './loki';
 
-const fixture = (name: string) => JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../testdata/fixtures/local/loki/${name}`), 'utf8'));
+const fixture = (name: string) =>
+  JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../testdata/fixtures/local/loki/${name}`), 'utf8'));
 const window = { startSeconds: 100, endSeconds: 1900 };
 
 function fakeLoki(options: { detectedFieldsFail?: boolean } = {}) {
   const calls: Array<{ path: string; params: Record<string, string>; headers?: Record<string, string> }> = [];
-  const get = (async (_uid: string, requestPath: string, params: Record<string, string>, headers?: Record<string, string>) => {
+  const get = (async (
+    _uid: string,
+    requestPath: string,
+    params: Record<string, string>,
+    headers?: Record<string, string>
+  ) => {
     calls.push({ path: requestPath, params, headers });
     switch (requestPath) {
       case '/loki/api/v1/labels':
@@ -49,12 +55,26 @@ describe('collectLokiInventory', () => {
       sdk: { name: 'opentelemetry', language: 'python', version: '1.45.1' },
       volume: 80,
     });
-    expect(checkout.metadata_keys).toEqual(expect.arrayContaining(['http_method', 'http_request_method', 'trace_id', 'scope_name']));
-    expect(checkout.stream_labels).toEqual(['deployment_environment_name', 'service_instance_id', 'service_name', 'service_namespace']);
-    expect(checkout.otlp_markers).toEqual(expect.arrayContaining(['scope_name', 'severity_number', 'observed_timestamp', 'flags', 'telemetry_sdk_name']));
+    expect(checkout.metadata_keys).toEqual(
+      expect.arrayContaining(['http_method', 'http_request_method', 'trace_id', 'scope_name'])
+    );
+    expect(checkout.stream_labels).toEqual([
+      'deployment_environment_name',
+      'service_instance_id',
+      'service_name',
+      'service_namespace',
+    ]);
+    expect(checkout.otlp_markers).toEqual(
+      expect.arrayContaining(['scope_name', 'severity_number', 'observed_timestamp', 'flags', 'telemetry_sdk_name'])
+    );
 
     const sampleCall = calls.find((call) => call.path === '/loki/api/v1/query_range');
-    expect(sampleCall?.params).toMatchObject({ query: '{service_name="checkout"}', limit: '5', start: '100000000000', end: '1900000000000' });
+    expect(sampleCall?.params).toMatchObject({
+      query: '{service_name="checkout"}',
+      limit: '5',
+      start: '100000000000',
+      end: '1900000000000',
+    });
     expect(sampleCall?.headers).toEqual({ 'X-Loki-Response-Encoding-Flags': 'categorize-labels' });
   });
 
@@ -66,7 +86,12 @@ describe('collectLokiInventory', () => {
     expect(errors).toEqual([]);
     expect(datasource.services[0].keys_method).toBe('sample');
     expect(datasource.services[0].metadata_keys).toEqual(expect.arrayContaining(['http_method', 'scope_name']));
-    expect(calls.filter((call) => call.path === '/loki/api/v1/query_range').map((call) => call.params.limit).sort()).toEqual(['20', '5']);
+    expect(
+      calls
+        .filter((call) => call.path === '/loki/api/v1/query_range')
+        .map((call) => call.params.limit)
+        .sort()
+    ).toEqual(['20', '5']);
   });
 });
 
