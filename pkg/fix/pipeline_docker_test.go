@@ -182,9 +182,12 @@ func logs(id string) string {
 
 func mustRun(t *testing.T, name string, args ...string) string {
 	t.Helper()
-	output, err := exec.Command(name, args...).CombinedOutput()
+	var stderr bytes.Buffer
+	command := exec.Command(name, args...)
+	command.Stderr = &stderr
+	output, err := command.Output()
 	if err != nil {
-		t.Fatalf("%s %v: %v\n%s", name, args, err, output)
+		t.Fatalf("%s %v: %v\n%s", name, args, err, stderr.String())
 	}
 	return string(output)
 }
