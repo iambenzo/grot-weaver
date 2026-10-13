@@ -11,6 +11,7 @@ func (a *App) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /catalogue/span-groups", a.handleSpanGroups)
 	mux.HandleFunc("POST /catalogue/metric-matches", a.handleMetricMatches)
 	mux.HandleFunc("POST /score", a.handleScore)
+	mux.HandleFunc("POST /fix-snippet", a.handleFixSnippet)
 }
 
 func (a *App) handleCatalogue(w http.ResponseWriter, _ *http.Request) {

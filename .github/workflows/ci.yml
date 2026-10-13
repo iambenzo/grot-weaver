@@ -80,6 +80,10 @@ jobs:
         if: steps.check-for-backend.outputs.has-backend == 'true'
         run: go test ./pkg/... ./cmd/...
 
+      - name: Test pipeline rules in otelcol-contrib and Alloy
+        if: steps.check-for-backend.outputs.has-backend == 'true'
+        run: go test -tags docker -count=1 ./pkg/fix/
+
       - name: Check catalogue matches its sources
         if: steps.check-for-backend.outputs.has-backend == 'true'
         run: |
