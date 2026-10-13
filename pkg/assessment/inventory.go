@@ -21,6 +21,7 @@ type Inventory struct {
 	Window           Window                 `json:"window"`
 	Traces           []TraceDatasource      `json:"traces"`
 	Metrics          []MetricDatasource     `json:"metrics"`
+	Logs             []LogDatasource        `json:"logs"`
 	Reclassification []ReclassificationRule `json:"reclassification,omitempty"`
 }
 
@@ -82,6 +83,14 @@ func (inv Inventory) Validate() error {
 		return fmt.Errorf("%w: %d metric datasources exceeds %d", ErrInvalidInventory, len(inv.Metrics), MaxDatasources)
 	}
 	for _, datasource := range inv.Metrics {
+		if err := datasource.validate(); err != nil {
+			return err
+		}
+	}
+	if len(inv.Logs) > MaxDatasources {
+		return fmt.Errorf("%w: %d log datasources exceeds %d", ErrInvalidInventory, len(inv.Logs), MaxDatasources)
+	}
+	for _, datasource := range inv.Logs {
 		if err := datasource.validate(); err != nil {
 			return err
 		}

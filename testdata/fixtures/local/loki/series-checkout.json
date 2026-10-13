@@ -1,0 +1,11 @@
+{
+  "data": [
+    {
+      "deployment_environment_name": "lab",
+      "service_instance_id": "checkout-1",
+      "service_name": "checkout",
+      "service_namespace": "shop"
+    }
+  ],
+  "status": "success"
+}

@@ -1,0 +1,338 @@
+{
+  "data": {
+    "encodingFlags": [
+      "categorize-labels"
+    ],
+    "result": [
+      {
+        "stream": {
+          "deployment_environment_name": "lab",
+          "service_instance_id": "checkout-1",
+          "service_name": "checkout",
+          "service_namespace": "shop"
+        },
+        "values": [
+          [
+            "1791891842614652928",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "GET",
+                "http_request_method": "GET",
+                "observed_timestamp": "1791891842614822923",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "05477d5859bb8055",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "16d2612076f7828d96dfb4326fc29123"
+              }
+            }
+          ],
+          [
+            "1791891841607597568",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "73",
+                "detected_level": "error",
+                "error_type": "500",
+                "exception_type": "OrderError",
+                "flags": "3",
+                "observed_timestamp": "1791891841607607881",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "17",
+                "severity_text": "ERROR",
+                "span_id": "ea10be4a19334848",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "f29704699185e33a1f06b084d99cadda"
+              }
+            }
+          ],
+          [
+            "1791891841607497216",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791891841607534631",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "ea10be4a19334848",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "f29704699185e33a1f06b084d99cadda"
+              }
+            }
+          ],
+          [
+            "1791891840600396800",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "73",
+                "detected_level": "error",
+                "error_type": "500",
+                "exception_type": "OrderError",
+                "flags": "3",
+                "observed_timestamp": "1791891840600407131",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "17",
+                "severity_text": "ERROR",
+                "span_id": "beccfcac6a4dd22b",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "ebdead953276b9c4ffdbe8c45c0872d0"
+              }
+            }
+          ],
+          [
+            "1791891840600308992",
+            "<line>",
+            {
+              "structuredMetadata": {
+                "code_file_path": "/app/emit.py",
+                "code_function_name": "emit_iteration",
+                "code_line_number": "71",
+                "detected_level": "info",
+                "flags": "3",
+                "http_method": "POST",
+                "http_request_method": "POST",
+                "observed_timestamp": "1791891840600342798",
+                "order_id": "o-123",
+                "scope_name": "semconv.emitter.logs",
+                "service_version": "1.2.3",
+                "severity_number": "9",
+                "severity_text": "INFO",
+                "span_id": "beccfcac6a4dd22b",
+                "telemetry_sdk_language": "python",
+                "telemetry_sdk_name": "opentelemetry",
+                "telemetry_sdk_version": "1.45.1",
+                "trace_id": "ebdead953276b9c4ffdbe8c45c0872d0"
+              }
+            }
+          ]
+        ]
+      }
+    ],
+    "resultType": "streams",
+    "stats": {
+      "cache": {
+        "chunk": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "index": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "instantMetricResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "labelResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "result": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "seriesResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "statsResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        },
+        "volumeResult": {
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "downloadTime": 0,
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "queryLengthServed": 0,
+          "requests": 0
+        }
+      },
+      "index": {
+        "bloomFilterTime": 0,
+        "chunkRefsLookupTime": 0,
+        "postFilterChunks": 0,
+        "shardsDuration": 0,
+        "totalChunks": 0,
+        "totalStreams": 0,
+        "usedBloomFilters": false
+      },
+      "ingester": {
+        "recvWaitTime": 0.000623,
+        "store": {
+          "chunk": {
+            "compressedBytes": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "decompressedStructuredMetadataBytes": 0,
+            "headChunkBytes": 12500,
+            "headChunkLines": 80,
+            "headChunkStructuredMetadataBytes": 11360,
+            "postFilterLines": 80,
+            "totalDuplicates": 0
+          },
+          "chunkRefsFetchTime": 33125,
+          "chunksDownloadTime": 0,
+          "congestionControlLatency": 0,
+          "dataobj": {
+            "pageBatches": 0,
+            "pagesDownloaded": 0,
+            "pagesDownloadedBytes": 0,
+            "pagesScanned": 0,
+            "postFilterRows": 0,
+            "postPredicateDecompressedBytes": 0,
+            "postPredicateRows": 0,
+            "postPredicateStructuredMetadataBytes": 0,
+            "prePredicateDecompressedBytes": 0,
+            "prePredicateDecompressedRows": 0,
+            "prePredicateDecompressedStructuredMetadataBytes": 0,
+            "totalPageDownloadTime": 0,
+            "totalRowsAvailable": 0
+          },
+          "pipelineWrapperFilteredLines": 0,
+          "queryReferencedStructuredMetadata": false,
+          "queryUsedV2Engine": false,
+          "totalChunksDownloaded": 0,
+          "totalChunksRef": 0
+        },
+        "totalBatches": 1,
+        "totalChunksMatched": 1,
+        "totalLinesSent": 5,
+        "totalReached": 1
+      },
+      "querier": {
+        "querierExecTime": 0.001871,
+        "store": {
+          "chunk": {
+            "compressedBytes": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "decompressedStructuredMetadataBytes": 0,
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "headChunkStructuredMetadataBytes": 0,
+            "postFilterLines": 0,
+            "totalDuplicates": 0
+          },
+          "chunkRefsFetchTime": 0,
+          "chunksDownloadTime": 0,
+          "congestionControlLatency": 0,
+          "dataobj": {
+            "pageBatches": 0,
+            "pagesDownloaded": 0,
+            "pagesDownloadedBytes": 0,
+            "pagesScanned": 0,
+            "postFilterRows": 0,
+            "postPredicateDecompressedBytes": 0,
+            "postPredicateRows": 0,
+            "postPredicateStructuredMetadataBytes": 0,
+            "prePredicateDecompressedBytes": 0,
+            "prePredicateDecompressedRows": 0,
+            "prePredicateDecompressedStructuredMetadataBytes": 0,
+            "totalPageDownloadTime": 0,
+            "totalRowsAvailable": 0
+          },
+          "pipelineWrapperFilteredLines": 0,
+          "queryReferencedStructuredMetadata": false,
+          "queryUsedV2Engine": false,
+          "totalChunksDownloaded": 0,
+          "totalChunksRef": 0
+        }
+      },
+      "summary": {
+        "bytesProcessedPerSecond": 6944926,
+        "execTime": 0.0018,
+        "linesProcessedPerSecond": 44447,
+        "queueTime": 0.000042,
+        "shards": 1,
+        "splits": 0,
+        "subqueries": 0,
+        "totalBytesProcessed": 12500,
+        "totalEntriesReturned": 5,
+        "totalLinesProcessed": 80,
+        "totalPostFilterLines": 80,
+        "totalStructuredMetadataBytesProcessed": 11360
+      }
+    }
+  },
+  "status": "success"
+}

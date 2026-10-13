@@ -1,0 +1,125 @@
+{
+  "fields": [
+    {
+      "cardinality": 1,
+      "label": "scope_name",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 60,
+      "label": "span_id",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 1,
+      "label": "telemetry_sdk_name",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 2,
+      "label": "http_method",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 2,
+      "label": "code_line_number",
+      "parsers": null,
+      "type": "int"
+    },
+    {
+      "cardinality": 1,
+      "label": "code_function_name",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 2,
+      "label": "severity_text",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 1,
+      "label": "flags",
+      "parsers": null,
+      "type": "int"
+    },
+    {
+      "cardinality": 1,
+      "label": "telemetry_sdk_language",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 1,
+      "label": "exception_type",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 2,
+      "label": "http_request_method",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 1,
+      "label": "code_file_path",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 1,
+      "label": "telemetry_sdk_version",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 1,
+      "label": "service_version",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 1,
+      "label": "error_type",
+      "parsers": null,
+      "type": "int"
+    },
+    {
+      "cardinality": 2,
+      "label": "detected_level",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 2,
+      "label": "severity_number",
+      "parsers": null,
+      "type": "int"
+    },
+    {
+      "cardinality": 80,
+      "label": "observed_timestamp",
+      "parsers": null,
+      "type": "int"
+    },
+    {
+      "cardinality": 60,
+      "label": "trace_id",
+      "parsers": null,
+      "type": "string"
+    },
+    {
+      "cardinality": 1,
+      "label": "order_id",
+      "parsers": null,
+      "type": "string"
+    }
+  ],
+  "limit": 1000
+}

@@ -87,6 +87,16 @@ export interface MetricAttribution {
   hints?: Record<string, string>;
 }
 
+export interface LogAttribution {
+  datasource: string;
+  owner: Owner;
+  source: string;
+  confidence: Confidence;
+  keys_method: 'detected_fields' | 'sample';
+  otlp: boolean;
+  sdk: { name?: string; language?: string; version?: string };
+}
+
 export interface DatasourceSummary {
   uid: string;
   signal: Signal;
@@ -103,6 +113,7 @@ export interface AssessmentResult {
   findings: Finding[];
   attributions: Attribution[];
   metric_attributions?: MetricAttribution[];
+  log_attributions?: LogAttribution[];
   datasources?: DatasourceSummary[];
   owners: ScoreRow[];
   namespaces: ScoreRow[];

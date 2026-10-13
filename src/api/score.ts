@@ -24,6 +24,7 @@ export function withLists(result: AssessmentResult): AssessmentResult {
     findings: result.findings ?? [],
     attributions: result.attributions ?? [],
     metric_attributions: result.metric_attributions ?? [],
+    log_attributions: result.log_attributions ?? [],
     datasources: result.datasources ?? [],
     owners: result.owners ?? [],
     namespaces: result.namespaces ?? [],

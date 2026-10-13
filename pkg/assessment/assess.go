@@ -35,6 +35,7 @@ type Result struct {
 	Findings       []scoring.RankedFinding `json:"findings"`
 	Attributions   []ServiceAttribution    `json:"attributions"`
 	Metrics        []MetricAttribution     `json:"metric_attributions"`
+	Logs           []LogAttribution        `json:"log_attributions"`
 	Datasources    []DatasourceSummary     `json:"datasources"`
 	Owners         []ScoreRow              `json:"owners"`
 	Namespaces     []ScoreRow              `json:"namespaces"`
@@ -56,6 +57,7 @@ type collected struct {
 	checks             []scoring.ResourceCheck
 	attributions       []ServiceAttribution
 	metricAttributions []MetricAttribution
+	logAttributions    []LogAttribution
 	datasources        []DatasourceSummary
 	totals             map[finding.Signal]float64
 }
@@ -70,6 +72,11 @@ func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
 	for _, datasource := range inv.Metrics {
 		a.assessMetricDatasource(datasource, inv.ReclassificationRules(), &gathered)
 	}
+	for _, datasource := range inv.Logs {
+		for _, service := range datasource.Services {
+			a.assessLogService(datasource.UID, service, &gathered)
+		}
+	}
 
 	scores := scoring.Score(gathered.findings, gathered.requirements, gathered.checks, options)
 	return Result{
@@ -78,6 +85,7 @@ func (a *Assessor) Assess(inv Inventory, options scoring.Options) Result {
 		Findings:       scoring.RankByImpact(gathered.findings, gathered.totals),
 		Attributions:   nonNil(gathered.attributions),
 		Metrics:        nonNil(gathered.metricAttributions),
+		Logs:           nonNil(gathered.logAttributions),
 		Datasources:    nonNil(gathered.datasources),
 		Owners:         rows(scores),
 		Namespaces:     rows(scoring.RollUp(servicesOnly(scores), scoring.ByNamespace)),

@@ -77,10 +77,32 @@ export interface ReclassificationRule {
   action: ReclassificationAction;
 }
 
+export type LogKeysMethod = 'detected_fields' | 'sample';
+
+export interface LogService {
+  service_name: string;
+  service_namespace: string;
+  stream_labels: string[];
+  metadata_keys: string[];
+  keys_method: LogKeysMethod;
+  sampled_lines: number;
+  otlp_markers: string[];
+  scope_names: string[];
+  sdk: SDK;
+  volume: number;
+}
+
+export interface LogDatasource {
+  uid: string;
+  labels: string[];
+  services: LogService[];
+}
+
 export interface Inventory {
   window: Window;
   traces: TraceDatasource[];
   metrics?: MetricDatasource[];
+  logs?: LogDatasource[];
   reclassification?: ReclassificationRule[];
 }
 

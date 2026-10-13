@@ -1,8 +1,12 @@
 {
   "files": {
+    "loki/detected-fields-checkout.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/loki/loki/api/v1/detected_fields?query={service_name=\"checkout\"} (30m window, sketch removed)"
+    },
     "loki/labels.json": {
       "headers": {},
-      "request": "/api/datasources/proxy/uid/loki/loki/api/v1/labels?start=1791801829000000000&end=1791888229000000000"
+      "request": "/api/datasources/proxy/uid/loki/loki/api/v1/labels"
     },
     "loki/sample-categorized.json": {
       "headers": {
@@ -10,9 +14,21 @@
       },
       "request": "/api/datasources/proxy/uid/loki/loki/api/v1/query_range?query=%7Bservice_name%3D%22checkout%22%7D&limit=20&start=1791801829000000000&end=1791888229000000000&direction=backward"
     },
+    "loki/sample-checkout.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/loki/loki/api/v1/query_range?query={service_name=\"checkout\"}&limit=5 with categorize-labels (lines blanked)"
+    },
+    "loki/series-checkout.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/loki/loki/api/v1/series?match[]={service_name=\"checkout\"}"
+    },
     "loki/service-name-values.json": {
       "headers": {},
-      "request": "/api/datasources/proxy/uid/loki/loki/api/v1/label/service_name/values?start=1791801829000000000&end=1791888229000000000"
+      "request": "/api/datasources/proxy/uid/loki/loki/api/v1/label/service_name/values"
+    },
+    "loki/volume-checkout.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/loki/loki/api/v1/query?query=sum(count_over_time({service_name=\"checkout\"}[1800s]))"
     },
     "prometheus/metric-names.json": {
       "headers": {},
