@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 
 	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
 )
 
 var (
@@ -23,7 +24,8 @@ var loadEmbeddedCatalogue = sync.OnceValues(catalogue.LoadEmbedded)
 
 type App struct {
 	backend.CallResourceHandler
-	catalogue *catalogue.Catalogue
+	catalogue   *catalogue.Catalogue
+	metricIndex *nameindex.MetricIndex
 }
 
 func NewApp(_ context.Context, _ backend.AppInstanceSettings) (instancemgmt.Instance, error) {
@@ -35,7 +37,7 @@ func NewApp(_ context.Context, _ backend.AppInstanceSettings) (instancemgmt.Inst
 }
 
 func newApp(loaded *catalogue.Catalogue) *App {
-	app := &App{catalogue: loaded}
+	app := &App{catalogue: loaded, metricIndex: nameindex.NewMetricIndex(loaded)}
 	mux := http.NewServeMux()
 	app.registerRoutes(mux)
 	app.CallResourceHandler = httpadapter.New(mux)

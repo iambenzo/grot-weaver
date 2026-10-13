@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"slices"
 	"strings"
 	"testing"
 
@@ -99,4 +100,23 @@ func Test_CheckHealth_reportsCatalogueVersion(t *testing.T) {
 	if !strings.Contains(result.Message, app.catalogue.Manifest.Semconv.Version) {
 		t.Errorf("message %q does not name the semconv version", result.Message)
 	}
+}
+
+func Test_CallResource_nameFormsListsEveryStoredSpelling(t *testing.T) {
+	response := callResource(t, newTestApp(t), http.MethodGet, "catalogue/name-forms")
+	if response.Status != http.StatusOK {
+		t.Fatalf("status = %d", response.Status)
+	}
+
+	var body nameFormsResponse
+	if err := json.Unmarshal(response.Body, &body); err != nil {
+		t.Fatal(err)
+	}
+	if got := body.Stored["http_server_request_duration_seconds_bucket"]; !slices.Equal(got, []string{"http.server.request.duration"}) {
+		t.Errorf("bucket entry = %v", got)
+	}
+	if got := body.Stored["http_server_duration"]; !slices.Equal(got, []string{"http.server.duration"}) {
+		t.Errorf("history-only entry = %v", got)
+	}
+	t.Logf("%d stored names, %d bytes", len(body.Stored), len(response.Body))
 }

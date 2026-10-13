@@ -165,10 +165,7 @@ func (i *AttributeIndex) scopedHistoryMatches(observed string, in Context) []cat
 }
 
 func chooseCandidate(observed string, candidates []catalogue.Attribute) AttributeMatch {
-	ordered := slices.Clone(candidates)
-	slices.SortStableFunc(ordered, func(a, b catalogue.Attribute) int {
-		return boolRank(a.Deprecated == nil) - boolRank(b.Deprecated == nil)
-	})
+	ordered, confidence := rankCandidates(candidates, func(a catalogue.Attribute) bool { return a.Deprecated == nil })
 	chosen := ordered[0]
 	form := FormUnderscore
 	if observed == chosen.Name {
@@ -180,28 +177,8 @@ func chooseCandidate(observed string, candidates []catalogue.Attribute) Attribut
 		Form:           form,
 		Attribute:      &chosen,
 		Alternatives:   ordered[1:],
-		Confidence:     candidateConfidence(ordered),
+		Confidence:     confidence,
 	}
-}
-
-func candidateConfidence(ordered []catalogue.Attribute) Confidence {
-	current := 0
-	for _, candidate := range ordered {
-		if candidate.Deprecated == nil {
-			current++
-		}
-	}
-	if len(ordered) == 1 || current == 1 {
-		return ConfidenceHigh
-	}
-	return ConfidenceMedium
-}
-
-func boolRank(preferred bool) int {
-	if preferred {
-		return 0
-	}
-	return 1
 }
 
 func spellings(name string) []string {

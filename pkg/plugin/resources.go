@@ -7,6 +7,7 @@ import (
 
 func (a *App) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /catalogue", a.handleCatalogue)
+	mux.HandleFunc("GET /catalogue/name-forms", a.handleNameForms)
 }
 
 func (a *App) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
