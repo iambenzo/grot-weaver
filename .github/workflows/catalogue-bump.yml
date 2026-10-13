@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '17 6 * * 1'
   workflow_dispatch:
+    inputs:
+      semconv:
+        description: Semantic conventions release tag, or latest
+        required: false
+        default: latest
 
 permissions:
   contents: write
@@ -28,11 +33,12 @@ jobs:
       - name: Regenerate from the latest sources
         run: |
           go run ./cmd/catalogue-gen \
-            -semconv latest \
+            -semconv "${SEMCONV}" \
             -genai-commit auto \
             -summary "${RUNNER_TEMP}/catalogue-summary.md"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          SEMCONV: ${{ inputs.semconv || 'latest' }}
 
       - name: Detect changes
         id: changes
