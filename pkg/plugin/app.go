@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 
+	"github.com/iambenzo/otel-semconv-compliance/pkg/assessment"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
 )
@@ -26,6 +27,7 @@ type App struct {
 	backend.CallResourceHandler
 	catalogue   *catalogue.Catalogue
 	metricIndex *nameindex.MetricIndex
+	assessor    *assessment.Assessor
 }
 
 func NewApp(_ context.Context, _ backend.AppInstanceSettings) (instancemgmt.Instance, error) {
@@ -37,7 +39,11 @@ func NewApp(_ context.Context, _ backend.AppInstanceSettings) (instancemgmt.Inst
 }
 
 func newApp(loaded *catalogue.Catalogue) *App {
-	app := &App{catalogue: loaded, metricIndex: nameindex.NewMetricIndex(loaded)}
+	app := &App{
+		catalogue:   loaded,
+		metricIndex: nameindex.NewMetricIndex(loaded),
+		assessor:    assessment.NewAssessor(loaded, nil),
+	}
 	mux := http.NewServeMux()
 	app.registerRoutes(mux)
 	app.CallResourceHandler = httpadapter.New(mux)

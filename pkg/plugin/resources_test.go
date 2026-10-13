@@ -10,6 +10,7 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 
+	"github.com/iambenzo/otel-semconv-compliance/pkg/assessment"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
 )
 
@@ -119,4 +120,46 @@ func Test_CallResource_nameFormsListsEveryStoredSpelling(t *testing.T) {
 		t.Errorf("history-only entry = %v", got)
 	}
 	t.Logf("%d stored names, %d bytes", len(body.Stored), len(response.Body))
+}
+
+func postScore(t *testing.T, app *App, body []byte) *backend.CallResourceResponse {
+	t.Helper()
+	var sender capturingSender
+	request := &backend.CallResourceRequest{Method: http.MethodPost, Path: "score", Body: body}
+	if err := app.CallResource(context.Background(), request, &sender); err != nil {
+		t.Fatalf("call resource: %v", err)
+	}
+	return sender.response
+}
+
+func Test_CallResource_score(t *testing.T) {
+	app := newTestApp(t)
+	valid := `{"inventory":{"window":{"start":1,"end":2},"traces":[{"uid":"tempo","services":[{"service_name":"checkout","span_count":3,"span_keys":[{"key":"http.method"}]}]}]}}`
+
+	tests := []struct {
+		name       string
+		body       []byte
+		wantStatus int
+	}{
+		{name: "valid inventory", body: []byte(valid), wantStatus: http.StatusOK},
+		{name: "unknown field rejected", body: []byte(`{"inventory":{},"surprise":true}`), wantStatus: http.StatusBadRequest},
+		{name: "invalid inventory rejected", body: []byte(`{"inventory":{"window":{"start":5,"end":1}}}`), wantStatus: http.StatusBadRequest},
+		{name: "malformed json rejected", body: []byte(`{`), wantStatus: http.StatusBadRequest},
+		{name: "oversized body rejected", body: []byte(`{"inventory":{"traces":[{"uid":"` + strings.Repeat("x", maxScoreRequestBytes) + `"}]}}`), wantStatus: http.StatusRequestEntityTooLarge},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := postScore(t, app, tt.body).Status; got != tt.wantStatus {
+				t.Errorf("status = %d, want %d", got, tt.wantStatus)
+			}
+		})
+	}
+
+	var result assessment.Result
+	if err := json.Unmarshal(postScore(t, app, []byte(valid)).Body, &result); err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Findings) == 0 || result.Findings[0].Observed != "http.method" || len(result.Owners) != 1 {
+		t.Errorf("result = %+v", result)
+	}
 }
