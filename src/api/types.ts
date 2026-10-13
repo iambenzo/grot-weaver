@@ -39,6 +39,8 @@ export interface Finding {
   source?: RegistrySource;
   volume: number;
   pipeline_introduced?: boolean;
+  metrics?: string[];
+  library?: { name: string; version?: string; evidence: string; confidence: Confidence };
   impact_share: number;
 }
 
@@ -73,11 +75,35 @@ export interface Attribution {
   sdk: { name?: string; language?: string; version?: string; distro?: string };
 }
 
+export type Origin = 'sdk' | 'collector_scraped' | 'non_otel';
+
+export interface MetricAttribution {
+  datasource: string;
+  owner: Owner;
+  source: string;
+  confidence: Confidence;
+  origin: { origin: Origin; confidence: Confidence; reason: string };
+  sdk: { name?: string; language?: string; version?: string };
+  hints?: Record<string, string>;
+}
+
+export interface DatasourceSummary {
+  uid: string;
+  signal: Signal;
+  strategy?: string;
+  overridden?: boolean;
+  mixed?: boolean;
+  evidence: { escaped: number; utf8: number; suffixed: number; not_suffixed: number };
+  unit_checkable: boolean;
+}
+
 export interface AssessmentResult {
   semconv_version: string;
   window: { start: number; end: number };
   findings: Finding[];
   attributions: Attribution[];
+  metric_attributions?: MetricAttribution[];
+  datasources?: DatasourceSummary[];
   owners: ScoreRow[];
   namespaces: ScoreRow[];
   signals: ScoreRow[];

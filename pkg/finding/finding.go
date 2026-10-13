@@ -77,6 +77,7 @@ type Finding struct {
 	Volume             float64               `json:"volume"`
 	PipelineIntroduced bool                  `json:"pipeline_introduced,omitempty"`
 	Metrics            []string              `json:"metrics,omitempty"`
+	Library            *Library              `json:"library,omitempty"`
 }
 
 var levels = map[Type]Level{
@@ -90,6 +91,13 @@ var levels = map[Type]Level{
 	TypeCustom:                     LevelInformation,
 	TypeSDKDefaultServiceName:      LevelViolation,
 	TypeMissingServiceName:         LevelViolation,
+}
+
+type Library struct {
+	Name       string               `json:"name"`
+	Version    string               `json:"version,omitempty"`
+	Evidence   string               `json:"evidence"`
+	Confidence nameindex.Confidence `json:"confidence"`
 }
 
 func LevelOf(t Type) Level {

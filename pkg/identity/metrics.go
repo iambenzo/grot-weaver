@@ -67,12 +67,23 @@ func mergeLabels(into, labels map[string]string) map[string]string {
 	return into
 }
 
+type SDK struct {
+	Name     string `json:"name,omitempty"`
+	Language string `json:"language,omitempty"`
+	Version  string `json:"version,omitempty"`
+}
+
 type MetricResolution struct {
 	Attribution Attribution
 	Origin      OriginClassification
+	SDK         SDK
 	Hints       map[string]string
 	Findings    []finding.Finding
 	Checks      []scoring.ResourceCheck
+}
+
+func sdkFrom(target map[string]string) SDK {
+	return SDK{Name: target["telemetry_sdk_name"], Language: target["telemetry_sdk_language"], Version: target["telemetry_sdk_version"]}
 }
 
 func ResolveMetricOwner(labels map[string]string, targets TargetIndex, volume float64) MetricResolution {
@@ -83,18 +94,24 @@ func ResolveMetricOwner(labels map[string]string, targets TargetIndex, volume fl
 		if origin.Origin == OriginNonOTel {
 			origin = OriginClassification{Origin: OriginSDK, Confidence: nameindex.ConfidenceHigh, Reason: "series carry a service_name label"}
 		}
-		return serviceResolution(finding.Owner{Kind: finding.OwnerService, Namespace: labels[serviceNamespaceLabel], Name: name}, SourceServiceNameLabel, origin, volume)
+		resolution := serviceResolution(finding.Owner{Kind: finding.OwnerService, Namespace: labels[serviceNamespaceLabel], Name: name}, SourceServiceNameLabel, origin, volume)
+		resolution.SDK = sdkFrom(target)
+		return resolution
 	}
 
 	if job := labels[jobLabel]; job != "" {
 		target, found := targets.ForJob(job)
 		origin := ClassifyOrigin(target, found, scope)
 		if IsSDKDefaultServiceName(job) {
-			return serviceResolution(finding.Owner{Kind: finding.OwnerService, Name: job}, SourceJobLabel, origin, volume)
+			resolution := serviceResolution(finding.Owner{Kind: finding.OwnerService, Name: job}, SourceJobLabel, origin, volume)
+			resolution.SDK = sdkFrom(target)
+			return resolution
 		}
 		if origin.Origin == OriginSDK {
 			namespace, name := splitJob(job)
-			return serviceResolution(finding.Owner{Kind: finding.OwnerService, Namespace: namespace, Name: name}, SourceJobLabel, origin, volume)
+			resolution := serviceResolution(finding.Owner{Kind: finding.OwnerService, Namespace: namespace, Name: name}, SourceJobLabel, origin, volume)
+			resolution.SDK = sdkFrom(target)
+			return resolution
 		}
 		owner := finding.Owner{Kind: finding.OwnerSource, Name: job}
 		return MetricResolution{
@@ -105,7 +122,9 @@ func ResolveMetricOwner(labels map[string]string, targets TargetIndex, volume fl
 
 	owner := finding.Owner{Kind: finding.OwnerUnattributed, Name: unattributedName}
 	if target, found := targets.byInstance[labels[instanceLabel]]; found && labels[instanceLabel] != "" {
-		return unattributedResolution(owner, SourceInstanceTarget, ClassifyOrigin(target, true, scope), pick(target, hintTargetLabels), volume)
+		resolution := unattributedResolution(owner, SourceInstanceTarget, ClassifyOrigin(target, true, scope), pick(target, hintTargetLabels), volume)
+		resolution.SDK = sdkFrom(target)
+		return resolution
 	}
 	return unattributedResolution(owner, SourceIdentityHint, ClassifyOrigin(nil, false, scope), pick(labels, identityLikeLabels), volume)
 }

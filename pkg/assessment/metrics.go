@@ -16,6 +16,7 @@ type MetricAttribution struct {
 	Datasource string `json:"datasource"`
 	identity.Attribution
 	Origin identity.OriginClassification `json:"origin"`
+	SDK    identity.SDK                  `json:"sdk"`
 	Hints  map[string]string             `json:"hints,omitempty"`
 }
 
@@ -40,6 +41,7 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 				Datasource:  datasource.UID,
 				Attribution: resolution.Attribution,
 				Origin:      resolution.Origin,
+				SDK:         resolution.SDK,
 				Hints:       resolution.Hints,
 			})
 			into.checks = append(into.checks, resolution.Checks...)
@@ -59,6 +61,20 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 }
 
 func (a *Assessor) classifyMetricName(owner finding.Owner, row MetricOwner, strategy nameindex.Strategy) finding.Finding {
+	classified := a.classifyMetricNameOnly(owner, row, strategy)
+	classified.Library = scopeLibrary(row.Labels)
+	return classified
+}
+
+func scopeLibrary(labels map[string]string) *finding.Library {
+	name := labels[identity.ScopeNameLabel]
+	if name == "" {
+		return nil
+	}
+	return &finding.Library{Name: name, Version: labels[identity.ScopeVersionLabel], Evidence: "otel_scope_name label", Confidence: nameindex.ConfidenceHigh}
+}
+
+func (a *Assessor) classifyMetricNameOnly(owner finding.Owner, row MetricOwner, strategy nameindex.Strategy) finding.Finding {
 	at := finding.Observation{Owner: owner, Signal: finding.SignalMetrics, Volume: row.Series}
 	if match := a.metrics.Match(row.Metric); match.Matched {
 		return a.classifier.Metric(at, preferStrategy(match, strategy))

@@ -132,3 +132,31 @@ func Test_Assess_metricsFromLocalFixtures(t *testing.T) {
 func identityTargets(series []map[string]string) identity.TargetIndex {
 	return identity.NewTargetIndex(series)
 }
+
+func Test_Assess_metricLibraries(t *testing.T) {
+	inventory := Inventory{Metrics: []MetricDatasource{{
+		UID: "prom",
+		TargetInfo: []map[string]string{
+			{"job": "shop/checkout", "telemetry_sdk_name": "opentelemetry", "telemetry_sdk_language": "python", "telemetry_sdk_version": "1.45.1"},
+		},
+		Owners: []MetricOwner{
+			{Metric: "http_server_request_duration_seconds_bucket", Labels: map[string]string{"job": "shop/checkout", "otel_scope_name": "opentelemetry.instrumentation.flask", "otel_scope_version": "0.56b0"}, Series: 3},
+			{Metric: "process_memory_usage_bytes", Labels: map[string]string{"job": "shop/checkout"}, Series: 1},
+		},
+	}}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	checkout := finding.Owner{Kind: finding.OwnerService, Namespace: "shop", Name: "checkout"}
+	scoped, _ := metricFinding(result, checkout, "http_server_request_duration_seconds_bucket")
+	if scoped.Library == nil || scoped.Library.Name != "opentelemetry.instrumentation.flask" || scoped.Library.Version != "0.56b0" || scoped.Library.Confidence != "high" {
+		t.Errorf("scoped library = %+v", scoped.Library)
+	}
+	unscoped, _ := metricFinding(result, checkout, "process_memory_usage_bytes")
+	if unscoped.Library != nil {
+		t.Errorf("library without scope labels = %+v, want unknown", unscoped.Library)
+	}
+	if len(result.Metrics) != 1 || result.Metrics[0].SDK != (identity.SDK{Name: "opentelemetry", Language: "python", Version: "1.45.1"}) {
+		t.Errorf("attribution SDK = %+v", result.Metrics)
+	}
+}
