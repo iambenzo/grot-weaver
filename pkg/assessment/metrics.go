@@ -57,6 +57,7 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 		}
 		names.add(a.classifyMetricName(ownerKey, owner, summary.Strategy))
 		into.totals[finding.SignalMetrics] += owner.Series
+		into.cover(finding.SignalMetrics, owner.Series, ownerKey.Kind == finding.OwnerService)
 		volumes[ownerMetricKey(ownerKey, owner.Metric)] += owner.Series
 	}
 	into.findings = append(into.findings, a.receiverIntroducedFindings(targets)...)

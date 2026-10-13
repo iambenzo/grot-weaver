@@ -25,27 +25,18 @@ import {
 } from '@grafana/ui';
 import { proxyGet } from '../../datasources/proxy';
 import { createLimiter } from '../../datasources/limiter';
-import { scoreInventory } from '../../api/score';
-import { fetchMetricsNeedingLabels, fetchSpanGroupRules } from '../../api/catalogue';
 import { Finding, Owner, Signal } from '../../api/types';
 import { lookupFindingLibraries, sameOwner } from '../../assessment/traceAssessment';
-import {
-  discoverStack,
-  ServiceIdentity,
-  StackAssessment,
-  assessStack,
-  mergeOwners,
-  ownerKey,
-} from '../../assessment/stackAssessment';
+import { ServiceIdentity, StackAssessment, mergeOwners, ownerKey } from '../../assessment/stackAssessment';
 import { evidenceTarget, exploreUrl } from '../../assessment/explore';
 import { libraryInfo } from '../../assessment/libraries';
-import { LabelProgress } from '../../inventory/prometheus';
 import { LibraryEvidence } from '../../inventory/traceLibraries';
 import { PluginSettings, concurrencyFrom } from '../../settings/settings';
 import { QueryWindow, toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
 import { FindingsTable } from './FindingsTable';
+import { Keyed, loadingText, useStackAssessment } from '../../assessment/useStackAssessment';
 import { HopCandidates } from './HopCandidates';
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
@@ -88,10 +79,6 @@ export class ServiceFindings extends SceneObjectBase<ServiceFindingsState> {
   }
 }
 
-type Outcome =
-  { status: 'failed'; message: string } | { status: 'ready'; assessment: StackAssessment; window: QueryWindow };
-type Load = { status: 'loading'; labels?: LabelProgress } | Outcome;
-
 function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>) {
   const styles = useStyles2(getStyles);
   const { service, namespace, signal, settings } = model.useState();
@@ -101,9 +88,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   const load = useStackAssessment(settings, window);
 
   if (load.status === 'loading') {
-    const labels =
-      load.labels && load.labels.total > 0 ? ` Checking metric labels ${load.labels.done}/${load.labels.total}.` : '';
-    return <LoadingPlaceholder text={`Collecting telemetry names and scoring them…${labels}`} />;
+    return <LoadingPlaceholder text={loadingText(load)} />;
   }
   if (load.status === 'failed') {
     return (
@@ -268,37 +253,6 @@ function CollectionWarnings({ assessment }: { assessment: StackAssessment }) {
   );
 }
 
-interface Keyed<K, V> {
-  key: K;
-  value: V;
-}
-
-function useStackAssessment(settings: PluginSettings, window: QueryWindow): Load {
-  const [loaded, setLoaded] = useState<Keyed<QueryWindow, Outcome>>();
-  const [progress, setProgress] = useState<Keyed<QueryWindow, LabelProgress>>();
-  useEffect(() => {
-    let cancelled = false;
-    const settle = (value: Outcome) => !cancelled && setLoaded({ key: window, value });
-    assessStack(discoverStack(settings), window, settings, {
-      get: proxyGet,
-      limit: createLimiter(concurrencyFrom(settings)),
-      score: scoreInventory,
-      spanGroupRules: fetchSpanGroupRules,
-      namesNeedingLabels: fetchMetricsNeedingLabels,
-      onLabelProgress: (value) => !cancelled && setProgress({ key: window, value }),
-    })
-      .then((assessment) => settle({ status: 'ready', assessment, window }))
-      .catch((error: unknown) => settle({ status: 'failed', message: messageOf(error) }));
-    return () => {
-      cancelled = true;
-    };
-  }, [settings, window]);
-  if (loaded && loaded.key === window) {
-    return loaded.value;
-  }
-  return { status: 'loading', labels: progress?.key === window ? progress.value : undefined };
-}
-
 const NO_EVIDENCE = new Map<string, LibraryEvidence>();
 
 function useLibraryEvidence(
@@ -336,14 +290,6 @@ function toOption(identity: ServiceIdentity): ComboboxOption {
     label: ownerLabel(identity.owner),
     description: identity.signals.join(', '),
   };
-}
-
-function messageOf(error: unknown): string {
-  if (error && typeof error === 'object') {
-    const candidate = error as { data?: { error?: string; message?: string }; message?: string };
-    return candidate.data?.error ?? candidate.data?.message ?? candidate.message ?? 'unknown error';
-  }
-  return String(error);
 }
 
 const getStyles = (theme: GrafanaTheme2) => ({

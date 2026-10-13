@@ -81,6 +81,14 @@ describe('lookupLibraries', () => {
 });
 
 describe('probeTraceQLMetrics', () => {
+  it('probes only the most recent hour', async () => {
+    const { context, calls } = fakeTempo();
+
+    await probeTraceQLMetrics(context);
+
+    expect(calls[0].params).toMatchObject({ start: String(23 * 3600), end: String(24 * 3600) });
+  });
+
   it.each([
     [undefined, true],
     [{ status: 500, data: { message: 'empty ring' } }, false],

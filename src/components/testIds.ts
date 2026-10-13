@@ -6,6 +6,13 @@ export const testIds = {
     tabs: 'data-testid service-signal-tabs',
     hops: 'data-testid service-hop-candidates',
   },
+  overview: {
+    header: 'data-testid overview-header',
+    tiles: 'data-testid overview-score-tiles',
+    violations: 'data-testid overview-top-violations',
+    services: 'data-testid overview-services',
+    sections: 'data-testid overview-owner-sections',
+  },
   window: {
     widenPrompt: 'data-testid window-widen-prompt',
     widenButton: 'data-testid window-widen-button',

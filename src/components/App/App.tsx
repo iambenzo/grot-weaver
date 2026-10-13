@@ -4,12 +4,13 @@ import { AppRootProps } from '@grafana/data';
 import { PluginPropsContext } from '../../utils/utils.plugin';
 import { readSettings } from '../../settings/settings';
 import { servicePage } from '../../pages/Service/servicePage';
+import { overviewPage } from '../../pages/Overview/overviewPage';
 
 function AppWithScenes({ jsonData }: { jsonData: unknown }) {
   const createApp = useCallback(() => {
     const settings = readSettings(jsonData);
     return new SceneApp({
-      pages: [servicePage(settings)],
+      pages: [overviewPage(settings), servicePage(settings)],
       urlSyncOptions: {
         updateUrlOnInit: true,
         createBrowserHistorySteps: true,

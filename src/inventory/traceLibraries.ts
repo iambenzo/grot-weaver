@@ -2,13 +2,14 @@ import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, tempoWindowParams } from '../window/window';
 import { attributeSelector, serviceFilterExpression } from './traceql';
+import { MetricsAttribute, queryMetricsRange } from './traceqlMetrics';
 
 const INSTRUMENTATION_NAME = 'instrumentation:name';
 const INSTRUMENTATION_VERSION = 'instrumentation:version';
 const DEFAULT_SAMPLE_LIMIT = 20;
 const SPANS_PER_SPAN_SET = '3';
-const STEPS_PER_WINDOW = 20;
-const MIN_STEP_SECONDS = 60;
+const PROBE_WINDOW_SECONDS = 3600;
+const MAX_LOOKUP_SLICES = 8;
 
 export type LookupMethod = 'metrics' | 'sample';
 
@@ -32,14 +33,7 @@ export interface FlaggedKey {
   scope: 'resource' | 'span';
 }
 
-interface Attribute {
-  key: string;
-  value?: { stringValue?: string };
-}
-
-interface MetricsResponse {
-  series?: Array<{ labels?: Attribute[]; samples?: Array<{ timestampMs: string; value?: number }> }>;
-}
+type Attribute = MetricsAttribute;
 
 interface SearchResponse {
   traces?: Array<{ spanSets?: Array<{ spans?: Array<{ startTimeUnixNano?: string; attributes?: Attribute[] }> }> }>;
@@ -59,13 +53,8 @@ export function flaggedKeyFilter(flagged: FlaggedKey): string {
 
 export async function probeTraceQLMetrics(context: LookupContext): Promise<boolean> {
   try {
-    await context.limit(() =>
-      context.get<MetricsResponse>(
-        context.uid,
-        '/api/metrics/query_range',
-        metricsParams(context.window, '{ } | count_over_time()')
-      )
-    );
+    const startSeconds = Math.max(context.window.startSeconds, context.window.endSeconds - PROBE_WINDOW_SECONDS);
+    await queryMetricsRange({ ...context, window: { ...context.window, startSeconds } }, '{ } | count_over_time()');
     return true;
   } catch {
     return false;
@@ -92,14 +81,12 @@ export async function lookupLibraries(
 
 async function lookupWithMetrics(context: LookupContext, flagged: FlaggedKey): Promise<LibraryEvidence> {
   const query = `${flaggedKeyFilter(flagged)} | count_over_time() by (${INSTRUMENTATION_NAME}, ${INSTRUMENTATION_VERSION})`;
-  const response = await context.limit(() =>
-    context.get<MetricsResponse>(context.uid, '/api/metrics/query_range', metricsParams(context.window, query))
-  );
+  const series = await queryMetricsRange(context, query, MAX_LOOKUP_SLICES);
   const evidence: LibraryEvidence = { libraries: [], confidence: 'high', method: 'metrics' };
-  for (const series of response.series ?? []) {
-    const counted = (series.samples ?? []).filter((sample) => (sample.value ?? 0) > 0);
+  for (const entry of series) {
+    const counted = (entry.samples ?? []).filter((sample) => (sample.value ?? 0) > 0);
     const spans = counted.reduce((total, sample) => total + (sample.value ?? 0), 0);
-    evidence.libraries.push({ ...libraryFrom(series.labels ?? []), spans });
+    evidence.libraries.push({ ...libraryFrom(entry.labels ?? []), spans });
     for (const sample of counted) {
       widenSeen(evidence, Number(sample.timestampMs));
     }
@@ -132,11 +119,6 @@ async function lookupWithSample(context: LookupContext, flagged: FlaggedKey): Pr
   }
   evidence.libraries = [...seen.values()];
   return evidence;
-}
-
-function metricsParams(window: QueryWindow, query: string): Record<string, string> {
-  const step = Math.max(Math.ceil((window.endSeconds - window.startSeconds) / STEPS_PER_WINDOW), MIN_STEP_SECONDS);
-  return { ...tempoWindowParams(window), q: query, step: `${step}s` };
 }
 
 function libraryFrom(attributes: Attribute[]): Library {

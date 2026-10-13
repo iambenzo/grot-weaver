@@ -230,7 +230,7 @@ func Test_Assess_emptyInventoryEncodesEmptyLists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, field := range []string{"findings", "attributions", "metric_attributions", "log_attributions", "datasources", "owners", "namespaces", "signals"} {
+	for _, field := range []string{"findings", "attributions", "metric_attributions", "log_attributions", "datasources", "hops", "coverage", "owners", "namespaces", "signals"} {
 		if !strings.Contains(string(encoded), `"`+field+`":[]`) {
 			t.Errorf("%s is not an empty list in %s", field, encoded)
 		}
@@ -256,5 +256,35 @@ func Test_Assess_customNamespacesFromTheRequest(t *testing.T) {
 	again, _ := findingFor(assessor.Assess(inventory(nil), scoringDefaults), checkout, "http.colour")
 	if again.Type != finding.TypeNotInRegistry {
 		t.Error("a request's custom namespaces leaked into the shared assessor")
+	}
+}
+
+func Test_Assess_coverageIsSDKOriginAttributedVolume(t *testing.T) {
+	inventory := Inventory{
+		Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{{ServiceName: "checkout", SpanCount: 90}, {ServiceName: "", SpanCount: 10}}}},
+		Metrics: []MetricDatasource{{
+			UID:        "prom",
+			TargetInfo: []map[string]string{{"job": "shop/checkout", "telemetry_sdk_name": "opentelemetry"}},
+			Owners: []MetricOwner{
+				{Metric: "process_memory_usage_bytes", Labels: map[string]string{"job": "shop/checkout"}, Series: 30},
+				{Metric: "node_cpu_seconds_total", Labels: map[string]string{"job": "integrations/node_exporter"}, Series: 70},
+			},
+		}},
+		Logs: []LogDatasource{{UID: "loki", Services: []LogService{
+			{ServiceName: "checkout", OTLPMarkers: []string{"scope_name"}, Volume: 40},
+			{ServiceName: "integrations/db-o11y", Volume: 60},
+		}}},
+	}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	want := map[finding.Signal]float64{finding.SignalTraces: 0.9, finding.SignalMetrics: 0.3, finding.SignalLogs: 0.4}
+	if len(result.Coverage) != 3 {
+		t.Fatalf("coverage = %+v", result.Coverage)
+	}
+	for _, row := range result.Coverage {
+		if got, _ := row.Coverage.Value(); got != want[row.Signal] {
+			t.Errorf("%s coverage = %v, want %v", row.Signal, got, want[row.Signal])
+		}
 	}
 }

@@ -27,6 +27,23 @@ function fakeTempo(failPaths: string[] = []): { get: ProxyGet; calls: Call[] } {
     if (requestPath === '/api/v2/search/tags') {
       return readFixture(params.scope === 'resource' ? 'tags-resource.json' : 'tags-span.json');
     }
+    if (requestPath === '/api/metrics/query_range') {
+      return {
+        series: [
+          {
+            labels: [{ key: 'resource.service.name', value: { stringValue: 'checkout' } }],
+            samples: [
+              { timestampMs: '1', value: 30 },
+              { timestampMs: '2', value: 12 },
+            ],
+          },
+          {
+            labels: [{ key: 'resource.service.name', value: { stringValue: '' } }],
+            samples: [{ timestampMs: '1', value: 3 }],
+          },
+        ],
+      };
+    }
     if (requestPath.includes('service.namespace')) {
       return { tagValues: params.q.includes('checkout') ? [{ type: 'string', value: 'shop' }] : [] };
     }
@@ -50,6 +67,8 @@ describe('collectTempoInventory', () => {
     );
     const checkout = datasource.services.find((service) => service.service_name === 'checkout');
     expect(checkout?.service_namespace).toBe('shop');
+    expect(checkout?.span_count).toBe(42);
+    expect(datasource.services.find((service) => service.service_name === '')?.span_count).toBe(3);
     expect(checkout?.sdk).toEqual({ language: 'python' });
     expect(checkout?.span_keys.map((key) => key.key)).toContain('http.method');
     expect(checkout?.resource_keys.map((key) => key.key)).toContain('service.name');

@@ -38,6 +38,7 @@ func (a *Assessor) assessLogService(datasource string, service LogService, into 
 	into.findings = append(into.findings, resolution.Findings...)
 	into.checks = append(into.checks, resolution.Checks...)
 	into.totals[finding.SignalLogs] += service.Volume
+	into.cover(finding.SignalLogs, service.Volume, owner.Kind == finding.OwnerService && len(service.OTLPMarkers) > 0)
 
 	library := logLibrary(service.ScopeNames)
 	at := finding.Observation{Owner: owner, Signal: finding.SignalLogs, Volume: service.Volume}

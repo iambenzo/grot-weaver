@@ -121,6 +121,7 @@ export interface AssessmentResult {
   log_attributions?: LogAttribution[];
   datasources?: DatasourceSummary[];
   hops?: ServiceHops[];
+  coverage?: Array<{ signal: Signal; coverage: Ratio }>;
   owners: ScoreRow[];
   namespaces: ScoreRow[];
   signals: ScoreRow[];

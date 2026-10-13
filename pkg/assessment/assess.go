@@ -38,6 +38,7 @@ type Result struct {
 	Logs           []LogAttribution        `json:"log_attributions"`
 	Datasources    []DatasourceSummary     `json:"datasources"`
 	Hops           []ServiceHops           `json:"hops"`
+	Coverage       []SignalCoverage        `json:"coverage"`
 	Owners         []ScoreRow              `json:"owners"`
 	Namespaces     []ScoreRow              `json:"namespaces"`
 	Signals        []ScoreRow              `json:"signals"`
@@ -63,6 +64,31 @@ type collected struct {
 	hopContexts        map[finding.Owner]hopContext
 	collectors         []Collector
 	totals             map[finding.Signal]float64
+	coverage           map[finding.Signal]scoring.Ratio
+}
+
+type SignalCoverage struct {
+	Signal   finding.Signal `json:"signal"`
+	Coverage scoring.Ratio  `json:"coverage"`
+}
+
+func (c *collected) cover(signal finding.Signal, volume float64, attributed bool) {
+	ratio := c.coverage[signal]
+	ratio.Denominator += volume
+	if attributed {
+		ratio.Numerator += volume
+	}
+	c.coverage[signal] = ratio
+}
+
+func (c *collected) coverageRows() []SignalCoverage {
+	rows := []SignalCoverage{}
+	for _, signal := range []finding.Signal{finding.SignalMetrics, finding.SignalTraces, finding.SignalLogs} {
+		if ratio, seen := c.coverage[signal]; seen {
+			rows = append(rows, SignalCoverage{Signal: signal, Coverage: ratio})
+		}
+	}
+	return rows
 }
 
 func (c *collected) noteOwner(context hopContext) {
@@ -106,7 +132,7 @@ func (a *Assessor) withCustomNamespaces(namespaces []string) *Assessor {
 }
 
 func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
-	gathered := collected{totals: map[finding.Signal]float64{}, hopContexts: map[finding.Owner]hopContext{}}
+	gathered := collected{totals: map[finding.Signal]float64{}, hopContexts: map[finding.Owner]hopContext{}, coverage: map[finding.Signal]scoring.Ratio{}}
 	for _, datasource := range inv.Traces {
 		for _, service := range datasource.Services {
 			a.assessTraceService(datasource.UID, service, &gathered)
@@ -131,6 +157,7 @@ func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
 		Logs:           nonNil(gathered.logAttributions),
 		Datasources:    nonNil(gathered.datasources),
 		Hops:           gathered.hops(inv.PipelineMappings),
+		Coverage:       gathered.coverageRows(),
 		Owners:         rows(scores),
 		Namespaces:     rows(scoring.RollUp(servicesOnly(scores), scoring.ByNamespace)),
 		Signals:        rows(scoring.RollUp(servicesOnly(scores), scoring.BySignal)),
@@ -145,6 +172,7 @@ func (a *Assessor) assessTraceService(datasource string, service TraceService, i
 	into.findings = append(into.findings, resolution.Findings...)
 	into.checks = append(into.checks, resolution.Checks...)
 	into.totals[finding.SignalTraces] += service.SpanCount
+	into.cover(finding.SignalTraces, service.SpanCount, owner.Kind == finding.OwnerService)
 
 	at := finding.Observation{Owner: owner, Signal: finding.SignalTraces}
 	for _, key := range service.ResourceKeys {

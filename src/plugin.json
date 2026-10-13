@@ -22,10 +22,17 @@
   "includes": [
     {
       "type": "page",
+      "name": "Overview",
+      "path": "/a/%PLUGIN_ID%/overview",
+      "addToNav": true,
+      "defaultNav": true
+    },
+    {
+      "type": "page",
       "name": "Service",
       "path": "/a/%PLUGIN_ID%/service",
       "addToNav": true,
-      "defaultNav": true
+      "defaultNav": false
     }
   ],
   "dependencies": {

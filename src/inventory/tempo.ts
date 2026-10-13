@@ -5,6 +5,7 @@ import { SpanGroupRule } from '../api/catalogue';
 import { CollectionError, KeyObservation, SDK, SpanGroupSample, TraceDatasource, TraceService } from './types';
 import { applicableRules, sampleSpanGroup } from './spanGroups';
 import { serviceFilterExpression } from './traceql';
+import { queryMetricsRange } from './traceqlMetrics';
 
 const SERVICE_NAME_TAG = 'resource.service.name';
 const SERVICE_NAMESPACE_TAG = 'resource.service.namespace';
@@ -53,8 +54,27 @@ export async function collectTempoInventory(
 ): Promise<TempoCollection> {
   const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit };
   const serviceNames = await guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG));
-  const services = await Promise.all((serviceNames ?? []).map((name) => collectService(context, name)));
+  const [services, volumes] = await Promise.all([
+    Promise.all((serviceNames ?? []).map((name) => collectService(context, name))),
+    spanVolumes(context),
+  ]);
+  for (const service of services) {
+    service.span_count = volumes.get(service.service_name) ?? 0;
+  }
   return { datasource: { uid, services }, errors: context.errors };
+}
+
+async function spanVolumes(context: CollectorContext): Promise<Map<string, number>> {
+  const volumes = new Map<string, number>();
+  const series = await guarded(context, 'span volumes', () =>
+    queryMetricsRange(context, `{ } | count_over_time() by (${SERVICE_NAME_TAG})`)
+  );
+  for (const entry of series ?? []) {
+    const name = entry.labels?.find((label) => label.key === SERVICE_NAME_TAG)?.value?.stringValue ?? '';
+    const spans = (entry.samples ?? []).reduce((total, sample) => total + (sample.value ?? 0), 0);
+    volumes.set(name, (volumes.get(name) ?? 0) + spans);
+  }
+  return volumes;
 }
 
 async function collectService(context: CollectorContext, serviceName: string): Promise<TraceService> {
