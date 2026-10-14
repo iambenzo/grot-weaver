@@ -53,7 +53,6 @@ type ReclassificationRule struct {
 }
 
 var DefaultReclassification = []ReclassificationRule{
-	{Pattern: "*:*", Action: ActionExclude},
 	{Pattern: "traces_spanmetrics_*", Action: ActionExclude},
 	{Pattern: "traces_service_graph_*", Action: ActionExclude},
 	{Pattern: "traces_target_info", Action: ActionExclude},

@@ -3,6 +3,7 @@ package assessment
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
@@ -17,6 +18,8 @@ const (
 	stackAddedMinSets         = 3
 	stackAddedMinOwners       = 2
 	stackAddedPipeline        = "stack-added labels"
+	assertsLabelPrefix        = "asserts_"
+	assertsPipeline           = "Grafana Asserts labels"
 )
 
 var structuralMetricLabels = map[string]bool{
@@ -39,7 +42,7 @@ func (a *Assessor) assessLabelKeys(datasource MetricDatasource, targets identity
 	labels := labelCollector{into: into, position: map[labelFindingKey]int{}}
 	stackAdded := stackAddedKeys(datasource.LabelKeys, targets)
 	for _, set := range datasource.LabelKeys {
-		if _, reclassified := Reclassify(set.Metric, rules); reclassified {
+		if _, reclassified := Reclassify(set.Metric, rules); reclassified || isRecordingRule(set.Metric) {
 			continue
 		}
 		registryMetric, known := a.registryMetricFor(set.Metric)
@@ -58,8 +61,11 @@ func (a *Assessor) assessLabelKeys(datasource MetricDatasource, targets identity
 				present[match.Attribute.Name] = true
 			}
 			classified := a.classifier.Attribute(finding.Observation{Owner: owner, Signal: finding.SignalMetrics, Volume: volume}, match, catalogue.ScopeMetrics)
-			if stackAdded[key] && match.Classification != nameindex.ClassMatched {
-				classified = asStackAdded(classified, owner)
+			switch {
+			case strings.HasPrefix(key, assertsLabelPrefix):
+				classified = asPipelineAdded(classified, assertsPipeline, "added by Grafana Asserts rather than by "+ownerLabel(owner))
+			case stackAdded[key] && match.Classification != nameindex.ClassMatched:
+				classified = asPipelineAdded(classified, stackAddedPipeline, "present on nearly every series across owners, so added by the stack rather than by "+ownerLabel(owner))
 			}
 			labels.add(classified, set.Metric)
 		}
@@ -92,14 +98,18 @@ func stackAddedKeys(sets []OwnerLabelKeys, targets identity.TargetIndex) map[str
 	return stackAdded
 }
 
-func asStackAdded(classified finding.Finding, service finding.Owner) finding.Finding {
+func isRecordingRule(metric string) bool {
+	return strings.Contains(metric, ":")
+}
+
+func asPipelineAdded(classified finding.Finding, pipeline, note string) finding.Finding {
 	moved := classified
-	moved.Owner = finding.Owner{Kind: finding.OwnerPipeline, Name: stackAddedPipeline}
+	moved.Owner = finding.Owner{Kind: finding.OwnerPipeline, Name: pipeline}
 	moved.Type = finding.TypeCustom
 	moved.Level = finding.LevelOf(finding.TypeCustom)
 	moved.Bucket = ""
 	moved.PipelineIntroduced = true
-	moved.Note = joinNote("present on nearly every series across owners, so added by the stack rather than by "+ownerLabel(service), classified.Note)
+	moved.Note = joinNote(note, classified.Note)
 	return moved
 }
 

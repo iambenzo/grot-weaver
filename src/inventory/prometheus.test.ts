@@ -9,6 +9,7 @@ import {
   labelsMatcher,
   nameMatcher,
   ownerSelector,
+  isRecordingRule,
   ownersQuery,
 } from './prometheus';
 
@@ -78,9 +79,10 @@ describe('collectPrometheusInventory', () => {
 
     const { datasource } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
 
-    const names = fixture('cloud', 'metric-names.json').data.length;
+    const names = (fixture('cloud', 'metric-names.json').data as string[]).filter((name) => !isRecordingRule(name));
     const ownerCalls = calls.filter((call) => call.params.query?.startsWith('count by (__name__, job'));
-    expect(ownerCalls.length).toBe(Math.ceil(names / 40));
+    expect(ownerCalls.length).toBe(Math.ceil(names.length / 40));
+    expect(ownerCalls.some((call) => call.params.query?.includes('asserts:'))).toBe(false);
     expect(datasource.owners).toContainEqual({
       metric: 'http_server_request_duration_seconds_bucket',
       labels: { job: 'shop/checkout' },
@@ -195,6 +197,11 @@ describe('queries', () => {
     expect(ownersQuery(['up'], window, ['deployment.environment.name', 'service.version'])).toBe(
       'count by (__name__, job, service_name, service_namespace, otel_scope_name, otel_scope_version, semconv_has_deployment_environment_name, semconv_has_service_version) (label_replace(label_replace(last_over_time({__name__=~"up"}[86400s]), "semconv_has_deployment_environment_name", "1", "deployment_environment_name", ".+"), "semconv_has_service_version", "1", "service_version", ".+"))'
     );
+  });
+
+  it('treats colon names as recording rules', () => {
+    expect(isRecordingRule('asserts:request:rate5m')).toBe(true);
+    expect(isRecordingRule('http_server_request_duration_seconds_bucket')).toBe(false);
   });
 
   it('asks for instances only on series without job or service_name', () => {

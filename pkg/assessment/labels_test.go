@@ -28,7 +28,7 @@ func Test_Assess_metricLabelKeys(t *testing.T) {
 			{Metric: "http_server_request_duration_seconds_bucket", Labels: map[string]string{"job": "shop/inventory"}, Series: 5},
 		},
 		LabelKeys: []OwnerLabelKeys{
-			{Metric: "http_server_request_duration_seconds_bucket", Selector: map[string]string{"job": "shop/checkout"}, Keys: keys("http_request_method", "url_scheme", "http_method", "acme_tenant")},
+			{Metric: "http_server_request_duration_seconds_bucket", Selector: map[string]string{"job": "shop/checkout"}, Keys: keys("http_request_method", "url_scheme", "http_method", "acme_tenant", "asserts_env")},
 			{Metric: "http_client_request_duration_seconds_bucket", Selector: map[string]string{"job": "shop/checkout"}, Keys: keys("http_request_method", "server_address", "server_port", "http_method")},
 			{Metric: "http_server_request_duration_seconds_bucket", Selector: map[string]string{"job": "payments"}, Keys: keys("http_request_method")},
 			{Metric: "http_server_request_duration_seconds_bucket", Selector: map[string]string{"job": "shop/inventory"}, Keys: keys("http_request_method", "url_scheme")},
@@ -59,6 +59,13 @@ func Test_Assess_metricLabelKeys(t *testing.T) {
 	}
 	if _, onService := metricFinding(result, checkout, "cluster"); onService {
 		t.Error("stack-added label charged to the service")
+	}
+	assertsOwner := finding.Owner{Kind: finding.OwnerPipeline, Name: assertsPipeline}
+	if env, found := metricFinding(result, assertsOwner, "asserts_env"); !found || !env.PipelineIntroduced || !strings.Contains(env.Note, "Grafana Asserts") {
+		t.Errorf("asserts_env = %+v (found %v), want it on the Asserts pipeline", env, found)
+	}
+	if _, onService := metricFinding(result, checkout, "asserts_env"); onService {
+		t.Error("Asserts label charged to the service")
 	}
 	tenant, _ := metricFinding(result, checkout, "acme_tenant")
 	if tenant.Type != finding.TypeCustom || tenant.Owner != checkout {
@@ -102,5 +109,33 @@ func Test_stackAddedKeys_needsEnoughSetsAndOwners(t *testing.T) {
 	}
 	if got := stackAddedKeys(one[:2], identityTargets(nil)); got != nil {
 		t.Errorf("too few sets should disable detection, got %v", got)
+	}
+}
+
+func Test_Assess_skipsRecordingRules(t *testing.T) {
+	rule := "asserts:request:rate5m"
+	inventory := Inventory{Reclassification: []ReclassificationRule{}, Metrics: []MetricDatasource{{
+		UID:        "prom",
+		Names:      []string{"http_server_request_duration_seconds_bucket", rule},
+		TargetInfo: []map[string]string{{"job": "shop/checkout", "telemetry_sdk_name": "opentelemetry"}},
+		Owners: []MetricOwner{
+			{Metric: "http_server_request_duration_seconds_bucket", Labels: map[string]string{"job": "shop/checkout"}, Series: 10},
+			{Metric: rule, Labels: map[string]string{"job": "shop/checkout"}, Series: 90},
+			{Metric: rule, Labels: map[string]string{}, Series: 50},
+		},
+		LabelKeys: []OwnerLabelKeys{{Metric: rule, Selector: map[string]string{"job": "shop/checkout"}, Keys: []string{"job", "asserts_env"}}},
+	}}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	for _, f := range result.Findings {
+		if f.Observed == rule || slices.Contains(f.Metrics, rule) {
+			t.Errorf("recording rule produced a finding: %+v", f)
+		}
+	}
+	for _, coverage := range result.Coverage {
+		if coverage.Signal == finding.SignalMetrics && coverage.Coverage.Denominator != 10 {
+			t.Errorf("metric volume = %v, want only the 10 instrumented series", coverage.Coverage.Denominator)
+		}
 	}
 }

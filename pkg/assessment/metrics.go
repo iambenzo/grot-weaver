@@ -29,7 +29,7 @@ func (a *Assessor) assessMetricDatasource(datasource MetricDatasource, rules []R
 	volumes := map[string]float64{}
 	names := metricNameCollector{into: into, position: map[metricNameKey]int{}}
 	for _, owner := range datasource.Owners {
-		if _, reclassified := Reclassify(owner.Metric, rules); reclassified {
+		if _, reclassified := Reclassify(owner.Metric, rules); reclassified || isRecordingRule(owner.Metric) {
 			continue
 		}
 		resolution := identity.ResolveMetricOwner(owner.Labels, targets, owner.Series)

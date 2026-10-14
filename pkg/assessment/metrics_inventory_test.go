@@ -11,7 +11,6 @@ func Test_Reclassify_defaults(t *testing.T) {
 		want   ReclassificationAction
 		found  bool
 	}{
-		{metric: "job:http_requests:rate5m", want: ActionExclude, found: true},
 		{metric: "traces_spanmetrics_calls_total", want: ActionExclude, found: true},
 		{metric: "traces_service_graph_request_total", want: ActionExclude, found: true},
 		{metric: "traces_target_info", want: ActionExclude, found: true},

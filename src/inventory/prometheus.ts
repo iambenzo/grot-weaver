@@ -196,8 +196,15 @@ async function targetInfoSeries(context: Context): Promise<Array<Record<string, 
   return response.data.map(({ __name__, ...labels }) => labels);
 }
 
+export function isRecordingRule(name: string): boolean {
+  return name.includes(':');
+}
+
 async function collectOwners(context: Context, names: string[]): Promise<MetricOwner[]> {
-  const batches = chunk(names, NAMES_PER_BATCH);
+  const batches = chunk(
+    names.filter((name) => !isRecordingRule(name)),
+    NAMES_PER_BATCH
+  );
   const owned = await Promise.all(
     batches.map((batch, index) =>
       guarded(context, `owners batch ${index + 1}/${batches.length}`, () => ownersForBatch(context, batch))
