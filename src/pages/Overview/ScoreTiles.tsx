@@ -50,7 +50,7 @@ export function ScoreTiles({ signal, row, coverage }: ScoreTilesProps) {
   ];
   return (
     <Stack direction="column" gap={1} data-testid={testIds.overview.tiles}>
-      <SectionHeading title={SIGNAL_LABELS[signal]} help={SIGNAL_TILES_HELP} />
+      <SectionHeading title={SIGNAL_LABELS[signal]} help={SIGNAL_TILES_HELP} divided={signal === 'metrics'} />
       <div className={styles.grid}>
         {tiles.map(([label, value, help]) => (
           <div key={label} className={styles.tile} title={help}>

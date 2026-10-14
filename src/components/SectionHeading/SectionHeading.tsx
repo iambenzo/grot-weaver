@@ -6,12 +6,13 @@ interface SectionHeadingProps {
   title: string;
   help: GuideItem[];
   variant?: 'h3' | 'h4';
+  divided?: boolean;
 }
 
-export function SectionHeading({ title, help, variant = 'h3' }: SectionHeadingProps) {
+export function SectionHeading({ title, help, variant = 'h3', divided = true }: SectionHeadingProps) {
   return (
     <div>
-      <Divider spacing={3} />
+      {divided && <Divider spacing={3} />}
       <Stack gap={0.5} alignItems="center">
         <Text element="h2" variant={variant}>
           {title}
