@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
 )
@@ -158,16 +157,6 @@ func presenceChecks(checks []ResourceAttributeCheck) []scoring.PresenceCheck {
 		presence = append(presence, scoring.PresenceCheck{Owner: check.Owner, Signal: check.Signal, Present: check.State == PresencePresent})
 	}
 	return presence
-}
-
-func renamedFrom(c *catalogue.Catalogue) map[string][]string {
-	renamed := map[string][]string{}
-	for _, attribute := range c.Registry.Attributes {
-		if attribute.Deprecated != nil && attribute.Deprecated.RenamedTo != "" {
-			renamed[attribute.Deprecated.RenamedTo] = append(renamed[attribute.Deprecated.RenamedTo], attribute.Name)
-		}
-	}
-	return renamed
 }
 
 func (inv Inventory) RequiredAttributes() []string {

@@ -2,7 +2,15 @@ import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { AssessmentResult } from '../api/types';
 import { Inventory } from '../inventory/types';
-import { DatasourceProgress, StackAssessment, assessStack, mergeOwners, retryDatasource } from './stackAssessment';
+import {
+  DatasourceProgress,
+  StackAssessment,
+  StackDependencies,
+  assessStack,
+  mergeOwners,
+  retryDatasource,
+  seriesPresenceAttributes,
+} from './stackAssessment';
 
 const checkout = { kind: 'service' as const, namespace: 'shop', name: 'checkout' };
 
@@ -24,6 +32,34 @@ describe('mergeOwners', () => {
     expect(shopCheckout?.signals).toEqual(['traces', 'metrics', 'logs']);
     expect(shopCheckout?.aliases).toEqual([{ kind: 'service', name: 'checkout' }]);
     expect(identities.find((identity) => identity.owner.kind === 'source')?.aliases).toEqual([]);
+  });
+});
+
+describe('seriesPresenceAttributes', () => {
+  const deps = (renamedAttributes?: StackDependencies['renamedAttributes']): StackDependencies => ({
+    get: jest.fn(),
+    limit: createLimiter(1),
+    score: jest.fn(),
+    spanGroupRules: async () => [],
+    namesNeedingLabels: async () => [],
+    renamedAttributes,
+  });
+
+  it('adds the deprecated names of each required attribute', async () => {
+    const renamed = async () => ({
+      'deployment.environment.name': ['deployment.environment'],
+      'other.name': ['other'],
+    });
+    expect(
+      await seriesPresenceAttributes({ requiredResourceAttributes: ['deployment.environment.name'] }, deps(renamed))
+    ).toEqual(['deployment.environment.name', 'deployment.environment']);
+  });
+
+  it('still checks the required attributes when the renamed lookup fails', async () => {
+    const failing = async () => Promise.reject(new Error('down'));
+    expect(await seriesPresenceAttributes({ requiredResourceAttributes: ['service.name'] }, deps(failing))).toEqual([
+      'service.name',
+    ]);
   });
 });
 

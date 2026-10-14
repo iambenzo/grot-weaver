@@ -52,7 +52,7 @@ func NewAssessor(c *catalogue.Catalogue, customNamespaces []string) *Assessor {
 		attributes: nameindex.NewAttributeIndex(c, customNamespaces),
 		metrics:    nameindex.NewMetricIndex(c),
 		classifier: finding.NewClassifier(c),
-		renamed:    renamedFrom(c),
+		renamed:    c.RenamedFrom(),
 	}
 }
 

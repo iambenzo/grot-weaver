@@ -37,3 +37,16 @@ export const fetchMetricsNeedingLabels: FetchMetricsNeedingLabels = async (names
   );
   return response.data.needs_labels;
 };
+
+export type FetchRenamedAttributes = () => Promise<Record<string, string[]>>;
+
+export const fetchRenamedAttributes: FetchRenamedAttributes = async () => {
+  const response = await lastValueFrom(
+    getBackendSrv().fetch<Record<string, string[]>>({
+      url: `/api/plugins/${pluginJson.id}/resources/catalogue/renamed-attributes`,
+      method: 'GET',
+      showErrorAlert: false,
+    })
+  );
+  return response.data;
+};

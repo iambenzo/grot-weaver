@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { proxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { scoreInventory } from '../api/score';
-import { fetchMetricsNeedingLabels, fetchSpanGroupRules } from '../api/catalogue';
+import { fetchMetricsNeedingLabels, fetchRenamedAttributes, fetchSpanGroupRules } from '../api/catalogue';
 import { LabelProgress } from '../inventory/prometheus';
 import { PluginSettings, concurrencyFrom } from '../settings/settings';
 import { QueryWindow } from '../window/window';
@@ -99,6 +99,7 @@ function startRun(
     score: scoreInventory,
     spanGroupRules: fetchSpanGroupRules,
     namesNeedingLabels: fetchMetricsNeedingLabels,
+    renamedAttributes: fetchRenamedAttributes,
     onLabelProgress: (labels) => patch({ labels }),
     onProgress: (progress) => patch({ progress }),
     onPartial: (assessment) => patch({ assessment }),

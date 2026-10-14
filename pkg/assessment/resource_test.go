@@ -105,6 +105,24 @@ func Test_Assess_requiredResourceAttributesOnMetricsUseSeriesLabels(t *testing.T
 	}
 }
 
+func Test_Assess_deprecatedResourceAttributesOnMetricSeriesLabels(t *testing.T) {
+	inventory := Inventory{Metrics: []MetricDatasource{{
+		UID:                 "prom",
+		Names:               []string{"http_server_request_duration_seconds_bucket"},
+		ResourceLabelChecks: []string{"deployment.environment.name", "deployment.environment"},
+		Owners: []MetricOwner{
+			{Metric: "http_server_request_duration_seconds_bucket", Labels: map[string]string{"service_name": "checkout", "semconv_has_deployment_environment": "1"}, Series: 3},
+		},
+	}}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	checkout := resourceStates(result, finding.Owner{Kind: finding.OwnerService, Name: "checkout"}, finding.SignalMetrics)
+	if got := checkout["deployment.environment.name"]; got.state != PresenceMissing || !strings.Contains(got.evidence, "deprecated deployment.environment") {
+		t.Errorf("deployment.environment.name = %+v, want missing with the deprecated name called out", got)
+	}
+}
+
 func Test_Assess_requiredResourceAttributesOnLogs(t *testing.T) {
 	inventory := Inventory{Logs: []LogDatasource{{UID: "loki", Services: []LogService{
 		{ServiceName: "checkout", ServiceNamespace: "shop", StreamLabels: []string{"service_name", "service_namespace", "service_instance_id"}, MetadataKeys: []string{"deployment_environment_name"}, KeysMethod: MethodDetectedFields, Volume: 3},

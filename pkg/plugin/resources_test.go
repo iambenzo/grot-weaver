@@ -173,6 +173,18 @@ func Test_CallResource_spanGroups(t *testing.T) {
 	}
 }
 
+func Test_CallResource_renamedAttributes(t *testing.T) {
+	response := callResource(t, newTestApp(t), http.MethodGet, "catalogue/renamed-attributes")
+
+	var renamed map[string][]string
+	if err := json.Unmarshal(response.Body, &renamed); err != nil || response.Status != http.StatusOK {
+		t.Fatalf("status %d err %v", response.Status, err)
+	}
+	if !slices.Contains(renamed["deployment.environment.name"], "deployment.environment") {
+		t.Errorf("deployment.environment.name renamed from %v", renamed["deployment.environment.name"])
+	}
+}
+
 func Test_CallResource_metricMatches(t *testing.T) {
 	app := newTestApp(t)
 	body := []byte(`{"names":["http_server_request_duration_seconds_bucket","http_server_duration_milliseconds_count","node_cpu_seconds_total"]}`)

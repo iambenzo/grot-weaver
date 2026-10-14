@@ -9,6 +9,7 @@ func (a *App) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /catalogue", a.handleCatalogue)
 	mux.HandleFunc("GET /catalogue/name-forms", a.handleNameForms)
 	mux.HandleFunc("GET /catalogue/span-groups", a.handleSpanGroups)
+	mux.HandleFunc("GET /catalogue/renamed-attributes", a.handleRenamedAttributes)
 	mux.HandleFunc("POST /catalogue/metric-matches", a.handleMetricMatches)
 	mux.HandleFunc("POST /score", a.handleScore)
 	mux.HandleFunc("POST /fix-snippet", a.handleFixSnippet)
@@ -20,6 +21,10 @@ func (a *App) handleCatalogue(w http.ResponseWriter, _ *http.Request) {
 
 func (a *App) handleSpanGroups(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, a.catalogue.SpanGroupRules())
+}
+
+func (a *App) handleRenamedAttributes(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, a.catalogue.RenamedFrom())
 }
 
 func writeJSON(w http.ResponseWriter, status int, body any) {

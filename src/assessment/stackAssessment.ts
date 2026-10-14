@@ -8,7 +8,7 @@ import { CollectionError, Inventory, LogDatasource, MetricDatasource, TraceDatas
 import { isPermissionDenied } from '../inventory/guard';
 import { QueryWindow } from '../window/window';
 import { ScoreInventory } from '../api/score';
-import { FetchSpanGroupRules, SpanGroupRule } from '../api/catalogue';
+import { FetchRenamedAttributes, FetchSpanGroupRules, SpanGroupRule } from '../api/catalogue';
 import { AssessmentResult, Owner, Signal } from '../api/types';
 import {
   DEFAULT_LOG_SAMPLE_LIMIT,
@@ -60,6 +60,7 @@ export interface StackDependencies {
   score: ScoreInventory;
   spanGroupRules: FetchSpanGroupRules;
   namesNeedingLabels: NamesNeedingLabels;
+  renamedAttributes?: FetchRenamedAttributes;
   onLabelProgress?: (progress: LabelProgress) => void;
   onProgress?: (progress: DatasourceProgress[]) => void;
   onPartial?: (assessment: StackAssessment) => void;
@@ -108,7 +109,10 @@ async function runAssessment(
   settings: PluginSettings,
   deps: StackDependencies
 ): Promise<StackAssessment> {
-  const rules = await deps.spanGroupRules().catch(() => []);
+  const [rules, presenceAttributes] = await Promise.all([
+    deps.spanGroupRules().catch(() => []),
+    seriesPresenceAttributes(settings, deps),
+  ]);
   const collections = [...seed];
   let finished = false;
   const snapshot = () => progressOf(datasources, collections);
@@ -121,7 +125,7 @@ async function runAssessment(
   deps.onProgress?.(snapshot());
   await Promise.all(
     targets.map(async (target) => {
-      collections.push(await collect(target, window, settings, deps, rules));
+      collections.push(await collect(target, window, settings, deps, rules, presenceAttributes));
       deps.onProgress?.(snapshot());
       if (finished || collections.length === targetsOf(datasources).length || !deps.onPartial) {
         return;
@@ -137,12 +141,19 @@ async function runAssessment(
   return assessment;
 }
 
+export async function seriesPresenceAttributes(settings: PluginSettings, deps: StackDependencies): Promise<string[]> {
+  const required = requiredResourceAttributes(settings);
+  const renamed = (await deps.renamedAttributes?.().catch(() => undefined)) ?? {};
+  return [...new Set([...required, ...required.flatMap((attribute) => renamed[attribute] ?? [])])];
+}
+
 async function collect(
   target: Target,
   window: QueryWindow,
   settings: PluginSettings,
   deps: StackDependencies,
-  rules: SpanGroupRule[]
+  rules: SpanGroupRule[],
+  presenceAttributes: string[]
 ): Promise<Collection> {
   const { ref, signal } = target;
   if (signal === 'traces') {
@@ -165,7 +176,7 @@ async function collect(
       window,
       deps.namesNeedingLabels,
       deps.onLabelProgress,
-      requiredResourceAttributes(settings)
+      presenceAttributes
     );
     return { ref, signal, errors: collected.errors, metrics: withStrategyOverride(collected.datasource, settings) };
   }

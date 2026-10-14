@@ -95,6 +95,16 @@ describeWhenEnabled('cloud end to end (read-only)', () => {
             ]);
             return JSON.parse(stdout) as SpanGroupRule[];
           },
+          renamedAttributes: async () => {
+            const { stdout } = await run('curl', [
+              '-s',
+              '-f',
+              '-b',
+              COOKIE_JAR,
+              `${PLUGIN_RESOURCES}/catalogue/renamed-attributes`,
+            ]);
+            return JSON.parse(stdout) as Record<string, string[]>;
+          },
           namesNeedingLabels: async (names) =>
             (await postLocal<{ needs_labels: string[] }>('catalogue/metric-matches', { names })).needs_labels,
           score: async (collected, volumeWeighted) => {
