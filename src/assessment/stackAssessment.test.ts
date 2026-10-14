@@ -58,6 +58,7 @@ describe('assessStack', () => {
           { match: '', pipeline: 'incomplete' },
         ],
         customNamespaces: ['acme'],
+        requiredResourceAttributes: ['service.name', 'team.name'],
       },
       { get, limit: createLimiter(4), score, spanGroupRules: async () => [], namesNeedingLabels: async () => [] }
     );
@@ -70,6 +71,7 @@ describe('assessStack', () => {
     expect(weighted).toBe(true);
     expect(inventory.pipeline_mappings).toEqual([{ match: 'shop/*', pipeline: 'edge' }]);
     expect(inventory.custom_namespaces).toEqual(['acme']);
+    expect(inventory.required_resource_attributes).toEqual(['service.name', 'team.name']);
   });
 });
 

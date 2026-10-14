@@ -16,6 +16,7 @@ type Assessor struct {
 	attributes *nameindex.AttributeIndex
 	metrics    *nameindex.MetricIndex
 	classifier finding.Classifier
+	renamed    map[string][]string
 }
 
 type ScoreRow struct {
@@ -30,18 +31,19 @@ type ServiceAttribution struct {
 }
 
 type Result struct {
-	SemconvVersion string                  `json:"semconv_version"`
-	Window         Window                  `json:"window"`
-	Findings       []scoring.RankedFinding `json:"findings"`
-	Attributions   []ServiceAttribution    `json:"attributions"`
-	Metrics        []MetricAttribution     `json:"metric_attributions"`
-	Logs           []LogAttribution        `json:"log_attributions"`
-	Datasources    []DatasourceSummary     `json:"datasources"`
-	Hops           []ServiceHops           `json:"hops"`
-	Coverage       []SignalCoverage        `json:"coverage"`
-	Owners         []ScoreRow              `json:"owners"`
-	Namespaces     []ScoreRow              `json:"namespaces"`
-	Signals        []ScoreRow              `json:"signals"`
+	SemconvVersion string                   `json:"semconv_version"`
+	Window         Window                   `json:"window"`
+	Findings       []scoring.RankedFinding  `json:"findings"`
+	Attributions   []ServiceAttribution     `json:"attributions"`
+	Metrics        []MetricAttribution      `json:"metric_attributions"`
+	Logs           []LogAttribution         `json:"log_attributions"`
+	Datasources    []DatasourceSummary      `json:"datasources"`
+	Hops           []ServiceHops            `json:"hops"`
+	Coverage       []SignalCoverage         `json:"coverage"`
+	Resource       []ResourceAttributeCheck `json:"resource_attributes"`
+	Owners         []ScoreRow               `json:"owners"`
+	Namespaces     []ScoreRow               `json:"namespaces"`
+	Signals        []ScoreRow               `json:"signals"`
 }
 
 func NewAssessor(c *catalogue.Catalogue, customNamespaces []string) *Assessor {
@@ -50,6 +52,7 @@ func NewAssessor(c *catalogue.Catalogue, customNamespaces []string) *Assessor {
 		attributes: nameindex.NewAttributeIndex(c, customNamespaces),
 		metrics:    nameindex.NewMetricIndex(c),
 		classifier: finding.NewClassifier(c),
+		renamed:    renamedFrom(c),
 	}
 }
 
@@ -65,6 +68,7 @@ type collected struct {
 	collectors         []Collector
 	totals             map[finding.Signal]float64
 	coverage           map[finding.Signal]scoring.Ratio
+	resources          resourceCollector
 }
 
 type SignalCoverage struct {
@@ -147,7 +151,8 @@ func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
 		}
 	}
 
-	scores := scoring.Score(gathered.findings, gathered.requirements, gathered.checks, options)
+	resourceChecks := gathered.resources.checks(inv.RequiredAttributes(), a.renamed)
+	scores := scoring.WithPresence(scoring.Score(gathered.findings, gathered.requirements, gathered.checks, options), presenceChecks(resourceChecks))
 	return Result{
 		SemconvVersion: a.catalogue.Manifest.Semconv.Version,
 		Window:         inv.Window,
@@ -158,6 +163,7 @@ func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
 		Datasources:    nonNil(gathered.datasources),
 		Hops:           gathered.hops(inv.PipelineMappings),
 		Coverage:       gathered.coverageRows(),
+		Resource:       resourceChecks,
 		Owners:         rows(scores),
 		Namespaces:     rows(scoring.RollUp(servicesOnly(scores), scoring.ByNamespace)),
 		Signals:        rows(scoring.RollUp(servicesOnly(scores), scoring.BySignal)),
@@ -173,6 +179,7 @@ func (a *Assessor) assessTraceService(datasource string, service TraceService, i
 	into.checks = append(into.checks, resolution.Checks...)
 	into.totals[finding.SignalTraces] += service.SpanCount
 	into.cover(finding.SignalTraces, service.SpanCount, owner.Kind == finding.OwnerService)
+	into.resources.observe(owner, finding.SignalTraces, traceResource(service))
 
 	at := finding.Observation{Owner: owner, Signal: finding.SignalTraces}
 	for _, key := range service.ResourceKeys {

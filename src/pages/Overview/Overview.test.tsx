@@ -16,6 +16,7 @@ describe('ScoreTiles', () => {
         naming_experimental: { value: 1, numerator: 1, denominator: 1 },
         requirements: { value: null, numerator: 0, denominator: 0 },
         resource: { value: 0.75, numerator: 3, denominator: 4 },
+        required_resource: { value: 0.25, numerator: 1, denominator: 4 },
         deprecated: 2,
         unclassified: 1,
         custom: 0,
@@ -28,6 +29,8 @@ describe('ScoreTiles', () => {
     expect(screen.getAllByText('N/A')).toHaveLength(2);
     expect(screen.getByText('90%')).toBeInTheDocument();
     expect(screen.getByText('Coverage')).toBeInTheDocument();
+    expect(screen.getByText('25%')).toBeInTheDocument();
+    expect(screen.getByText('Required resource attributes')).toBeInTheDocument();
   });
 });
 
@@ -38,6 +41,7 @@ describe('ServicesTable', () => {
       scores: {},
       worst: 0.4,
       violations: 3,
+      requiredResource: { value: 0.8, numerator: 4, denominator: 5 },
     };
 
     expect(serviceLink(row, { from: 'now-24h', to: 'now' })).toBe(
@@ -46,6 +50,7 @@ describe('ServicesTable', () => {
     render(<ServicesTable rows={[row]} range={{ from: 'now-24h', to: 'now' }} />);
     expect(screen.getByRole('link', { name: 'shop/checkout' })).toBeInTheDocument();
     expect(screen.getByText('40%')).toBeInTheDocument();
+    expect(screen.getByText('80%')).toBeInTheDocument();
   });
 });
 

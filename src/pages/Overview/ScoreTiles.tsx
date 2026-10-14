@@ -37,6 +37,11 @@ export function ScoreTiles({ signal, row, coverage }: ScoreTilesProps) {
     ['Naming: Experimental', formatRatio(scores?.naming_experimental), 'The same for development and alpha names'],
     ['Requirements', formatRatio(scores?.requirements), 'Required attributes present where checked'],
     ['Resource', formatRatio(scores?.resource), 'service.name present and not the SDK default'],
+    [
+      'Required resource attributes',
+      formatRatio(scores?.required_resource),
+      'Your required resource attributes present per service; separate from semconv conformance',
+    ],
     ['Deprecated', String(scores?.deprecated ?? 0), 'Distinct deprecated names in use'],
     ['Unclassified', String(scores?.unclassified ?? 0), 'Names in a semconv namespace that match nothing'],
     ['Coverage', formatRatio(coverage), 'Share of volume that is SDK-origin and attributed to a service'],

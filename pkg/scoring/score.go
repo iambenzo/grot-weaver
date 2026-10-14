@@ -42,6 +42,7 @@ type Scores struct {
 	NamingExperimental Ratio `json:"naming_experimental"`
 	Requirements       Ratio `json:"requirements"`
 	Resource           Ratio `json:"resource"`
+	RequiredResource   Ratio `json:"required_resource"`
 	Deprecated         int   `json:"deprecated"`
 	Unclassified       int   `json:"unclassified"`
 	Custom             int   `json:"custom"`
@@ -54,6 +55,7 @@ func (s Scores) add(other Scores) Scores {
 		NamingExperimental: s.NamingExperimental.add(other.NamingExperimental),
 		Requirements:       s.Requirements.add(other.Requirements),
 		Resource:           s.Resource.add(other.Resource),
+		RequiredResource:   s.RequiredResource.add(other.RequiredResource),
 		Deprecated:         s.Deprecated + other.Deprecated,
 		Unclassified:       s.Unclassified + other.Unclassified,
 		Custom:             s.Custom + other.Custom,
@@ -79,6 +81,12 @@ type ResourceCheck struct {
 	Passed bool
 }
 
+type PresenceCheck struct {
+	Owner   finding.Owner
+	Signal  finding.Signal
+	Present bool
+}
+
 type Options struct {
 	VolumeWeighted bool
 }
@@ -96,6 +104,14 @@ func Score(findings []finding.Finding, requirements []RequirementCheck, resource
 	for _, check := range resources {
 		key := Key{Owner: check.Owner, Signal: check.Signal}
 		scores[key] = scores[key].add(Scores{Resource: outcome(check.Passed, 1)})
+	}
+	return scores
+}
+
+func WithPresence(scores map[Key]Scores, checks []PresenceCheck) map[Key]Scores {
+	for _, check := range checks {
+		key := Key{Owner: check.Owner, Signal: check.Signal}
+		scores[key] = scores[key].add(Scores{RequiredResource: outcome(check.Present, 1)})
 	}
 	return scores
 }

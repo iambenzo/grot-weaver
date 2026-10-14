@@ -56,6 +56,7 @@ export interface Scores {
   naming_experimental: Ratio;
   requirements: Ratio;
   resource: Ratio;
+  required_resource: Ratio;
   deprecated: number;
   unclassified: number;
   custom: number;
@@ -112,6 +113,16 @@ export interface DatasourceSummary {
   unit_checkable: boolean;
 }
 
+export type PresenceState = 'present' | 'missing' | 'unknown';
+
+export interface ResourceAttributeCheck {
+  owner: Owner;
+  signal: Signal;
+  attribute: string;
+  state: PresenceState;
+  evidence: string;
+}
+
 export interface AssessmentResult {
   semconv_version: string;
   window: { start: number; end: number };
@@ -122,6 +133,7 @@ export interface AssessmentResult {
   datasources?: DatasourceSummary[];
   hops?: ServiceHops[];
   coverage?: Array<{ signal: Signal; coverage: Ratio }>;
+  resource_attributes?: ResourceAttributeCheck[];
   owners: ScoreRow[];
   namespaces: ScoreRow[];
   signals: ScoreRow[];

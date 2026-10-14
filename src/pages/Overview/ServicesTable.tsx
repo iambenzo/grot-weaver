@@ -36,6 +36,11 @@ export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { fr
       cell: ({ row }) => (row.original.worst === null ? 'N/A' : `${Math.round(row.original.worst * 100)}%`),
     },
     { id: 'violations', header: 'Violations', cell: ({ row }) => row.original.violations },
+    {
+      id: 'requiredResource',
+      header: 'Required attributes',
+      cell: ({ row }) => formatRatio(row.original.requiredResource),
+    },
     ...SIGNALS.map((signal): Column<ServiceRow> => ({
       id: signal,
       header: `${signal[0].toUpperCase()}${signal.slice(1)} (stable naming)`,

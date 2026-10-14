@@ -24,12 +24,20 @@ export interface PluginSettings {
   upstreamCheck?: boolean;
   pipelineMappings?: PipelineMapping[];
   customNamespaces?: string[];
+  requiredResourceAttributes?: string[];
 }
 
 export interface PipelineMapping {
   match: string;
   pipeline: string;
 }
+
+export const DEFAULT_REQUIRED_RESOURCE_ATTRIBUTES = [
+  'service.name',
+  'service.namespace',
+  'service.instance.id',
+  'deployment.environment.name',
+];
 
 export const DEFAULT_TRACE_SAMPLE_LIMIT = 20;
 export const DEFAULT_LOG_SAMPLE_LIMIT = 20;
@@ -74,6 +82,9 @@ export function readSettings(jsonData: unknown): PluginSettings {
   if (isStringList(raw.customNamespaces)) {
     settings.customNamespaces = raw.customNamespaces;
   }
+  if (isStringList(raw.requiredResourceAttributes)) {
+    settings.requiredResourceAttributes = raw.requiredResourceAttributes;
+  }
   if (typeof raw.traceSampleLimit === 'number') {
     settings.traceSampleLimit = raw.traceSampleLimit;
   }
@@ -106,6 +117,10 @@ export function sampleLimit(configured: number | undefined, fallback: number): n
     return fallback;
   }
   return Math.min(configured, MAX_SAMPLE_LIMIT);
+}
+
+export function requiredResourceAttributes(settings: PluginSettings): string[] {
+  return settings.requiredResourceAttributes ?? DEFAULT_REQUIRED_RESOURCE_ATTRIBUTES;
 }
 
 export function isUpstreamCheckEnabled(settings: PluginSettings): boolean {

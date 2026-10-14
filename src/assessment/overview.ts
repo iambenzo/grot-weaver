@@ -19,6 +19,7 @@ export interface ServiceRow {
   scores: Partial<Record<Signal, ScoreRow['scores']>>;
   worst: number | null;
   violations: number;
+  requiredResource: Ratio;
 }
 
 export function ratioValue(ratio: Ratio | undefined): number | null {
@@ -66,8 +67,15 @@ export function serviceRows(result: AssessmentResult): ServiceRow[] {
       continue;
     }
     const key = ownerKey(row.owner);
-    const existing = rows.get(key) ?? { owner: row.owner, scores: {}, worst: null, violations: 0 };
+    const existing = rows.get(key) ?? {
+      owner: row.owner,
+      scores: {},
+      worst: null,
+      violations: 0,
+      requiredResource: { value: null, numerator: 0, denominator: 0 },
+    };
     existing.scores[row.signal] = row.scores;
+    existing.requiredResource = addRatio(existing.requiredResource, row.scores.required_resource);
     const naming = [row.scores.naming_stable, row.scores.naming_release_candidate, row.scores.naming_experimental]
       .map(ratioValue)
       .filter((value): value is number => value !== null);
@@ -88,6 +96,12 @@ export function serviceRows(result: AssessmentResult): ServiceRow[] {
       b.violations - a.violations ||
       ownerKey(a.owner).localeCompare(ownerKey(b.owner))
   );
+}
+
+function addRatio(total: Ratio, next: Ratio | undefined): Ratio {
+  const numerator = total.numerator + (next?.numerator ?? 0);
+  const denominator = total.denominator + (next?.denominator ?? 0);
+  return { numerator, denominator, value: denominator > 0 ? numerator / denominator : null };
 }
 
 export interface OwnerSummary {

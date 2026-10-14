@@ -18,15 +18,19 @@ import {
   useStyles2,
 } from '@grafana/ui';
 import { testIds } from '../testIds';
+import { PageGuide } from '../PageGuide/PageGuide';
+import { SETTINGS_GUIDE } from '../PageGuide/guides';
 import {
   DEFAULT_CONCURRENCY,
   DEFAULT_DATASOURCE_TYPES,
   DEFAULT_LOG_SAMPLE_LIMIT,
+  DEFAULT_REQUIRED_RESOURCE_ATTRIBUTES,
   DEFAULT_TRACE_SAMPLE_LIMIT,
   DatasourceTypes,
   PipelineMapping,
   PluginSettings,
   readSettings,
+  requiredResourceAttributes,
 } from '../../settings/settings';
 import { DEFAULT_WINDOW, WINDOW_PRESETS } from '../../window/presets';
 import { ReclassificationRule, TRANSLATION_STRATEGIES, TranslationStrategy } from '../../inventory/types';
@@ -57,6 +61,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
 
   return (
     <div className={styles.page} data-testid={testIds.appConfig.container}>
+      <PageGuide page="settings" items={SETTINGS_GUIDE} testId={testIds.appConfig.guide} />
       <FieldSet label="Datasources">
         {SIGNALS.map((signal) => (
           <Field
@@ -167,6 +172,27 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
             tags={settings.customNamespaces ?? []}
             onChange={(customNamespaces) => update({ customNamespaces })}
           />
+        </Field>
+        <Field
+          label="Required resource attributes"
+          description="Checked on every service for each signal and scored separately from semconv conformance. Semconv itself only requires service.name."
+          data-testid={testIds.appConfig.requiredAttributes}
+        >
+          <Stack direction="column" gap={1} alignItems="flex-start">
+            <TagsInput
+              tags={requiredResourceAttributes(settings)}
+              onChange={(attributes) => update({ requiredResourceAttributes: attributes })}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              fill="text"
+              onClick={() => update({ requiredResourceAttributes: undefined })}
+              disabled={settings.requiredResourceAttributes === undefined}
+            >
+              Reset to {DEFAULT_REQUIRED_RESOURCE_ATTRIBUTES.length} defaults
+            </Button>
+          </Stack>
         </Field>
       </FieldSet>
 

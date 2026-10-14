@@ -107,6 +107,7 @@ export interface Inventory {
   reclassification?: ReclassificationRule[];
   custom_namespaces?: string[];
   pipeline_mappings?: Array<{ match: string; pipeline: string }>;
+  required_resource_attributes?: string[];
 }
 
 export interface CollectionError {

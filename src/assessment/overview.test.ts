@@ -8,6 +8,7 @@ const scores = (stable: number | null, rc: number | null = null, experimental: n
   naming_experimental: ratio(experimental),
   requirements: ratio(null),
   resource: ratio(1),
+  required_resource: { value: 0.5, numerator: 1, denominator: 2 },
   deprecated: 0,
   unclassified: 0,
   custom: 0,
@@ -67,6 +68,7 @@ describe('serviceRows', () => {
       ['quiet', null],
     ]);
     expect(rows[0].violations).toBe(1);
+    expect(rows[0].requiredResource).toEqual({ value: 0.5, numerator: 2, denominator: 4 });
   });
 });
 

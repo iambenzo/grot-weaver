@@ -26,6 +26,8 @@ type Inventory struct {
 	Reclassification []ReclassificationRule `json:"reclassification,omitempty"`
 	CustomNamespaces []string               `json:"custom_namespaces,omitempty"`
 	PipelineMappings []PipelineMapping      `json:"pipeline_mappings,omitempty"`
+
+	RequiredResourceAttributes []string `json:"required_resource_attributes,omitempty"`
 }
 
 const MaxCustomNamespaces = 200
@@ -112,6 +114,9 @@ func (inv Inventory) Validate() error {
 		if _, err := path.Match(mapping.Match, ""); err != nil || mapping.Match == "" || mapping.Pipeline == "" || len(mapping.Pipeline) > MaxNameLength {
 			return fmt.Errorf("%w: malformed pipeline mapping %q -> %q", ErrInvalidInventory, mapping.Match, mapping.Pipeline)
 		}
+	}
+	if err := validateRequiredAttributes(inv.RequiredResourceAttributes); err != nil {
+		return err
 	}
 	return validateReclassification(inv.Reclassification)
 }

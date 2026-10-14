@@ -185,6 +185,9 @@ function buildInventory(collections: Collection[], window: QueryWindow, settings
   if (settings.customNamespaces && settings.customNamespaces.length > 0) {
     inventory.custom_namespaces = settings.customNamespaces;
   }
+  if (settings.requiredResourceAttributes) {
+    inventory.required_resource_attributes = settings.requiredResourceAttributes;
+  }
   const mappings = (settings.pipelineMappings ?? []).filter((mapping) => mapping.match && mapping.pipeline);
   if (mappings.length > 0) {
     inventory.pipeline_mappings = mappings;

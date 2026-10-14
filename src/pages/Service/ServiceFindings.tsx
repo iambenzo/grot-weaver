@@ -47,6 +47,9 @@ import {
   hasOTelServices,
 } from '../../components/StackStatus/StackStatus';
 import { HopCandidates } from './HopCandidates';
+import { ResourceAttributes } from './ResourceAttributes';
+import { PageGuide } from '../../components/PageGuide/PageGuide';
+import { SERVICE_GUIDE } from '../../components/PageGuide/guides';
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
@@ -120,6 +123,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
     <Stack direction="column" gap={2}>
       <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
       <FeatureLimits progress={load.progress} result={assessment.result} />
+      <PageGuide page="service" items={SERVICE_GUIDE} testId={testIds.service.guide} />
       {!assessment.partial && !hasOTelServices(assessment.result) && <EmptyTelemetry result={assessment.result} />}
       <WidenWindowPrompt
         window={load.window}
@@ -202,6 +206,11 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
       {identity.aliases.length > 0 && (
         <Text color="secondary">Also seen as: {identity.aliases.map(ownerLabel).join(', ')}</Text>
       )}
+      <ResourceAttributes
+        checks={assessment.result.resource_attributes ?? []}
+        owners={[identity.owner, ...identity.aliases]}
+        signals={SIGNALS.filter((candidate) => identity.signals.includes(candidate))}
+      />
       <TabsBar data-testid={testIds.service.tabs}>
         {SIGNALS.map((candidate) => (
           <Tab

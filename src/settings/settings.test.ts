@@ -6,6 +6,7 @@ import {
   isUpstreamCheckEnabled,
   isVolumeWeighted,
   readSettings,
+  requiredResourceAttributes,
   sampleLimit,
   withStrategyOverride,
 } from './settings';
@@ -38,6 +39,9 @@ describe('readSettings', () => {
       { excludedDatasources: ['grafanacloud-usage'], customNamespaces: ['acme'] },
     ],
     [{ excludedDatasources: [1] }, {}],
+    [{ requiredResourceAttributes: ['service.name'] }, { requiredResourceAttributes: ['service.name'] }],
+    [{ requiredResourceAttributes: [] }, { requiredResourceAttributes: [] }],
+    [{ requiredResourceAttributes: 'service.name' }, {}],
     [
       { traceSampleLimit: 50, logSampleLimit: 10, upstreamCheck: false },
       { traceSampleLimit: 50, logSampleLimit: 10, upstreamCheck: false },
@@ -112,5 +116,17 @@ describe('concurrencyFrom', () => {
     [500, 32],
   ])('maps %p to %p', (configured, expected) => {
     expect(concurrencyFrom({ concurrency: configured })).toBe(expected);
+  });
+});
+
+describe('requiredResourceAttributes', () => {
+  it('defaults to the four identity attributes and keeps an emptied list', () => {
+    expect(requiredResourceAttributes({})).toEqual([
+      'service.name',
+      'service.namespace',
+      'service.instance.id',
+      'deployment.environment.name',
+    ]);
+    expect(requiredResourceAttributes({ requiredResourceAttributes: [] })).toEqual([]);
   });
 });

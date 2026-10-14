@@ -101,6 +101,23 @@ func Test_Score_requirementAndResourceChecks(t *testing.T) {
 	}
 }
 
+func Test_WithPresence_isSeparateFromConformance(t *testing.T) {
+	findings := []finding.Finding{named(checkout, finding.SignalTraces, "http.request.method", finding.TypeConformant, finding.BucketStable, 1)}
+	checks := []PresenceCheck{
+		{Owner: checkout, Signal: finding.SignalTraces, Present: true},
+		{Owner: checkout, Signal: finding.SignalTraces, Present: false},
+	}
+
+	got := WithPresence(Score(findings, nil, nil, Options{}), checks)[Key{Owner: checkout, Signal: finding.SignalTraces}]
+
+	if value(t, got.RequiredResource) != 0.5 || value(t, got.NamingStable) != 1 {
+		t.Errorf("required resource %+v naming %+v", got.RequiredResource, got.NamingStable)
+	}
+	if _, defined := got.Requirements.Value(); defined {
+		t.Error("presence checks must not count as semconv requirements")
+	}
+}
+
 func Test_Score_pipelineFindingsDoNotAffectTheService(t *testing.T) {
 	introduced := named(pipeline, finding.SignalMetrics, "net_host_name", finding.TypeDeprecated, finding.BucketStable, 1)
 	introduced.PipelineIntroduced = true
