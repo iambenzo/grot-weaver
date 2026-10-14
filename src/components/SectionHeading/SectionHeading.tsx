@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton, Stack, Text, Toggletip } from '@grafana/ui';
+import { Box, IconButton, Stack, Text, Toggletip } from '@grafana/ui';
 import { GuideItem } from './guides';
 
 interface SectionHeadingProps {
@@ -10,14 +10,16 @@ interface SectionHeadingProps {
 
 export function SectionHeading({ title, help, variant = 'h3' }: SectionHeadingProps) {
   return (
-    <Stack gap={0.5} alignItems="center">
-      <Text element="h2" variant={variant}>
-        {title}
-      </Text>
-      <Toggletip title={title} content={<HelpContent items={help} />} placement="bottom-start">
-        <IconButton name="info-circle" size="sm" aria-label={`About ${title}`} />
-      </Toggletip>
-    </Stack>
+    <Box marginTop={2}>
+      <Stack gap={0.5} alignItems="center">
+        <Text element="h2" variant={variant}>
+          {title}
+        </Text>
+        <Toggletip title={title} content={<HelpContent items={help} />} placement="bottom-start">
+          <IconButton name="info-circle" size="sm" aria-label={`About ${title}`} />
+        </Toggletip>
+      </Stack>
+    </Box>
   );
 }
 
