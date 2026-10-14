@@ -15,8 +15,8 @@ import { PluginSettings, isUpstreamCheckEnabled } from '../../settings/settings'
 import { UpstreamBanner } from '../../upstream/UpstreamBanner';
 import { toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
-import { PageGuide } from '../../components/PageGuide/PageGuide';
-import { OVERVIEW_GUIDE } from '../../components/PageGuide/guides';
+import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
+import { SERVICES_HELP, TOP_VIOLATIONS_HELP } from '../../components/SectionHeading/guides';
 import { testIds } from '../../components/testIds';
 import { ScoreTiles } from './ScoreTiles';
 import { TopViolations } from './TopViolations';
@@ -65,7 +65,6 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
     return (
       <Stack direction="column" gap={3}>
         <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
-        <PageGuide page="overview" items={OVERVIEW_GUIDE} testId={testIds.overview.guide} />
         {status}
         <EmptyTelemetry result={result} />
         <WidenWindowPrompt window={load.window} observedItems={0} timeRange={timeRangeObject} />
@@ -77,7 +76,6 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   return (
     <Stack direction="column" gap={3}>
       <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
-      <PageGuide page="overview" items={OVERVIEW_GUIDE} testId={testIds.overview.guide} />
       {status}
       <WidenWindowPrompt window={load.window} observedItems={result.findings.length} timeRange={timeRangeObject} />
       <Stack direction="column" gap={2}>
@@ -91,9 +89,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
         ))}
       </Stack>
       <Stack direction="column" gap={1}>
-        <Text element="h2" variant="h3">
-          Top violations
-        </Text>
+        <SectionHeading title="Top violations" help={TOP_VIOLATIONS_HELP} />
         <TabsBar>
           {SIGNALS.map((candidate) => (
             <Tab
@@ -108,9 +104,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
         <TopViolations groups={groups.filter((group) => group.signal === signal)} />
       </Stack>
       <Stack direction="column" gap={1}>
-        <Text element="h2" variant="h3">
-          Services, worst first
-        </Text>
+        <SectionHeading title="Services, worst first" help={SERVICES_HELP} />
         <ServicesTable rows={serviceRows(result)} range={range} />
       </Stack>
       <OwnerSections result={result} />

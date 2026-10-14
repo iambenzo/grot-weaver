@@ -6,7 +6,6 @@ export const testIds = {
     tabs: 'data-testid service-signal-tabs',
     hops: 'data-testid service-hop-candidates',
     resourceAttributes: 'data-testid service-resource-attributes',
-    guide: 'data-testid service-guide',
   },
   overview: {
     header: 'data-testid overview-header',
@@ -14,7 +13,6 @@ export const testIds = {
     violations: 'data-testid overview-top-violations',
     services: 'data-testid overview-services',
     sections: 'data-testid overview-owner-sections',
-    guide: 'data-testid overview-guide',
   },
   status: {
     progress: 'data-testid status-progress',
@@ -38,7 +36,6 @@ export const testIds = {
   },
   appConfig: {
     container: 'data-testid ac-container',
-    guide: 'data-testid ac-guide',
     excluded: 'data-testid ac-excluded-datasources',
     defaultWindow: 'data-testid ac-default-window',
     requiredAttributes: 'data-testid ac-required-attributes',

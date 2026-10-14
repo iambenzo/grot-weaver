@@ -5,6 +5,8 @@ import { Badge, BadgeColor, Stack, Text, TextLink, useStyles2 } from '@grafana/u
 import { Owner, PresenceState, ResourceAttributeCheck, Signal } from '../../api/types';
 import { sameOwner } from '../../assessment/traceAssessment';
 import { testIds } from '../../components/testIds';
+import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
+import { RESOURCE_ATTRIBUTES_HELP } from '../../components/SectionHeading/guides';
 
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 const SDK_ENVIRONMENT_URL = 'https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/';
@@ -49,12 +51,7 @@ export function ResourceAttributes({ checks, owners, signals }: ResourceAttribut
 
   return (
     <Stack direction="column" gap={1} data-testid={testIds.service.resourceAttributes}>
-      <Text element="h2" variant="h4">
-        Required resource attributes
-      </Text>
-      <Text color="secondary">
-        Your required list, checked on every signal this service sends. This is separate from the semconv score.
-      </Text>
+      <SectionHeading title="Required resource attributes" help={RESOURCE_ATTRIBUTES_HELP} variant="h4" />
       <div className={styles.scroll}>
         <table className={styles.table}>
           <thead>

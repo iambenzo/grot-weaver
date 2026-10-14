@@ -18,8 +18,6 @@ import {
   useStyles2,
 } from '@grafana/ui';
 import { testIds } from '../testIds';
-import { PageGuide } from '../PageGuide/PageGuide';
-import { SETTINGS_GUIDE } from '../PageGuide/guides';
 import {
   DEFAULT_CONCURRENCY,
   DEFAULT_DATASOURCE_TYPES,
@@ -61,7 +59,6 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
 
   return (
     <div className={styles.page} data-testid={testIds.appConfig.container}>
-      <PageGuide page="settings" items={SETTINGS_GUIDE} testId={testIds.appConfig.guide} />
       <FieldSet label="Datasources">
         {SIGNALS.map((signal) => (
           <Field

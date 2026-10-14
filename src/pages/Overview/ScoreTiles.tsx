@@ -4,6 +4,8 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { Stack, Text, useStyles2 } from '@grafana/ui';
 import { Ratio, ScoreRow, Signal } from '../../api/types';
 import { testIds } from '../../components/testIds';
+import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
+import { SIGNAL_TILES_HELP } from '../../components/SectionHeading/guides';
 
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 
@@ -48,9 +50,7 @@ export function ScoreTiles({ signal, row, coverage }: ScoreTilesProps) {
   ];
   return (
     <Stack direction="column" gap={1} data-testid={testIds.overview.tiles}>
-      <Text element="h2" variant="h3">
-        {SIGNAL_LABELS[signal]}
-      </Text>
+      <SectionHeading title={SIGNAL_LABELS[signal]} help={SIGNAL_TILES_HELP} />
       <div className={styles.grid}>
         {tiles.map(([label, value, help]) => (
           <div key={label} className={styles.tile} title={help}>
