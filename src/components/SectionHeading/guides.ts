@@ -24,6 +24,8 @@ export const TOP_VIOLATIONS_HELP: GuideItem[] = [
 
 export const SERVICES_HELP: GuideItem[] = [
   { meaning: 'Lowest naming score first. Open a service to see its findings and how to fix them.' },
+  { term: 'Metrics, Traces, Logs', meaning: 'The share of that signal using stable semconv names.' },
+  { term: 'Required attributes', meaning: 'The share of required resource attributes found, kept out of the score.' },
   {
     meaning:
       'Pipelines, Sources and Unattributed below hold telemetry no service owns. Fix those in the collector, Alloy or scrape config.',

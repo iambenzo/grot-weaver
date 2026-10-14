@@ -1,5 +1,6 @@
 import React from 'react';
-import { Column, InteractiveTable, LinkButton } from '@grafana/ui';
+import { css } from '@emotion/css';
+import { Column, InteractiveTable, LinkButton, useStyles2 } from '@grafana/ui';
 import { Signal } from '../../api/types';
 import { ServiceRow } from '../../assessment/overview';
 import { prefixRoute } from '../../utils/utils.routing';
@@ -18,6 +19,7 @@ export function serviceLink(row: ServiceRow, range: { from: string; to: string }
 }
 
 export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { from: string; to: string } }) {
+  const styles = useStyles2(getStyles);
   const columns: Array<Column<ServiceRow>> = [
     {
       id: 'service',
@@ -32,7 +34,7 @@ export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { fr
     },
     {
       id: 'worst',
-      header: 'Lowest naming score',
+      header: 'Lowest score',
       cell: ({ row }) => (row.original.worst === null ? 'N/A' : `${Math.round(row.original.worst * 100)}%`),
     },
     { id: 'violations', header: 'Violations', cell: ({ row }) => row.original.violations },
@@ -43,12 +45,12 @@ export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { fr
     },
     ...SIGNALS.map((signal): Column<ServiceRow> => ({
       id: signal,
-      header: `${signal[0].toUpperCase()}${signal.slice(1)} (stable naming)`,
+      header: `${signal[0].toUpperCase()}${signal.slice(1)}`,
       cell: ({ row }) => formatRatio(row.original.scores[signal]?.naming_stable),
     })),
   ];
   return (
-    <div data-testid={testIds.overview.services}>
+    <div className={styles.scroll} data-testid={testIds.overview.services}>
       <InteractiveTable
         columns={columns}
         data={rows}
@@ -58,3 +60,9 @@ export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { fr
     </div>
   );
 }
+
+const getStyles = () => ({
+  scroll: css({
+    overflowX: 'auto',
+  }),
+});
