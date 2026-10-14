@@ -16,6 +16,7 @@ import {
   PluginSettings,
   datasourceTypesFor,
   isExcluded,
+  requiredResourceAttributes,
   sampleLimit,
   withStrategyOverride,
 } from '../settings/settings';
@@ -163,7 +164,8 @@ async function collect(
       deps.limit,
       window,
       deps.namesNeedingLabels,
-      deps.onLabelProgress
+      deps.onLabelProgress,
+      requiredResourceAttributes(settings)
     );
     return { ref, signal, errors: collected.errors, metrics: withStrategyOverride(collected.datasource, settings) };
   }

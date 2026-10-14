@@ -96,8 +96,9 @@ export function ResourceAttributes({ checks, owners, signals }: ResourceAttribut
         <Text color="secondary">
           To add a missing attribute, set it in the SDK with <code>OTEL_RESOURCE_ATTRIBUTES</code> (for example{' '}
           <code>service.namespace=shop,deployment.environment.name=production</code>) or add it in the Collector or
-          Alloy with the resource or Kubernetes attributes processor. On metrics, attributes other than service.name,
-          service.namespace and service.instance.id live on <code>target_info</code>.
+          Alloy with the resource or Kubernetes attributes processor. On metrics, attributes promoted to labels appear
+          on every series and the rest are only on <code>target_info</code>. Grafana Cloud promotes
+          deployment.environment.name and the service attributes by default.
           <span className={styles.links}>
             <TextLink href={SDK_ENVIRONMENT_URL} external>
               SDK environment variables

@@ -23,6 +23,8 @@ type MetricDatasource struct {
 	LabelKeys  []OwnerLabelKeys    `json:"label_keys"`
 	Collectors []map[string]string `json:"collectors"`
 
+	ResourceLabelChecks []string `json:"resource_label_checks,omitempty"`
+
 	StrategyOverride nameindex.Strategy `json:"strategy_override,omitempty"`
 }
 
@@ -88,6 +90,9 @@ func validateReclassification(rules []ReclassificationRule) error {
 func (d MetricDatasource) validate() error {
 	if d.UID == "" {
 		return fmt.Errorf("%w: metric datasource without uid", ErrInvalidInventory)
+	}
+	if err := validateRequiredAttributes(d.ResourceLabelChecks); err != nil {
+		return err
 	}
 	if d.StrategyOverride != "" && !slices.Contains(nameindex.Strategies, d.StrategyOverride) {
 		return fmt.Errorf("%w: unknown translation strategy %q", ErrInvalidInventory, d.StrategyOverride)

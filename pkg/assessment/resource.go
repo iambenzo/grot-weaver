@@ -3,6 +3,7 @@ package assessment
 import (
 	"cmp"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -17,7 +18,11 @@ const (
 	attributeServiceName       = "service.name"
 	attributeServiceNamespace  = "service.namespace"
 	attributeServiceInstanceID = "service.instance.id"
+
+	presenceLabelPrefix = "semconv_has_"
 )
+
+var invalidLabelCharacters = regexp.MustCompile(`[^a-zA-Z0-9_]`)
 
 var DefaultRequiredResourceAttributes = []string{
 	attributeServiceName, attributeServiceNamespace, attributeServiceInstanceID, "deployment.environment.name",
@@ -194,10 +199,14 @@ func traceResource(service TraceService) *observedResource {
 	return observed
 }
 
-func metricResource(owner finding.Owner, labels, target map[string]string) *observedResource {
-	observed := newObservedResource("target_info", "no target_info series for this service, which is where the other resource attributes are kept", target != nil)
+func metricResource(owner finding.Owner, labels, target map[string]string, checkedOnSeries []string) *observedResource {
+	observed := newObservedResource("the series labels and target_info", "not promoted to series labels and no target_info series for this service", target != nil)
 	observed.settle(attributeServiceName, "job or service_name label", true)
 	observed.settle(attributeServiceNamespace, "job prefix or service_namespace label", owner.Namespace != "" || labels["service_namespace"] != "")
+	for _, attribute := range checkedOnSeries {
+		label := promLabelName(attribute)
+		observed.settle(attribute, label+" label on series", labels[presenceLabelPrefix+label] != "")
+	}
 	if target == nil {
 		return observed
 	}
@@ -210,6 +219,10 @@ func metricResource(owner finding.Owner, labels, target map[string]string) *obse
 		}
 	}
 	return observed
+}
+
+func promLabelName(attribute string) string {
+	return invalidLabelCharacters.ReplaceAllString(attribute, "_")
 }
 
 func logResource(service LogService) *observedResource {

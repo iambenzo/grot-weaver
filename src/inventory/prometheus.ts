@@ -7,6 +7,7 @@ import { guardStep } from './guard';
 const TARGET_INFO = 'target_info';
 const OWNER_LABELS = ['job', 'service_name', 'service_namespace', 'otel_scope_name', 'otel_scope_version'];
 const NAMES_PER_BATCH = 40;
+const PRESENCE_LABEL_PREFIX = 'semconv_has_';
 const REGEX_META = /[.*+?^${}()|[\]\\]/g;
 
 interface PrometheusResponse<T> {
@@ -24,6 +25,7 @@ interface Context {
   get: ProxyGet;
   limit: Limiter;
   window: QueryWindow;
+  presenceAttributes: string[];
   errors: CollectionError[];
 }
 
@@ -65,8 +67,18 @@ function promqlString(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-export function ownersQuery(names: string[], window: QueryWindow): string {
-  return `count by (__name__, ${OWNER_LABELS.join(', ')}) (last_over_time(${nameMatcher(names)}[${prometheusLookback(window)}]))`;
+export function promLabelName(attribute: string): string {
+  return attribute.replace(/[^a-zA-Z0-9_]/g, '_');
+}
+
+export function ownersQuery(names: string[], window: QueryWindow, presenceAttributes: string[] = []): string {
+  const labels = [...new Set(presenceAttributes.map(promLabelName))];
+  const flagged = labels.reduce(
+    (inner, label) => `label_replace(${inner}, "${PRESENCE_LABEL_PREFIX}${label}", "1", "${label}", ".+")`,
+    `last_over_time(${nameMatcher(names)}[${prometheusLookback(window)}])`
+  );
+  const grouping = ['__name__', ...OWNER_LABELS, ...labels.map((label) => PRESENCE_LABEL_PREFIX + label)];
+  return `count by (${grouping.join(', ')}) (${flagged})`;
 }
 
 export function anonymousOwnersQuery(names: string[], window: QueryWindow): string {
@@ -80,9 +92,10 @@ export async function collectPrometheusInventory(
   limit: Limiter,
   window: QueryWindow,
   namesNeedingLabels: NamesNeedingLabels = async () => [],
-  onLabelProgress: (progress: LabelProgress) => void = () => undefined
+  onLabelProgress: (progress: LabelProgress) => void = () => undefined,
+  presenceAttributes: string[] = []
 ): Promise<PrometheusCollection> {
-  const context: Context = { uid, get, limit, window, errors: [] };
+  const context: Context = { uid, get, limit, window, presenceAttributes, errors: [] };
   const [names, targetInfo, collectors] = await Promise.all([
     guarded(context, 'metric names', () => metricNames(context)),
     guarded(context, 'target_info series', () => targetInfoSeries(context)),
@@ -105,6 +118,7 @@ export async function collectPrometheusInventory(
       owners,
       label_keys: labelKeys,
       collectors: collectors ?? [],
+      ...(presenceAttributes.length > 0 && { resource_label_checks: presenceAttributes }),
     },
     errors: context.errors,
   };
@@ -193,7 +207,9 @@ async function collectOwners(context: Context, names: string[]): Promise<MetricO
 }
 
 async function ownersForBatch(context: Context, batch: string[]): Promise<MetricOwner[]> {
-  const owners = (await instantQuery(context, ownersQuery(batch, context.window))).map(toOwner);
+  const owners = (await instantQuery(context, ownersQuery(batch, context.window, context.presenceAttributes))).map(
+    toOwner
+  );
   const anonymous = owners
     .filter((owner) => !owner.labels.job && !owner.labels.service_name)
     .map((owner) => owner.metric);

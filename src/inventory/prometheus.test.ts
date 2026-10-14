@@ -191,6 +191,12 @@ describe('queries', () => {
     );
   });
 
+  it('flags which required attributes are labels on the series without grouping by their values', () => {
+    expect(ownersQuery(['up'], window, ['deployment.environment.name', 'service.version'])).toBe(
+      'count by (__name__, job, service_name, service_namespace, otel_scope_name, otel_scope_version, semconv_has_deployment_environment_name, semconv_has_service_version) (label_replace(label_replace(last_over_time({__name__=~"up"}[86400s]), "semconv_has_deployment_environment_name", "1", "deployment_environment_name", ".+"), "semconv_has_service_version", "1", "service_version", ".+"))'
+    );
+  });
+
   it('asks for instances only on series without job or service_name', () => {
     expect(anonymousOwnersQuery(['up'], window)).toBe(
       'count by (__name__, instance) (last_over_time({__name__=~"up", job="", service_name=""}[86400s]))'

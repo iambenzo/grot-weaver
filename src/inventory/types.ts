@@ -55,6 +55,7 @@ export interface MetricDatasource {
   owners: MetricOwner[];
   label_keys: OwnerLabelKeys[];
   collectors: Array<Record<string, string>>;
+  resource_label_checks?: string[];
   strategy_override?: TranslationStrategy;
 }
 

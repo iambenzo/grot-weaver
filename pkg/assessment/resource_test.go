@@ -82,6 +82,29 @@ func Test_Assess_requiredResourceAttributesOnMetricsUseTargetInfo(t *testing.T) 
 	})
 }
 
+func Test_Assess_requiredResourceAttributesOnMetricsUseSeriesLabels(t *testing.T) {
+	inventory := Inventory{Metrics: []MetricDatasource{{
+		UID:                 "prom",
+		Names:               []string{"http_server_request_duration_seconds_bucket"},
+		ResourceLabelChecks: DefaultRequiredResourceAttributes,
+		Owners: []MetricOwner{
+			{Metric: "http_server_request_duration_seconds_bucket", Labels: map[string]string{"service_name": "checkout", "service_namespace": "shop", "semconv_has_deployment_environment_name": "1"}, Series: 3},
+			{Metric: "http_server_request_duration_seconds_bucket", Labels: map[string]string{"service_name": "checkout", "service_namespace": "shop"}, Series: 1},
+		},
+	}}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	checkout := resourceStates(result, finding.Owner{Kind: finding.OwnerService, Namespace: "shop", Name: "checkout"}, finding.SignalMetrics)
+	wantStates(t, checkout, map[string]PresenceState{
+		"service.name": PresencePresent, "service.namespace": PresencePresent,
+		"service.instance.id": PresenceMissing, "deployment.environment.name": PresencePresent,
+	})
+	if checkout["deployment.environment.name"].evidence != "deployment_environment_name label on series" {
+		t.Errorf("evidence = %q", checkout["deployment.environment.name"].evidence)
+	}
+}
+
 func Test_Assess_requiredResourceAttributesOnLogs(t *testing.T) {
 	inventory := Inventory{Logs: []LogDatasource{{UID: "loki", Services: []LogService{
 		{ServiceName: "checkout", ServiceNamespace: "shop", StreamLabels: []string{"service_name", "service_namespace", "service_instance_id"}, MetadataKeys: []string{"deployment_environment_name"}, KeysMethod: MethodDetectedFields, Volume: 3},
@@ -136,6 +159,10 @@ func Test_Inventory_Validate_requiredResourceAttributes(t *testing.T) {
 	for _, attributes := range [][]string{{""}, tooMany, {strings.Repeat("a", MaxNameLength+1)}} {
 		if err := (Inventory{RequiredResourceAttributes: attributes}).Validate(); err == nil {
 			t.Errorf("attributes %d long validated", len(attributes))
+		}
+		datasource := Inventory{Metrics: []MetricDatasource{{UID: "prom", ResourceLabelChecks: attributes}}}
+		if err := datasource.Validate(); err == nil {
+			t.Errorf("series label checks %d long validated", len(attributes))
 		}
 	}
 	if err := (Inventory{RequiredResourceAttributes: []string{"service.name"}}).Validate(); err != nil {
