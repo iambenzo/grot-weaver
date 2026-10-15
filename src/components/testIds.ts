@@ -6,6 +6,7 @@ export const testIds = {
     tabs: 'data-testid service-signal-tabs',
     hops: 'data-testid service-hop-candidates',
     resourceAttributes: 'data-testid service-resource-attributes',
+    productReadiness: 'data-testid service-product-readiness',
   },
   overview: {
     header: 'data-testid overview-header',

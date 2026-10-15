@@ -40,6 +40,33 @@ export const RESOURCE_ATTRIBUTES_HELP: GuideItem[] = [
   },
 ];
 
+export const PRODUCT_READINESS_HELP: GuideItem[] = [
+  {
+    meaning:
+      'Share of the attributes each Grafana Cloud product needs that this service sends, per signal. Kept out of every score.',
+  },
+  {
+    term: 'Also unlocks',
+    meaning: 'Recommended attributes that turn on extra features, such as linking to Kubernetes.',
+  },
+  {
+    term: 'Not checkable',
+    meaning:
+      'None of the needed attributes could be judged from what was collected, for example no target_info series.',
+  },
+  { term: 'N/A', meaning: 'The product needs nothing from this signal, or the service does not send it.' },
+  {
+    term: 'Knowledge Graph',
+    meaning:
+      'Checked against the rules for new stacks. Older stacks may use k8s.cluster.name as the environment instead.',
+  },
+  {
+    term: 'Application Observability',
+    meaning:
+      'The classic app filters on deployment.environment by default, so deployment.environment.name alone does not count.',
+  },
+];
+
 export const FINDINGS_HELP: GuideItem[] = [
   { meaning: 'One row per name that differs from semconv on the selected signal.' },
   {

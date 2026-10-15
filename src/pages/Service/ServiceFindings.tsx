@@ -48,6 +48,7 @@ import {
 } from '../../components/StackStatus/StackStatus';
 import { HopCandidates } from './HopCandidates';
 import { ResourceAttributes } from './ResourceAttributes';
+import { ProductReadiness } from './ProductReadiness';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { FINDINGS_HELP } from '../../components/SectionHeading/guides';
 
@@ -205,6 +206,11 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
       {identity.aliases.length > 0 && (
         <Text color="secondary">Also seen as: {identity.aliases.map(ownerLabel).join(', ')}</Text>
       )}
+      <ProductReadiness
+        rows={assessment.result.product_readiness ?? []}
+        owners={[identity.owner, ...identity.aliases]}
+        signals={SIGNALS.filter((candidate) => identity.signals.includes(candidate))}
+      />
       <ResourceAttributes
         checks={assessment.result.resource_attributes ?? []}
         owners={[identity.owner, ...identity.aliases]}

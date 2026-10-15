@@ -7,6 +7,7 @@ import { sameOwner } from '../../assessment/traceAssessment';
 import { testIds } from '../../components/testIds';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { RESOURCE_ATTRIBUTES_HELP } from '../../components/SectionHeading/guides';
+import { getTableStyles } from './tableStyles';
 
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 const SDK_ENVIRONMENT_URL = 'https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/';
@@ -41,7 +42,8 @@ export function bestCheck(
 }
 
 export function ResourceAttributes({ checks, owners, signals }: ResourceAttributesProps) {
-  const styles = useStyles2(getStyles);
+  const styles = useStyles2(getTableStyles);
+  const linkStyles = useStyles2(getLinkStyles);
   const owned = ownerResourceChecks(checks, owners);
   const attributes = [...new Set(owned.map((check) => check.attribute))];
   if (attributes.length === 0) {
@@ -99,7 +101,7 @@ export function ResourceAttributes({ checks, owners, signals }: ResourceAttribut
           Alloy with the resource or Kubernetes attributes processor. On metrics, attributes promoted to labels appear
           on every series and the rest are only on <code>target_info</code>. Grafana Cloud promotes
           deployment.environment.name and the service attributes by default.
-          <span className={styles.links}>
+          <span className={linkStyles.links}>
             <TextLink href={SDK_ENVIRONMENT_URL} external>
               SDK environment variables
             </TextLink>
@@ -116,20 +118,7 @@ export function ResourceAttributes({ checks, owners, signals }: ResourceAttribut
   );
 }
 
-const getStyles = (theme: GrafanaTheme2) => ({
-  scroll: css({
-    overflowX: 'auto',
-  }),
-  table: css({
-    borderCollapse: 'collapse',
-    width: '100%',
-    'th, td': {
-      textAlign: 'left',
-      verticalAlign: 'top',
-      padding: theme.spacing(1),
-      borderBottom: `1px solid ${theme.colors.border.weak}`,
-    },
-  }),
+const getLinkStyles = (theme: GrafanaTheme2) => ({
   links: css({
     display: 'flex',
     flexWrap: 'wrap',
