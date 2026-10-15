@@ -6,6 +6,7 @@ import { ProxyGet } from '../../src/datasources/proxy';
 import { createLimiter } from '../../src/datasources/limiter';
 import { withLists } from '../../src/api/score';
 import { SpanGroupRule } from '../../src/api/catalogue';
+import { Product } from '../../src/api/products';
 import { AssessmentResult } from '../../src/api/types';
 import { Inventory } from '../../src/inventory/types';
 import { assessStack } from '../../src/assessment/stackAssessment';
@@ -104,6 +105,10 @@ describeWhenEnabled('cloud end to end (read-only)', () => {
               `${PLUGIN_RESOURCES}/catalogue/renamed-attributes`,
             ]);
             return JSON.parse(stdout) as Record<string, string[]>;
+          },
+          products: async () => {
+            const { stdout } = await run('curl', ['-s', '-f', '-b', COOKIE_JAR, `${PLUGIN_RESOURCES}/products`]);
+            return JSON.parse(stdout) as Product[];
           },
           namesNeedingLabels: async (names) =>
             (await postLocal<{ needs_labels: string[] }>('catalogue/metric-matches', { names })).needs_labels,
