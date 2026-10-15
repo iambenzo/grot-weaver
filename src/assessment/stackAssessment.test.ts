@@ -92,6 +92,31 @@ describe('seriesPresenceAttributes', () => {
     expect(attributes).toEqual(['service.name', 'k8s.pod.name']);
   });
 
+  it('leaves out product attributes that only matter on traces or logs', async () => {
+    const products = async () => [
+      {
+        id: 'kg',
+        name: 'KG',
+        summary: '',
+        requirements: [
+          {
+            signal: 'traces' as const,
+            attribute: 'telemetry.sdk.name',
+            level: 'required' as const,
+            source: 'https://grafana.com/docs/x',
+          },
+        ],
+      },
+    ];
+
+    const attributes = await seriesPresenceAttributes(
+      { requiredResourceAttributes: ['service.name'] },
+      deps(undefined, products)
+    );
+
+    expect(attributes).toEqual(['service.name']);
+  });
+
   it('still returns the required list when products cannot be fetched', async () => {
     const failing = async () => {
       throw new Error('boom');

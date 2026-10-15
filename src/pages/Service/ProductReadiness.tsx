@@ -67,7 +67,7 @@ function SignalCell({ readiness }: { readiness?: SignalReadiness }) {
     <Stack direction="column" gap={0.5} alignItems="flex-start">
       <ShareBadge share={readiness.share} />
       {readiness.missing.length > 0 && <AttributeList label="Missing" attributes={readiness.missing} />}
-      {readiness.unknown.length > 0 && <AttributeList label="Not checked" attributes={readiness.unknown} />}
+      {readiness.unknown.length > 0 && <AttributeList label="Not checkable" attributes={readiness.unknown} />}
       {readiness.missingRecommended.length > 0 && (
         <AttributeList label="Also unlocks" attributes={readiness.missingRecommended} />
       )}
@@ -79,7 +79,14 @@ function ShareBadge({ share }: { share: number | null }) {
   if (share === null) {
     return <Badge text="Not checkable" color="darkgrey" />;
   }
-  return <Badge text={`${Math.round(share * 100)}%`} color={share === 1 ? 'green' : 'orange'} />;
+  return <Badge text={`${Math.round(share * 100)}%`} color={shareColor(share)} />;
+}
+
+function shareColor(share: number) {
+  if (share === 1) {
+    return 'green';
+  }
+  return share === 0 ? 'red' : 'orange';
 }
 
 function AttributeList({ label, attributes }: { label: string; attributes: string[] }) {

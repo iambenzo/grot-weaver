@@ -52,7 +52,7 @@ export const PRODUCT_READINESS_HELP: GuideItem[] = [
   {
     term: 'Not checkable',
     meaning:
-      'None of the needed attributes could be judged from what was collected, for example no target_info series.',
+      'Shown when nothing is missing but some needed attributes could not be judged from what was collected, for example no target_info series.',
   },
   { term: 'N/A', meaning: 'The product needs nothing from this signal, or the service does not send it.' },
   {

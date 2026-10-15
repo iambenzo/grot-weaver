@@ -50,9 +50,9 @@ func Test_resourceCollector_readiness(t *testing.T) {
 			wantRatio: scoring.Ratio{Numerator: 2, Denominator: 3}, wantMissing: []string{"deployment.environment.name"}, wantUnknown: []string{}, wantRecommendedGap: []string{"k8s.pod.name"},
 		},
 		{
-			name:      "unknown attributes are left out of the ratio",
+			name:      "unknown attributes with nothing missing make the signal not checkable",
 			service:   TraceService{ServiceName: "checkout", ServiceNamespace: "shop"},
-			wantRatio: scoring.Ratio{Numerator: 2, Denominator: 2}, wantMissing: []string{}, wantUnknown: []string{"deployment.environment.name"}, wantRecommendedGap: []string{},
+			wantRatio: scoring.Ratio{}, wantMissing: []string{}, wantUnknown: []string{"deployment.environment.name"}, wantRecommendedGap: []string{},
 		},
 	}
 	for _, tc := range cases {
@@ -118,6 +118,71 @@ func Test_Assess_readinessLeavesEveryScoreUnchanged(t *testing.T) {
 	for _, row := range result.Owners {
 		if row.Owner == cart && row.Signal == finding.SignalTraces && row.Scores.RequiredResource != (scoring.Ratio{Numerator: 3, Denominator: 4}) {
 			t.Errorf("required_resource = %+v, want 3/4 from the four defaults only", row.Scores.RequiredResource)
+		}
+	}
+}
+
+func Test_resourceCollector_readinessOnMetricSeriesFlags(t *testing.T) {
+	metricsProduct := product.Product{ID: "test", Name: "Test", Requirements: []product.Requirement{
+		{Signal: finding.SignalMetrics, Attribute: "deployment.environment.name", Alternatives: []string{"deployment.environment"}, Level: product.LevelRequired},
+	}}
+	checked := []string{"deployment.environment.name", "deployment.environment"}
+	cases := []struct {
+		name            string
+		labels          map[string]string
+		checkedOnSeries []string
+		wantPresent     []string
+		wantMissing     []string
+		wantUnknown     []string
+	}{
+		{
+			name:            "both names checked and neither flagged",
+			labels:          map[string]string{"job": "shop/checkout"},
+			checkedOnSeries: checked,
+			wantPresent:     []string{}, wantMissing: []string{"deployment.environment.name"}, wantUnknown: []string{},
+		},
+		{
+			name:            "only the current name checked and not flagged",
+			labels:          map[string]string{"job": "shop/checkout"},
+			checkedOnSeries: checked[:1],
+			wantPresent:     []string{}, wantMissing: []string{}, wantUnknown: []string{"deployment.environment.name"},
+		},
+		{
+			name:            "the deprecated name flagged on the series",
+			labels:          map[string]string{"job": "shop/checkout", "semconv_has_deployment_environment": "1"},
+			checkedOnSeries: checked,
+			wantPresent:     []string{"deployment.environment.name"}, wantMissing: []string{}, wantUnknown: []string{},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var collector resourceCollector
+			collector.observe(checkout, finding.SignalMetrics, metricResource(checkout, tc.labels, nil, tc.checkedOnSeries))
+
+			row := readinessOf(t, collector.readiness([]product.Product{metricsProduct}), checkout, finding.SignalMetrics, "test")
+
+			if !slices.Equal(row.Present, tc.wantPresent) || !slices.Equal(row.Missing, tc.wantMissing) || !slices.Equal(row.Unknown, tc.wantUnknown) {
+				t.Errorf("present %v missing %v unknown %v", row.Present, row.Missing, row.Unknown)
+			}
+		})
+	}
+}
+
+func Test_Assess_readinessIsNotCheckableWhenNoResourceKeysWereRead(t *testing.T) {
+	inventory := Inventory{Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{
+		{ServiceName: "cart", SpanCount: 5},
+	}}}}
+	cart := finding.Owner{Kind: finding.OwnerService, Name: "cart"}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	for _, productID := range []string{"application-observability", "knowledge-graph"} {
+		row := readinessOf(t, result.Readiness, cart, finding.SignalTraces, productID)
+		if _, defined := row.Readiness.Value(); defined {
+			t.Errorf("%s readiness = %+v, want not checkable", productID, row)
+		}
+		if len(row.Unknown) == 0 || len(row.Missing) != 0 {
+			t.Errorf("%s missing %v unknown %v", productID, row.Missing, row.Unknown)
 		}
 	}
 }

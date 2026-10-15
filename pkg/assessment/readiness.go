@@ -48,6 +48,13 @@ func (o *observedResource) readinessFor(key scoring.Key, candidate product.Produ
 			row.MissingRecommended = append(row.MissingRecommended, requirement.Attribute)
 		}
 	}
-	row.Readiness = scoring.Ratio{Numerator: float64(len(row.Present)), Denominator: float64(len(row.Present) + len(row.Missing))}
+	row.Readiness = readinessRatio(row)
 	return row
+}
+
+func readinessRatio(row ProductReadiness) scoring.Ratio {
+	if len(row.Unknown) > 0 && len(row.Missing) == 0 {
+		return scoring.Ratio{}
+	}
+	return scoring.Ratio{Numerator: float64(len(row.Present)), Denominator: float64(len(row.Present) + len(row.Missing))}
 }

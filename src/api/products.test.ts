@@ -1,7 +1,7 @@
-import { Product, productAttributes } from './products';
+import { Product, metricProductAttributes } from './products';
 
-describe('productAttributes', () => {
-  it('lists every attribute and alternative once', () => {
+describe('metricProductAttributes', () => {
+  it('lists every metrics attribute and alternative once, ignoring other signals', () => {
     const products: Product[] = [
       {
         id: 'a',
@@ -24,14 +24,16 @@ describe('productAttributes', () => {
         summary: '',
         requirements: [
           { signal: 'logs', attribute: 'k8s.pod.name', level: 'required', source: 'https://grafana.com/docs/z' },
+          {
+            signal: 'metrics',
+            attribute: 'deployment.environment',
+            level: 'required',
+            source: 'https://grafana.com/docs/z',
+          },
         ],
       },
     ];
 
-    expect(productAttributes(products)).toEqual([
-      'deployment.environment.name',
-      'deployment.environment',
-      'k8s.pod.name',
-    ]);
+    expect(metricProductAttributes(products)).toEqual(['deployment.environment.name', 'deployment.environment']);
   });
 });

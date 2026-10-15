@@ -10,7 +10,7 @@ import { QueryWindow } from '../window/window';
 import { ScoreInventory } from '../api/score';
 import { FetchRenamedAttributes, FetchSpanGroupRules, SpanGroupRule } from '../api/catalogue';
 import { AssessmentResult, Owner, Signal } from '../api/types';
-import { FetchProducts, productAttributes } from '../api/products';
+import { FetchProducts, metricProductAttributes } from '../api/products';
 import {
   DEFAULT_LOG_SAMPLE_LIMIT,
   DEFAULT_TRACE_SAMPLE_LIMIT,
@@ -152,7 +152,7 @@ export async function seriesPresenceAttributes(settings: PluginSettings, deps: S
     deps.products?.().catch(() => undefined),
   ]);
   const deprecated = required.flatMap((attribute) => renamed?.[attribute] ?? []);
-  return [...new Set([...required, ...deprecated, ...productAttributes(products ?? [])])].slice(
+  return [...new Set([...required, ...deprecated, ...metricProductAttributes(products ?? [])])].slice(
     0,
     MAX_SERIES_PRESENCE_CHECKS
   );

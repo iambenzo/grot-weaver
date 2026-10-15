@@ -88,4 +88,56 @@ describe('serviceReadiness', () => {
 
     expect(kg.overall).toBeCloseTo(3 / 4);
   });
+
+  it('reports present attributes with unknown ones and nothing missing as not checkable', () => {
+    const [kg] = serviceReadiness(
+      [row(checkout, 'traces', { present: ['service.name'], unknown: ['deployment.environment.name'] })],
+      [checkout]
+    );
+
+    expect(kg.signals.traces?.share).toBeNull();
+    expect(kg.overall).toBeNull();
+  });
+
+  it('reports the share of the checked attributes when something is missing and something is unknown', () => {
+    const [kg] = serviceReadiness(
+      [
+        row(checkout, 'traces', {
+          present: ['service.name'],
+          missing: ['service.namespace'],
+          unknown: ['deployment.environment.name'],
+        }),
+      ],
+      [checkout]
+    );
+
+    expect(kg.signals.traces?.share).toBeCloseTo(1 / 2);
+    expect(kg.overall).toBeCloseTo(1 / 2);
+  });
+
+  it('is not checkable overall when no signal has anything missing and any has unknown attributes', () => {
+    const [kg] = serviceReadiness(
+      [
+        row(checkout, 'traces', { present: ['service.name'] }),
+        row(checkout, 'metrics', { present: ['service.name'], unknown: ['service.instance.id'] }),
+      ],
+      [checkout]
+    );
+
+    expect(kg.signals.traces?.share).toBe(1);
+    expect(kg.signals.metrics?.share).toBeNull();
+    expect(kg.overall).toBeNull();
+  });
+
+  it('is partial overall when one signal is missing something and another has unknown attributes', () => {
+    const [kg] = serviceReadiness(
+      [
+        row(checkout, 'traces', { present: ['service.name'], missing: ['service.namespace'] }),
+        row(checkout, 'metrics', { present: ['service.name'], unknown: ['service.instance.id'] }),
+      ],
+      [checkout]
+    );
+
+    expect(kg.overall).toBeCloseTo(2 / 3);
+  });
 });

@@ -31,11 +31,13 @@ export const fetchProducts: FetchProducts = async () => {
   return response.data;
 };
 
-export function productAttributes(products: Product[]): string[] {
+export function metricProductAttributes(products: Product[]): string[] {
   return [
     ...new Set(
       products.flatMap((product) =>
-        product.requirements.flatMap((requirement) => [requirement.attribute, ...(requirement.alternatives ?? [])])
+        product.requirements
+          .filter((requirement) => requirement.signal === 'metrics')
+          .flatMap((requirement) => [requirement.attribute, ...(requirement.alternatives ?? [])])
       )
     ),
   ];

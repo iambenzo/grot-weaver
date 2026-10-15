@@ -37,17 +37,27 @@ function mergeSignal(existing: SignalReadiness | undefined, row: ProductReadines
   const missingRecommended = existing
     ? existing.missingRecommended.filter((attribute) => row.missing_recommended.includes(attribute))
     : row.missing_recommended;
-  return { present, missing, unknown, missingRecommended, share: shareOf(present.length, missing.length) };
+  return {
+    present,
+    missing,
+    unknown,
+    missingRecommended,
+    share: shareOf(present.length, missing.length, unknown.length),
+  };
 }
 
 function overallShare(signals: SignalReadiness[]): number | null {
   const present = signals.reduce((total, signal) => total + signal.present.length, 0);
   const missing = signals.reduce((total, signal) => total + signal.missing.length, 0);
-  return shareOf(present, missing);
+  const unknown = signals.reduce((total, signal) => total + signal.unknown.length, 0);
+  return shareOf(present, missing, unknown);
 }
 
-function shareOf(present: number, missing: number): number | null {
-  return present + missing === 0 ? null : present / (present + missing);
+function shareOf(present: number, missing: number, unknown: number): number | null {
+  if (present + missing === 0 || (missing === 0 && unknown > 0)) {
+    return null;
+  }
+  return present / (present + missing);
 }
 
 function union(first: string[], second: string[]): string[] {
