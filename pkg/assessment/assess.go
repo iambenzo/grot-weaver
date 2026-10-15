@@ -8,6 +8,7 @@ import (
 	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/identity"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
+	"github.com/iambenzo/otel-semconv-compliance/pkg/product"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
 )
 
@@ -41,6 +42,7 @@ type Result struct {
 	Hops           []ServiceHops            `json:"hops"`
 	Coverage       []SignalCoverage         `json:"coverage"`
 	Resource       []ResourceAttributeCheck `json:"resource_attributes"`
+	Readiness      []ProductReadiness       `json:"product_readiness"`
 	Owners         []ScoreRow               `json:"owners"`
 	Namespaces     []ScoreRow               `json:"namespaces"`
 	Signals        []ScoreRow               `json:"signals"`
@@ -164,6 +166,7 @@ func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
 		Hops:           gathered.hops(inv.PipelineMappings),
 		Coverage:       gathered.coverageRows(),
 		Resource:       resourceChecks,
+		Readiness:      gathered.resources.readiness(product.Products),
 		Owners:         rows(scores),
 		Namespaces:     rows(scoring.RollUp(servicesOnly(scores), scoring.ByNamespace)),
 		Signals:        rows(scoring.RollUp(servicesOnly(scores), scoring.BySignal)),

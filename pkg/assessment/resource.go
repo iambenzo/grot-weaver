@@ -115,7 +115,7 @@ func (c *resourceCollector) observe(owner finding.Owner, signal finding.Signal, 
 	c.observed[key] = observed
 }
 
-func (c *resourceCollector) checks(required []string, renamedFrom map[string][]string) []ResourceAttributeCheck {
+func (c *resourceCollector) sortedKeys() []scoring.Key {
 	keys := make([]scoring.Key, 0, len(c.observed))
 	for key := range c.observed {
 		keys = append(keys, key)
@@ -123,8 +123,12 @@ func (c *resourceCollector) checks(required []string, renamedFrom map[string][]s
 	slices.SortFunc(keys, func(a, b scoring.Key) int {
 		return cmp.Or(cmp.Compare(a.Owner.Namespace, b.Owner.Namespace), cmp.Compare(a.Owner.Name, b.Owner.Name), cmp.Compare(a.Signal, b.Signal))
 	})
+	return keys
+}
+
+func (c *resourceCollector) checks(required []string, renamedFrom map[string][]string) []ResourceAttributeCheck {
 	checks := []ResourceAttributeCheck{}
-	for _, key := range keys {
+	for _, key := range c.sortedKeys() {
 		for _, attribute := range required {
 			state, evidence := c.observed[key].judge(attribute, renamedFrom[attribute])
 			checks = append(checks, ResourceAttributeCheck{Key: key, Attribute: attribute, State: state, Evidence: evidence})
@@ -146,6 +150,25 @@ func (o *observedResource) judge(attribute string, deprecatedNames []string) (Pr
 		}
 	}
 	return PresenceMissing, "not found in " + o.where
+}
+
+func (o *observedResource) judgeAny(names []string) PresenceState {
+	if slices.ContainsFunc(names, o.has) {
+		return PresencePresent
+	}
+	if o.complete || !slices.ContainsFunc(names, o.unsettled) {
+		return PresenceMissing
+	}
+	return PresenceUnknown
+}
+
+func (o *observedResource) has(name string) bool {
+	_, present := o.lookup(name)
+	return present
+}
+
+func (o *observedResource) unsettled(name string) bool {
+	return !o.authoritative[name]
 }
 
 func presenceChecks(checks []ResourceAttributeCheck) []scoring.PresenceCheck {
