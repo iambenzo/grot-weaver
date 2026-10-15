@@ -4,6 +4,7 @@ import { AssessmentResult } from '../api/types';
 import { Inventory } from '../inventory/types';
 import {
   DatasourceProgress,
+  MAX_SERIES_PRESENCE_CHECKS,
   StackAssessment,
   StackDependencies,
   assessStack,
@@ -36,13 +37,17 @@ describe('mergeOwners', () => {
 });
 
 describe('seriesPresenceAttributes', () => {
-  const deps = (renamedAttributes?: StackDependencies['renamedAttributes']): StackDependencies => ({
+  const deps = (
+    renamedAttributes?: StackDependencies['renamedAttributes'],
+    products?: StackDependencies['products']
+  ): StackDependencies => ({
     get: jest.fn(),
     limit: createLimiter(1),
     score: jest.fn(),
     spanGroupRules: async () => [],
     namesNeedingLabels: async () => [],
     renamedAttributes,
+    products,
   });
 
   it('adds the deprecated names of each required attribute', async () => {
@@ -60,6 +65,73 @@ describe('seriesPresenceAttributes', () => {
     expect(await seriesPresenceAttributes({ requiredResourceAttributes: ['service.name'] }, deps(failing))).toEqual([
       'service.name',
     ]);
+  });
+
+  it('adds product attributes after the required list and its deprecated names', async () => {
+    const products = async () => [
+      {
+        id: 'kg',
+        name: 'KG',
+        summary: '',
+        requirements: [
+          {
+            signal: 'metrics' as const,
+            attribute: 'k8s.pod.name',
+            level: 'recommended' as const,
+            source: 'https://grafana.com/docs/x',
+          },
+        ],
+      },
+    ];
+
+    const attributes = await seriesPresenceAttributes(
+      { requiredResourceAttributes: ['service.name'] },
+      deps(undefined, products)
+    );
+
+    expect(attributes).toEqual(['service.name', 'k8s.pod.name']);
+  });
+
+  it('still returns the required list when products cannot be fetched', async () => {
+    const failing = async () => {
+      throw new Error('boom');
+    };
+
+    const attributes = await seriesPresenceAttributes(
+      { requiredResourceAttributes: ['service.name'] },
+      deps(undefined, failing)
+    );
+
+    expect(attributes).toEqual(['service.name']);
+  });
+
+  it('caps the flags so the inventory stays within the backend limit, keeping the required list first', async () => {
+    const required = Array.from({ length: 50 }, (_, i) => `required.${i}`);
+    const renamed = async () => Object.fromEntries(required.map((attribute) => [attribute, [`${attribute}.old`]]));
+    const products = async () => [
+      {
+        id: 'kg',
+        name: 'KG',
+        summary: '',
+        requirements: [
+          {
+            signal: 'metrics' as const,
+            attribute: 'k8s.pod.name',
+            level: 'required' as const,
+            source: 'https://grafana.com/docs/x',
+          },
+        ],
+      },
+    ];
+
+    const attributes = await seriesPresenceAttributes(
+      { requiredResourceAttributes: required },
+      deps(renamed, products)
+    );
+
+    expect(attributes).toHaveLength(MAX_SERIES_PRESENCE_CHECKS);
+    expect(attributes.slice(0, 50)).toEqual(required);
+    expect(attributes).not.toContain('k8s.pod.name');
   });
 });
 

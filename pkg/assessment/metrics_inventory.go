@@ -90,7 +90,7 @@ func (d MetricDatasource) validate() error {
 	if d.UID == "" {
 		return fmt.Errorf("%w: metric datasource without uid", ErrInvalidInventory)
 	}
-	if err := validateRequiredAttributes(d.ResourceLabelChecks); err != nil {
+	if err := validateResourceLabelChecks(d.ResourceLabelChecks); err != nil {
 		return err
 	}
 	if d.StrategyOverride != "" && !slices.Contains(nameindex.Strategies, d.StrategyOverride) {

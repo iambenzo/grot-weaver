@@ -3,6 +3,7 @@ import { proxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { scoreInventory } from '../api/score';
 import { fetchMetricsNeedingLabels, fetchRenamedAttributes, fetchSpanGroupRules } from '../api/catalogue';
+import { fetchProducts } from '../api/products';
 import { LabelProgress } from '../inventory/prometheus';
 import { PluginSettings, concurrencyFrom } from '../settings/settings';
 import { QueryWindow } from '../window/window';
@@ -100,6 +101,7 @@ function startRun(
     spanGroupRules: fetchSpanGroupRules,
     namesNeedingLabels: fetchMetricsNeedingLabels,
     renamedAttributes: fetchRenamedAttributes,
+    products: fetchProducts,
     onLabelProgress: (labels) => patch({ labels }),
     onProgress: (progress) => patch({ progress }),
     onPartial: (assessment) => patch({ assessment }),

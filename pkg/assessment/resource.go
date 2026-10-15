@@ -13,6 +13,7 @@ import (
 
 const (
 	MaxRequiredResourceAttributes = 50
+	MaxResourceLabelChecks        = 100
 
 	attributeServiceName       = "service.name"
 	attributeServiceNamespace  = "service.namespace"
@@ -190,12 +191,20 @@ func (inv Inventory) RequiredAttributes() []string {
 }
 
 func validateRequiredAttributes(attributes []string) error {
-	if len(attributes) > MaxRequiredResourceAttributes {
-		return fmt.Errorf("%w: %d required resource attributes exceeds %d", ErrInvalidInventory, len(attributes), MaxRequiredResourceAttributes)
+	return validateAttributeList(attributes, MaxRequiredResourceAttributes, "required resource attributes")
+}
+
+func validateResourceLabelChecks(attributes []string) error {
+	return validateAttributeList(attributes, MaxResourceLabelChecks, "resource label checks")
+}
+
+func validateAttributeList(attributes []string, limit int, what string) error {
+	if len(attributes) > limit {
+		return fmt.Errorf("%w: %d %s exceeds %d", ErrInvalidInventory, len(attributes), what, limit)
 	}
 	for _, attribute := range attributes {
 		if attribute == "" || len(attribute) > MaxNameLength {
-			return fmt.Errorf("%w: empty or overlong required resource attribute", ErrInvalidInventory)
+			return fmt.Errorf("%w: empty or overlong %s entry", ErrInvalidInventory, what)
 		}
 	}
 	return nil

@@ -10,6 +10,7 @@ import { QueryWindow } from '../window/window';
 import { ScoreInventory } from '../api/score';
 import { FetchRenamedAttributes, FetchSpanGroupRules, SpanGroupRule } from '../api/catalogue';
 import { AssessmentResult, Owner, Signal } from '../api/types';
+import { FetchProducts, productAttributes } from '../api/products';
 import {
   DEFAULT_LOG_SAMPLE_LIMIT,
   DEFAULT_TRACE_SAMPLE_LIMIT,
@@ -61,6 +62,7 @@ export interface StackDependencies {
   spanGroupRules: FetchSpanGroupRules;
   namesNeedingLabels: NamesNeedingLabels;
   renamedAttributes?: FetchRenamedAttributes;
+  products?: FetchProducts;
   onLabelProgress?: (progress: LabelProgress) => void;
   onProgress?: (progress: DatasourceProgress[]) => void;
   onPartial?: (assessment: StackAssessment) => void;
@@ -141,10 +143,19 @@ async function runAssessment(
   return assessment;
 }
 
+export const MAX_SERIES_PRESENCE_CHECKS = 100;
+
 export async function seriesPresenceAttributes(settings: PluginSettings, deps: StackDependencies): Promise<string[]> {
   const required = requiredResourceAttributes(settings);
-  const renamed = (await deps.renamedAttributes?.().catch(() => undefined)) ?? {};
-  return [...new Set([...required, ...required.flatMap((attribute) => renamed[attribute] ?? [])])];
+  const [renamed, products] = await Promise.all([
+    deps.renamedAttributes?.().catch(() => undefined),
+    deps.products?.().catch(() => undefined),
+  ]);
+  const deprecated = required.flatMap((attribute) => renamed?.[attribute] ?? []);
+  return [...new Set([...required, ...deprecated, ...productAttributes(products ?? [])])].slice(
+    0,
+    MAX_SERIES_PRESENCE_CHECKS
+  );
 }
 
 async function collect(

@@ -1,6 +1,8 @@
 package assessment
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -174,7 +176,10 @@ func Test_Inventory_Validate_requiredResourceAttributes(t *testing.T) {
 	for index := range tooMany {
 		tooMany[index] = "a"
 	}
-	for _, attributes := range [][]string{{""}, tooMany, {strings.Repeat("a", MaxNameLength+1)}} {
+	if err := (Inventory{RequiredResourceAttributes: tooMany}).Validate(); err == nil {
+		t.Errorf("attributes %d long validated", len(tooMany))
+	}
+	for _, attributes := range [][]string{{""}, {strings.Repeat("a", MaxNameLength+1)}} {
 		if err := (Inventory{RequiredResourceAttributes: attributes}).Validate(); err == nil {
 			t.Errorf("attributes %d long validated", len(attributes))
 		}
@@ -185,5 +190,21 @@ func Test_Inventory_Validate_requiredResourceAttributes(t *testing.T) {
 	}
 	if err := (Inventory{RequiredResourceAttributes: []string{"service.name"}}).Validate(); err != nil {
 		t.Error(err)
+	}
+}
+
+func Test_MetricDatasource_validate_resourceLabelChecksHaveTheirOwnLimit(t *testing.T) {
+	names := func(count int) []string {
+		attributes := make([]string, count)
+		for i := range attributes {
+			attributes[i] = fmt.Sprintf("attribute.%d", i)
+		}
+		return attributes
+	}
+	if err := (Inventory{Metrics: []MetricDatasource{{UID: "prom", ResourceLabelChecks: names(60)}}}).Validate(); err != nil {
+		t.Errorf("60 checks: %v", err)
+	}
+	if err := (Inventory{Metrics: []MetricDatasource{{UID: "prom", ResourceLabelChecks: names(MaxResourceLabelChecks + 1)}}}).Validate(); !errors.Is(err, ErrInvalidInventory) {
+		t.Errorf("%d checks: err = %v, want ErrInvalidInventory", MaxResourceLabelChecks+1, err)
 	}
 }

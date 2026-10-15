@@ -12,6 +12,7 @@ import (
 
 	"github.com/iambenzo/otel-semconv-compliance/pkg/assessment"
 	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/otel-semconv-compliance/pkg/product"
 )
 
 type capturingSender struct {
@@ -201,5 +202,17 @@ func Test_CallResource_metricMatches(t *testing.T) {
 	want := []string{"http_server_request_duration_seconds_bucket", "http_server_duration_milliseconds_count"}
 	if !slices.Equal(response.NeedsLabels, want) {
 		t.Errorf("needs_labels = %v, want %v", response.NeedsLabels, want)
+	}
+}
+
+func Test_CallResource_products(t *testing.T) {
+	response := callResource(t, newTestApp(t), http.MethodGet, "products")
+
+	var products []product.Product
+	if err := json.Unmarshal(response.Body, &products); err != nil || response.Status != http.StatusOK {
+		t.Fatalf("status %d err %v", response.Status, err)
+	}
+	if !slices.ContainsFunc(products, func(p product.Product) bool { return p.ID == "knowledge-graph" }) {
+		t.Errorf("products = %+v, want knowledge-graph", products)
 	}
 }
