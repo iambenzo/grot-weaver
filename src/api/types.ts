@@ -123,6 +123,18 @@ export interface ResourceAttributeCheck {
   evidence: string;
 }
 
+export interface ProductReadiness {
+  owner: Owner;
+  signal: Signal;
+  product: string;
+  product_name: string;
+  readiness: Ratio;
+  present: string[];
+  missing: string[];
+  unknown: string[];
+  missing_recommended: string[];
+}
+
 export interface AssessmentResult {
   semconv_version: string;
   window: { start: number; end: number };
@@ -134,6 +146,7 @@ export interface AssessmentResult {
   hops?: ServiceHops[];
   coverage?: Array<{ signal: Signal; coverage: Ratio }>;
   resource_attributes?: ResourceAttributeCheck[];
+  product_readiness?: ProductReadiness[];
   owners: ScoreRow[];
   namespaces: ScoreRow[];
   signals: ScoreRow[];
