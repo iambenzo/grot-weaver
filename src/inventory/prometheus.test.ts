@@ -6,6 +6,7 @@ import { MAX_OWNER_ATTEMPTS_PER_BATCH, SERIES_HOURS_PER_QUERY } from './queryBud
 import { MAX_METRIC_NAMES, MAX_TARGET_INFO_SERIES } from './limits';
 import {
   MAX_LABEL_KEY_CALLS,
+  serviceScopeMatchers,
   anonymousOwnersQuery,
   collectPrometheusInventory,
   collectorsQuery,
@@ -563,5 +564,10 @@ describe('service scope', () => {
     expect(calls.filter((call) => call.path === '/api/v1/series').map((call) => call.params['match[]'])).toEqual([
       'target_info{job=~"shop/checkout|otel-collector"}',
     ]);
+  });
+
+  it('requires a namespace prefix on the job when the service name itself contains a slash', () => {
+    expect(serviceScopeMatchers('integrations/db-o11y')[0]).toBe('job=~"[^/]+/integrations/db-o11y", service_name=""');
+    expect(serviceScopeMatchers('checkout')[0]).toBe('job=~"([^/]+/)?checkout", service_name=""');
   });
 });

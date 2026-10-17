@@ -89,7 +89,7 @@ export function nameMatcher(names: string[], extra?: string): string {
 
 export function serviceScopeMatchers(service: string): string[] {
   return [
-    `job=~"([^/]+/)?${promqlString(service.replace(REGEX_META, '\\$&'))}", service_name=""`,
+    `job=~"${service.includes('/') ? '[^/]+/' : '([^/]+/)?'}${promqlString(service.replace(REGEX_META, '\\$&'))}", service_name=""`,
     `service_name="${promqlString(service)}"`,
   ];
 }
