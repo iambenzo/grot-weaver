@@ -7,6 +7,7 @@ export const testIds = {
     hops: 'data-testid service-hop-candidates',
     resourceAttributes: 'data-testid service-resource-attributes',
     productReadiness: 'data-testid service-product-readiness',
+    quickView: 'data-testid service-quick-view',
   },
   overview: {
     header: 'data-testid overview-header',

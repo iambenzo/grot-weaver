@@ -44,6 +44,7 @@ interface Context {
   presenceAttributes: string[];
   errors: CollectionError[];
   labelChecks?: LabelChecks;
+  scope?: string[];
 }
 
 export interface LabelChecks {
@@ -81,9 +82,16 @@ export function collectorsQuery(window: QueryWindow): string {
   return `count by (${COLLECTOR_LABELS.join(', ')}) (last_over_time({__name__=~"${COLLECTOR_METRICS}"}[${prometheusLookback(window)}]))`;
 }
 
-export function nameMatcher(names: string[]): string {
+export function nameMatcher(names: string[], extra?: string): string {
   const alternatives = names.map((name) => promqlString(name.replace(REGEX_META, '\\$&')));
-  return `{__name__=~"${alternatives.join('|')}"}`;
+  return `{__name__=~"${alternatives.join('|')}"${extra ? `, ${extra}` : ''}}`;
+}
+
+export function serviceScopeMatchers(service: string): string[] {
+  return [
+    `job=~"(.+/)?${promqlString(service.replace(REGEX_META, '\\$&'))}"`,
+    `service_name="${promqlString(service)}"`,
+  ];
 }
 
 function promqlString(value: string): string {
@@ -94,11 +102,16 @@ export function promLabelName(attribute: string): string {
   return attribute.replace(/[^a-zA-Z0-9_]/g, '_');
 }
 
-export function ownersQuery(names: string[], window: QueryWindow, presenceAttributes: string[] = []): string {
+export function ownersQuery(
+  names: string[],
+  window: QueryWindow,
+  presenceAttributes: string[] = [],
+  extra?: string
+): string {
   const labels = [...new Set(presenceAttributes.map(promLabelName))];
   const flagged = labels.reduce(
     (inner, label) => `label_replace(${inner}, "${PRESENCE_LABEL_PREFIX}${label}", "1", "${label}", ".+")`,
-    `last_over_time(${nameMatcher(names)}[${prometheusLookback(window)}])`
+    `last_over_time(${nameMatcher(names, extra)}[${prometheusLookback(window)}])`
   );
   const grouping = ['__name__', ...OWNER_LABELS, ...labels.map((label) => PRESENCE_LABEL_PREFIX + label)];
   return `count by (${grouping.join(', ')}) (${flagged})`;
@@ -116,9 +129,18 @@ export async function collectPrometheusInventory(
   window: QueryWindow,
   namesNeedingLabels: NamesNeedingLabels = async () => [],
   onLabelProgress: (progress: LabelProgress) => void = () => undefined,
-  presenceAttributes: string[] = []
+  presenceAttributes: string[] = [],
+  service?: string
 ): Promise<PrometheusCollection> {
-  const context: Context = { uid, get, limit, window, presenceAttributes, errors: [] };
+  const context: Context = {
+    uid,
+    get,
+    limit,
+    window,
+    presenceAttributes,
+    errors: [],
+    scope: service === undefined ? undefined : serviceScopeMatchers(service),
+  };
   const [names, targetInfo, collectors] = await Promise.all([
     guarded(context, 'metric names', () => metricNames(context)),
     guarded(context, 'target_info series', () => targetInfoSeries(context)),
@@ -242,18 +264,23 @@ async function labelNames(context: Context, matcher: string): Promise<string[]> 
 }
 
 async function metricNames(context: Context): Promise<string[]> {
-  const response = await context.limit(() =>
-    context.get<PrometheusResponse<string[]>>(
-      context.uid,
-      '/api/v1/label/__name__/values',
-      prometheusWindowParams(context.window)
+  const selectors = context.scope?.map((matcher) => ({ 'match[]': `{${matcher}}` })) ?? [{}];
+  const responses = await Promise.all(
+    selectors.map((selector) =>
+      context.limit(() =>
+        context.get<PrometheusResponse<string[]>>(context.uid, '/api/v1/label/__name__/values', {
+          ...prometheusWindowParams(context.window),
+          ...selector,
+        })
+      )
     )
   );
-  return [...response.data].sort();
+  return [...new Set(responses.flatMap((response) => response.data))].sort();
 }
 
 async function targetInfoSeries(context: Context): Promise<Array<Record<string, string>>> {
-  const params = { ...prometheusWindowParams(context.window), 'match[]': TARGET_INFO };
+  const selector = context.scope ? `${TARGET_INFO}{${context.scope[0]}}` : TARGET_INFO;
+  const params = { ...prometheusWindowParams(context.window), 'match[]': selector };
   const response = await context.limit(() =>
     context.get<PrometheusResponse<Array<Record<string, string>>>>(context.uid, '/api/v1/series', params)
   );
@@ -265,7 +292,7 @@ export function isRecordingRule(name: string): boolean {
 }
 
 async function collectOwners(context: Context, names: string[]): Promise<MetricOwner[]> {
-  const seriesOf = await activeSeriesByName(context);
+  const seriesOf = context.scope ? () => 0 : await activeSeriesByName(context);
   const batches = planBatches(
     names.filter((name) => !isRecordingRule(name)),
     seriesOf,
@@ -388,6 +415,14 @@ function mergeOwnerSlices(owners: MetricOwner[]): MetricOwner[] {
 }
 
 async function ownersForBatch(context: Context, batch: string[], window: QueryWindow): Promise<MetricOwner[]> {
+  if (context.scope) {
+    const scoped = await Promise.all(
+      context.scope.map((matcher) =>
+        instantQuery(context, ownersQuery(batch, window, context.presenceAttributes, matcher), window)
+      )
+    );
+    return mergeOwnerSlices(scoped.flat().map(toOwner));
+  }
   const owners = (await instantQuery(context, ownersQuery(batch, window, context.presenceAttributes), window)).map(
     toOwner
   );

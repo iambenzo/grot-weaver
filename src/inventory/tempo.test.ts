@@ -535,3 +535,26 @@ describe('request cost', () => {
     expect(calls).toHaveLength(5 + 3 * names.length);
   });
 });
+
+describe('service scope', () => {
+  it('collects only the scoped service and scopes the TraceQL metrics queries to it', async () => {
+    const { get, calls } = fakeTempo();
+
+    const { datasource } = await collectTempoInventory(
+      'tempo',
+      get,
+      createLimiter(2),
+      window,
+      [],
+      undefined,
+      'checkout'
+    );
+
+    expect(datasource.services.map((service) => service.service_name)).toEqual(['checkout']);
+    expect(
+      calls
+        .filter((call) => call.path === '/api/metrics/query_range')
+        .every((call) => call.params.q.startsWith('{ resource.service.name = "checkout" }'))
+    ).toBe(true);
+  });
+});

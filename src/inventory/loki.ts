@@ -10,7 +10,10 @@ const SERVICE_NAME = 'service_name';
 const SERVICE_NAMESPACE = 'service_namespace';
 const VALUES_SAMPLE_LIMIT = '5';
 const DEFAULT_KEYS_SAMPLE_LIMIT = 20;
-const VOLUME_SELECTOR = `{${SERVICE_NAME}=~".+", ${SERVICE_NAMESPACE}=~".*"}`;
+function volumeSelector(service?: string): string {
+  const name = service === undefined ? `${SERVICE_NAME}=~".+"` : `${SERVICE_NAME}="${escapeLabelValue(service)}"`;
+  return `{${name}, ${SERVICE_NAMESPACE}=~".*"}`;
+}
 export const VOLUME_SERIES_LIMIT = 5000;
 const CATEGORIZE_LABELS = { 'X-Loki-Response-Encoding-Flags': 'categorize-labels' };
 
@@ -50,6 +53,7 @@ interface Context {
   errors: CollectionError[];
   sampleLimit?: number;
   volumes?: Volumes;
+  service?: string;
 }
 
 export interface LokiCollection {
@@ -74,13 +78,16 @@ export async function collectLokiInventory(
   get: ProxyGet,
   limit: Limiter,
   window: QueryWindow,
-  sampleLimit?: number
+  sampleLimit?: number,
+  service?: string
 ): Promise<LokiCollection> {
-  const context: Context = { uid, get, limit, window, errors: [], sampleLimit };
+  const context: Context = { uid, get, limit, window, errors: [], sampleLimit, service };
   const [labels, serviceNames, volumes] = await Promise.all([
     guarded(context, 'labels', () => lokiGet<string[]>(context, '/loki/api/v1/labels', lokiWindowParams(window))),
-    guarded(context, 'service names', () =>
-      lokiGet<string[]>(context, `/loki/api/v1/label/${SERVICE_NAME}/values`, lokiWindowParams(window))
+    guarded(context, 'service names', async () =>
+      (await lokiGet<string[]>(context, `/loki/api/v1/label/${SERVICE_NAME}/values`, lokiWindowParams(window))).filter(
+        (name) => service === undefined || name === service
+      )
     ),
     indexVolumes(context).catch(() => undefined),
   ]);
@@ -219,7 +226,7 @@ async function indexVolumes(context: Context): Promise<Volumes> {
   const result = await lokiGet<{ result: Array<{ metric: Record<string, string>; value: [number, string] }> }>(
     context,
     '/loki/api/v1/index/volume',
-    { ...lokiWindowParams(context.window), query: VOLUME_SELECTOR, limit: String(VOLUME_SERIES_LIMIT) }
+    { ...lokiWindowParams(context.window), query: volumeSelector(context.service), limit: String(VOLUME_SERIES_LIMIT) }
   );
   const volumes: Volumes = new Map();
   for (const { metric, value } of result.result) {

@@ -36,7 +36,7 @@ import { QueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
 import { FindingsTable } from './FindingsTable';
-import { Keyed, useStackAssessment } from '../../assessment/useStackAssessment';
+import { Keyed, useServiceAssessment } from '../../assessment/useStackAssessment';
 import { ownerSummary } from '../../fix/summary';
 import { identifiedLibrary } from '../../fix/fixOptions';
 import {
@@ -97,7 +97,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   const { service, namespace, signal, settings } = model.useState();
   const timeRangeObject = sceneGraph.getTimeRange(model) as SceneTimeRange;
   const { value: timeRange } = timeRangeObject.useState();
-  const load = useStackAssessment(settings, timeRange);
+  const { load, quick } = useServiceAssessment(settings, timeRange, service);
 
   if (load.status === 'loading') {
     return <LoadingProgress progress={load.progress} labels={load.labels} />;
@@ -121,6 +121,12 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
 
   return (
     <Stack direction="column" gap={2}>
+      {quick && (
+        <Alert severity="info" title={`Quick view of ${service}`} data-testid={testIds.service.quickView}>
+          Only this service has been scanned so far. Labels that a pipeline adds to every service, and the impact
+          ranking, can change when the full scan of the stack finishes, and this page then updates.
+        </Alert>
+      )}
       <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
       <FeatureLimits progress={load.progress} result={assessment.result} />
       {!assessment.partial && !hasOTelServices(assessment.result) && <EmptyTelemetry result={assessment.result} />}

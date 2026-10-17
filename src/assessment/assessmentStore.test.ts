@@ -211,4 +211,13 @@ describe('assessment store', () => {
 
     expect(retryDatasource).toHaveBeenCalledTimes(2);
   });
+
+  it('passes a scoped run its service to the assessment', () => {
+    const runs = controlledRuns(assessStack as jest.Mock);
+    const { store } = storeAt({ nowMs: 0 });
+
+    store.acquire('a|checkout', window, settings, 'checkout');
+
+    expect(runs[0].deps.service).toBe('checkout');
+  });
 });

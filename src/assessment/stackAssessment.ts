@@ -74,6 +74,7 @@ export interface StackDependencies {
   namesNeedingLabels: NamesNeedingLabels;
   renamedAttributes?: FetchRenamedAttributes;
   products?: FetchProducts;
+  service?: string;
   onLabelProgress?: (progress: LabelProgress) => void;
   onProgress?: (progress: DatasourceProgress[]) => void;
   onPartial?: (assessment: StackAssessment) => void;
@@ -180,7 +181,7 @@ async function collect(
   const { ref, signal } = target;
   if (signal === 'traces') {
     const limit = sampleLimit(settings.traceSampleLimit, DEFAULT_TRACE_SAMPLE_LIMIT);
-    const collected = await collectTempoInventory(ref.uid, deps.get, deps.limit, window, rules, limit);
+    const collected = await collectTempoInventory(ref.uid, deps.get, deps.limit, window, rules, limit, deps.service);
     return {
       ref,
       signal,
@@ -199,7 +200,8 @@ async function collect(
       window,
       deps.namesNeedingLabels,
       deps.onLabelProgress,
-      presenceAttributes
+      presenceAttributes,
+      deps.service
     );
     return {
       ref,
@@ -210,7 +212,7 @@ async function collect(
     };
   }
   const limit = sampleLimit(settings.logSampleLimit, DEFAULT_LOG_SAMPLE_LIMIT);
-  const collected = await collectLokiInventory(ref.uid, deps.get, deps.limit, window, limit);
+  const collected = await collectLokiInventory(ref.uid, deps.get, deps.limit, window, limit, deps.service);
   return {
     ref,
     signal,

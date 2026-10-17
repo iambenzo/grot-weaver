@@ -51,6 +51,7 @@ interface CollectorContext {
   errors: CollectionError[];
   spanGroupRules: SpanGroupRule[];
   sampleLimit?: number;
+  service?: string;
 }
 
 interface MeasuredSeries {
@@ -81,11 +82,14 @@ export async function collectTempoInventory(
   limit: Limiter,
   window: QueryWindow,
   spanGroupRules: SpanGroupRule[] = [],
-  sampleLimit?: number
+  sampleLimit?: number,
+  service?: string
 ): Promise<TempoCollection> {
-  const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit };
+  const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit, service };
   const [serviceNames, filterIgnored, measured] = await Promise.all([
-    guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG)),
+    guarded(context, 'service names', async () =>
+      (await tagValues(context, SERVICE_NAME_TAG)).filter((name) => service === undefined || name === service)
+    ),
     isTagFilterIgnored(context).catch(() => false),
     measureServices(context),
   ]);
@@ -197,7 +201,7 @@ async function spanSeries(context: CollectorContext, sdkTags: string[]): Promise
   try {
     series = await queryMetricsRange(
       context,
-      `{ } | count_over_time() by (${[SERVICE_NAME_TAG, SERVICE_NAMESPACE_TAG, ...sdkTags].join(', ')})`
+      `${context.service === undefined ? '{ }' : serviceFilter({ name: context.service })} | count_over_time() by (${[SERVICE_NAME_TAG, SERVICE_NAMESPACE_TAG, ...sdkTags].join(', ')})`
     );
   } catch {
     return undefined;

@@ -26,23 +26,33 @@ export type Load =
     };
 
 const sharedStore = createAssessmentStore();
+const quickStore = createAssessmentStore();
+
+export interface AssessmentOptions {
+  store?: AssessmentStore;
+  service?: string;
+  enabled?: boolean;
+}
 
 export function useStackAssessment(
   settings: PluginSettings,
   timeRange: TimeRange,
-  store: AssessmentStore = sharedStore
+  { store = sharedStore, service, enabled = true }: AssessmentOptions = {}
 ): Load {
-  const key = runKey(settings, timeRange.raw);
+  const key = runKey(settings, timeRange.raw, service);
   const [snapshot, setSnapshot] = useState<Keyed<string, { run: Run; state: RunState }>>();
 
   useEffect(() => {
-    const run = store.acquire(key, toQueryWindow(timeRange), settings);
+    if (!enabled) {
+      return;
+    }
+    const run = store.acquire(key, toQueryWindow(timeRange), settings, service);
     const update = () => setSnapshot({ key, value: { run, state: run.state } });
     update();
     return store.subscribe(run, update);
-  }, [key, settings, timeRange, store]);
+  }, [key, settings, timeRange, store, service, enabled]);
 
-  if (!snapshot || snapshot.key !== key) {
+  if (!enabled || !snapshot || snapshot.key !== key) {
     return { status: 'loading', progress: [] };
   }
   const { run, state } = snapshot.value;
@@ -60,6 +70,36 @@ export function useStackAssessment(
     return { status: 'failed', message: state.message, progress: state.progress };
   }
   return { status: 'loading', progress: state.progress, labels: state.labels };
+}
+
+export interface ServiceLoad {
+  load: Load;
+  quick: boolean;
+}
+
+export function chooseServiceLoad(full: Load, quick: Load): ServiceLoad {
+  const complete = (load: Load) => load.status === 'ready' && !load.assessment.partial;
+  if (complete(full) || full.status === 'failed' || !complete(quick)) {
+    return { load: full, quick: false };
+  }
+  return { load: quick, quick: true };
+}
+
+export function useServiceAssessment(
+  settings: PluginSettings,
+  timeRange: TimeRange,
+  service: string | undefined,
+  store: AssessmentStore = sharedStore,
+  quickLane: AssessmentStore = quickStore
+): ServiceLoad {
+  const full = useStackAssessment(settings, timeRange, { store });
+  const fullComplete = full.status === 'ready' && !full.assessment.partial;
+  const quick = useStackAssessment(settings, timeRange, {
+    store: quickLane,
+    service,
+    enabled: service !== undefined && !fullComplete,
+  });
+  return chooseServiceLoad(full, quick);
 }
 
 export function loadingText(load: { labels?: LabelProgress }): string {

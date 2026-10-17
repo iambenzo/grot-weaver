@@ -314,6 +314,19 @@ describe('request cost', () => {
   });
 });
 
+describe('service scope', () => {
+  it('collects only the scoped service and scopes the index volume query to it', async () => {
+    const { get, calls } = fakeLoki({ serviceNames: ['checkout', 'cart'] });
+
+    const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window, undefined, 'checkout');
+
+    expect(datasource.services.map((service) => service.service_name)).toEqual(['checkout']);
+    expect(calls.find((call) => call.path === '/loki/api/v1/index/volume')?.params.query).toBe(
+      '{service_name="checkout", service_namespace=~".*"}'
+    );
+  });
+});
+
 describe('scorer limits', () => {
   it('skips a Loki datasource with more services than the scorer accepts', async () => {
     const { get, calls } = fakeLoki({

@@ -502,3 +502,45 @@ describe('request cost', () => {
     expect(calls).toHaveLength(4 + Math.ceil(names.length / 40));
   });
 });
+
+describe('service scope', () => {
+  it('asks only for the service metric names and owners, by job and by service_name', async () => {
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath, params) => {
+      if (requestPath === '/api/v1/label/__name__/values') {
+        return {
+          status: 'success',
+          data: params['match[]']?.includes('job') ? ['a_total', 'b_total'] : ['b_total', 'c_total'],
+        };
+      }
+      return undefined;
+    });
+
+    const { datasource } = await collectPrometheusInventory(
+      'prom',
+      get,
+      createLimiter(4),
+      window,
+      undefined,
+      undefined,
+      [],
+      'check.out'
+    );
+
+    expect(datasource.names).toEqual(['a_total', 'b_total', 'c_total']);
+    expect(
+      calls.filter((call) => call.path === '/api/v1/label/__name__/values').map((call) => call.params['match[]'])
+    ).toEqual(['{job=~"(.+/)?check\\\\.out"}', '{service_name="check.out"}']);
+    expect(calls.find((call) => call.path === '/api/v1/series')?.params['match[]']).toBe(
+      'target_info{job=~"(.+/)?check\\\\.out"}'
+    );
+    expect(calls.some((call) => call.path === '/api/v1/cardinality/label_values')).toBe(false);
+    const owners = calls.filter((call) => call.params.query?.startsWith('count by (__name__, job'));
+    expect(
+      owners.map(
+        (call) =>
+          call.params.query.includes('job=~"(.+/)?check\\\\.out"') ||
+          call.params.query.includes('service_name="check.out"')
+      )
+    ).toEqual([true, true]);
+  });
+});

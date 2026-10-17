@@ -37,6 +37,7 @@ type Listener = () => void;
 
 interface ActiveRun extends Run {
   settings: PluginSettings;
+  service?: string;
   startedAtMs: number;
   running: number;
   controller: AbortController;
@@ -63,8 +64,8 @@ export function browserDependencies(settings: PluginSettings, signal: AbortSigna
   };
 }
 
-export function runKey(settings: PluginSettings, rawRange: { from: unknown; to: unknown }): string {
-  return JSON.stringify([String(rawRange.from), String(rawRange.to), settings]);
+export function runKey(settings: PluginSettings, rawRange: { from: unknown; to: unknown }, service?: string): string {
+  return JSON.stringify([String(rawRange.from), String(rawRange.to), settings, service ?? null]);
 }
 
 export function createAssessmentStore(
@@ -86,6 +87,7 @@ export function createAssessmentStore(
   const execute = (run: ActiveRun, begin: Start) =>
     begin({
       ...dependencies(run.settings, run.controller.signal),
+      service: run.service,
       onLabelProgress: (labels) => patch(run, { labels }),
       onProgress: (progress) => patch(run, { progress }),
       onPartial: (assessment) => patch(run, { assessment }),
@@ -118,7 +120,7 @@ export function createAssessmentStore(
     run !== undefined && run.key === key && (run.running > 0 || nowMs() - run.startedAtMs < MAX_REUSE_MS);
 
   return {
-    acquire(key: string, window: QueryWindow, settings: PluginSettings): Run {
+    acquire(key: string, window: QueryWindow, settings: PluginSettings, service?: string): Run {
       if (reusable(current, key)) {
         clearTimeout(current.abandonTimer);
         return current;
@@ -130,6 +132,7 @@ export function createAssessmentStore(
         key,
         window,
         settings,
+        service,
         state: { progress: [] },
         startedAtMs: nowMs(),
         running: 0,
