@@ -12,7 +12,8 @@ import { Inventory } from '../../src/inventory/types';
 import { assessStack } from '../../src/assessment/stackAssessment';
 
 const run = promisify(execFile);
-const PLUGIN_RESOURCES = 'http://localhost:13000/api/plugins/iambenzo-semconvcompliance-app/resources';
+const LOCAL_GRAFANA = 'http://localhost:13000';
+const PLUGIN_RESOURCES = `${LOCAL_GRAFANA}/api/plugins/iambenzo-semconvcompliance-app/resources`;
 const OUTPUT_DIR = path.resolve(__dirname, '../evidence/cloud-raw');
 const WINDOW_SECONDS = Number(process.env.VALIDATE_WINDOW_DAYS ?? 1) * 24 * 3600;
 const GCX_MAX_BUFFER_BYTES = 256 * 1024 * 1024;
@@ -47,25 +48,26 @@ const cloudGet: ProxyGet = async <T>(
   }
 };
 
-async function postLocal<T>(resource: string, body: unknown): Promise<T> {
+const localSession = createLimiter(1);
+
+async function curlLocal<T>(resource: string, body?: unknown): Promise<T> {
+  const session = ['-s', '-f', '-b', COOKIE_JAR, '-c', COOKIE_JAR];
+  const { stdout } = await localSession(async () => {
+    await run('curl', [...session, '-X', 'POST', `${LOCAL_GRAFANA}/api/user/auth-tokens/rotate`]);
+    return run('curl', [...session, ...bodyArgs(resource, body), `${PLUGIN_RESOURCES}/${resource}`], {
+      maxBuffer: GCX_MAX_BUFFER_BYTES,
+    });
+  });
+  return JSON.parse(stdout) as T;
+}
+
+function bodyArgs(resource: string, body: unknown): string[] {
+  if (body === undefined) {
+    return [];
+  }
   const bodyFile = path.join(OUTPUT_DIR, `request-${resource.replace(/\//g, '-')}.json`);
   fs.writeFileSync(bodyFile, JSON.stringify(body));
-  const { stdout } = await run(
-    'curl',
-    [
-      '-s',
-      '-f',
-      '-b',
-      COOKIE_JAR,
-      '-H',
-      'Content-Type: application/json',
-      '--data-binary',
-      `@${bodyFile}`,
-      `${PLUGIN_RESOURCES}/${resource}`,
-    ],
-    { maxBuffer: GCX_MAX_BUFFER_BYTES }
-  );
-  return JSON.parse(stdout) as T;
+  return ['-H', 'Content-Type: application/json', '--data-binary', `@${bodyFile}`];
 }
 
 const describeWhenEnabled = COOKIE_JAR ? describe : describe.skip;
@@ -86,36 +88,15 @@ describeWhenEnabled('cloud end to end (read-only)', () => {
         {
           get: cloudGet,
           limit: createLimiter(8),
-          spanGroupRules: async () => {
-            const { stdout } = await run('curl', [
-              '-s',
-              '-f',
-              '-b',
-              COOKIE_JAR,
-              `${PLUGIN_RESOURCES}/catalogue/span-groups`,
-            ]);
-            return JSON.parse(stdout) as SpanGroupRule[];
-          },
-          renamedAttributes: async () => {
-            const { stdout } = await run('curl', [
-              '-s',
-              '-f',
-              '-b',
-              COOKIE_JAR,
-              `${PLUGIN_RESOURCES}/catalogue/renamed-attributes`,
-            ]);
-            return JSON.parse(stdout) as Record<string, string[]>;
-          },
-          products: async () => {
-            const { stdout } = await run('curl', ['-s', '-f', '-b', COOKIE_JAR, `${PLUGIN_RESOURCES}/products`]);
-            return JSON.parse(stdout) as Product[];
-          },
+          spanGroupRules: () => curlLocal<SpanGroupRule[]>('catalogue/span-groups'),
+          renamedAttributes: () => curlLocal<Record<string, string[]>>('catalogue/renamed-attributes'),
+          products: () => curlLocal<Product[]>('products'),
           namesNeedingLabels: async (names) =>
-            (await postLocal<{ needs_labels: string[] }>('catalogue/metric-matches', { names })).needs_labels,
+            (await curlLocal<{ needs_labels: string[] }>('catalogue/metric-matches', { names })).needs_labels,
           score: async (collected, volumeWeighted) => {
             inventory = collected;
             return withLists(
-              await postLocal<AssessmentResult>('score', { inventory: collected, volume_weighted: volumeWeighted })
+              await curlLocal<AssessmentResult>('score', { inventory: collected, volume_weighted: volumeWeighted })
             );
           },
         }

@@ -87,4 +87,4 @@ curl -s -c $J -H 'Content-Type: application/json' -d '{"user":"admin","password"
 VALIDATE_WINDOW_DAYS=30 LOCAL_GRAFANA_COOKIES=$J npx jest --ci --rootDir . --testMatch '<rootDir>/dev/validate/**/*.test.ts' --forceExit
 ```
 
-The inventory and assessment are written to `dev/evidence/cloud-raw/` (git-ignored, because they contain real names). Without `LOCAL_GRAFANA_COOKIES` the suite is skipped.
+The inventory and assessment are written to `dev/evidence/cloud-raw/` (git-ignored, because they contain real names). Without `LOCAL_GRAFANA_COOKIES` the suite is skipped. Grafana rotates session tokens from the client, so the suite calls `POST /api/user/auth-tokens/rotate` before each local request and writes the new cookie back to the jar. One login keeps working across runs; log in again only if a run fails with 401.
