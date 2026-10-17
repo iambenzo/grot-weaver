@@ -342,18 +342,23 @@ describe('collectTempoInventory', () => {
       ],
       samples: [{ timestampMs: '1', value: spans }],
     });
-    const withDistros = (rare: number, common: number) =>
-      (async (uid: string, requestPath: string, params: Record<string, string>) =>
-        requestPath === '/api/metrics/query_range' && params.q.includes('telemetry.distro.name')
-          ? { series: [distroSeries(undefined, common), distroSeries('beyla', rare)] }
-          : get(uid, requestPath, params)) as ProxyGet;
-    const checkoutSdk = async (rare: number, common: number) =>
+    const withDistros = (rare: number, common: number, distroFirst: boolean) =>
+      (async (uid: string, requestPath: string, params: Record<string, string>) => {
+        if (requestPath !== '/api/metrics/query_range' || !params.q.includes('telemetry.distro.name')) {
+          return get(uid, requestPath, params);
+        }
+        const series = [distroSeries(undefined, common), distroSeries('beyla', rare)];
+        return { series: distroFirst ? series.reverse() : series };
+      }) as ProxyGet;
+    const checkoutSdk = async (rare: number, common: number, distroFirst = false) =>
       (
-        await collectTempoInventory('tempo', withDistros(rare, common), createLimiter(2), window)
+        await collectTempoInventory('tempo', withDistros(rare, common, distroFirst), createLimiter(2), window)
       ).datasource.services.find((service) => service.service_name === 'checkout')?.sdk;
 
     expect(await checkoutSdk(1, 100)).toEqual({ language: 'python' });
     expect(await checkoutSdk(100, 1)).toEqual({ language: 'python', distro: 'beyla' });
+    expect(await checkoutSdk(10, 10)).toEqual({ language: 'python' });
+    expect(await checkoutSdk(10, 10, true)).toEqual({ language: 'python' });
   });
 
   it('takes SDK fields for every service from two TraceQL metrics queries instead of per-service tag values', async () => {

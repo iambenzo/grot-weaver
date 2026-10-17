@@ -327,7 +327,10 @@ function dominantDistro(series: MeasuredSeries[], service: ServiceRef): string {
     const distro = entry.sdk.distro ?? '';
     spansByDistro.set(distro, (spansByDistro.get(distro) ?? 0) + entry.spans);
   }
-  return [...spansByDistro].reduce<[string, number]>((best, entry) => (entry[1] > best[1] ? entry : best), ['', -1])[0];
+  return [...spansByDistro].reduce<[string, number]>(
+    (best, entry) => (entry[1] > best[1] || (entry[1] === best[1] && entry[0] === '') ? entry : best),
+    ['', -1]
+  )[0];
 }
 
 async function sdkFromTags(
