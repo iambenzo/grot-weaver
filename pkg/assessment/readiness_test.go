@@ -86,6 +86,22 @@ func Test_resourceCollector_readinessIsNotCheckableWhenEveryRequirementIsUnknown
 	}
 }
 
+func serviceSignalOf(t *testing.T, services []ServiceReadiness, owner finding.Owner, signal finding.Signal, productID string) SignalReadiness {
+	t.Helper()
+	for _, service := range services {
+		if service.Kind != owner.Kind || service.Name != owner.Name || service.Product != productID {
+			continue
+		}
+		for _, candidate := range service.Signals {
+			if candidate.Signal == signal {
+				return candidate
+			}
+		}
+	}
+	t.Fatalf("no %s readiness for %+v on %s in %+v", productID, owner, signal, services)
+	return SignalReadiness{}
+}
+
 func Test_resourceCollector_readinessSkipsSignalsWithoutRequirementsAndNonServiceOwners(t *testing.T) {
 	var collector resourceCollector
 	collector.observe(checkout, finding.SignalLogs, logResource(LogService{ServiceName: "checkout", SampledLines: 1}))
@@ -104,14 +120,14 @@ func Test_Assess_readinessLeavesEveryScoreUnchanged(t *testing.T) {
 
 	result := newAssessor(t).Assess(inventory, scoringDefaults)
 
-	kg := readinessOf(t, result.Readiness, cart, finding.SignalTraces, "knowledge-graph")
+	kg := serviceSignalOf(t, result.Readiness, cart, finding.SignalTraces, "knowledge-graph")
 	if kg.Readiness != (scoring.Ratio{Numerator: 2, Denominator: 2}) {
 		t.Errorf("knowledge graph readiness = %+v, want 2/2", kg)
 	}
 	if !slices.Equal(kg.MissingRecommended, []string{"service.namespace", "k8s.cluster.name", "k8s.namespace.name", "k8s.pod.name", "k8s.node.name"}) {
 		t.Errorf("knowledge graph recommended gap = %v", kg.MissingRecommended)
 	}
-	classic := readinessOf(t, result.Readiness, cart, finding.SignalTraces, "application-observability")
+	classic := serviceSignalOf(t, result.Readiness, cart, finding.SignalTraces, "application-observability")
 	if classic.Readiness != (scoring.Ratio{Numerator: 1, Denominator: 3}) || !slices.Equal(classic.Missing, []string{"deployment.environment", "telemetry.sdk.name"}) {
 		t.Errorf("classic readiness = %+v, want 1/3 with only deployment.environment.name not counting", classic)
 	}
@@ -177,7 +193,7 @@ func Test_Assess_readinessIsNotCheckableWhenNoResourceKeysWereRead(t *testing.T)
 	result := newAssessor(t).Assess(inventory, scoringDefaults)
 
 	for _, productID := range []string{"application-observability", "knowledge-graph"} {
-		row := readinessOf(t, result.Readiness, cart, finding.SignalTraces, productID)
+		row := serviceSignalOf(t, result.Readiness, cart, finding.SignalTraces, productID)
 		if _, defined := row.Readiness.Value(); defined {
 			t.Errorf("%s readiness = %+v, want not checkable", productID, row)
 		}
@@ -185,4 +201,90 @@ func Test_Assess_readinessIsNotCheckableWhenNoResourceKeysWereRead(t *testing.T)
 			t.Errorf("%s missing %v unknown %v", productID, row.Missing, row.Unknown)
 		}
 	}
+}
+
+func Test_serviceReadiness(t *testing.T) {
+	alias := finding.Owner{Kind: finding.OwnerService, Name: "checkout"}
+	cart := finding.Owner{Kind: finding.OwnerService, Name: "cart"}
+	row := func(owner finding.Owner, signal finding.Signal, present, missing, unknown, recommended []string) ProductReadiness {
+		return ProductReadiness{
+			Key: scoring.Key{Owner: owner, Signal: signal}, Product: "knowledge-graph", ProductName: "Knowledge Graph",
+			Present: present, Missing: missing, Unknown: unknown, MissingRecommended: recommended,
+		}
+	}
+	ratio := func(numerator, denominator float64) scoring.Ratio {
+		return scoring.Ratio{Numerator: numerator, Denominator: denominator}
+	}
+	notCheckable := scoring.Ratio{}
+	tests := []struct {
+		name        string
+		rows        []ProductReadiness
+		wantSignals map[finding.Signal]scoring.Ratio
+		wantOverall scoring.Ratio
+	}{
+		{name: "fully ready", rows: []ProductReadiness{
+			row(checkout, finding.SignalTraces, []string{"service.name", "service.namespace"}, nil, nil, nil),
+		}, wantSignals: map[finding.Signal]scoring.Ratio{finding.SignalTraces: ratio(2, 2)}, wantOverall: ratio(2, 2)},
+		{name: "partially ready", rows: []ProductReadiness{
+			row(checkout, finding.SignalTraces, []string{"service.name", "service.namespace"}, []string{"deployment.environment.name"}, nil, nil),
+		}, wantSignals: map[finding.Signal]scoring.Ratio{finding.SignalTraces: ratio(2, 3)}, wantOverall: ratio(2, 3)},
+		{name: "every requirement unknown is not checkable", rows: []ProductReadiness{
+			row(checkout, finding.SignalMetrics, nil, nil, []string{"service.instance.id"}, nil),
+		}, wantSignals: map[finding.Signal]scoring.Ratio{finding.SignalMetrics: notCheckable}, wantOverall: notCheckable},
+		{name: "present with unknown and nothing missing is not checkable", rows: []ProductReadiness{
+			row(checkout, finding.SignalTraces, []string{"service.name"}, nil, []string{"deployment.environment.name"}, nil),
+		}, wantSignals: map[finding.Signal]scoring.Ratio{finding.SignalTraces: notCheckable}, wantOverall: notCheckable},
+		{name: "missing and unknown together count the checked attributes", rows: []ProductReadiness{
+			row(checkout, finding.SignalTraces, []string{"service.name"}, []string{"service.namespace"}, []string{"deployment.environment.name"}, nil),
+		}, wantSignals: map[finding.Signal]scoring.Ratio{finding.SignalTraces: ratio(1, 2)}, wantOverall: ratio(1, 2)},
+		{name: "overall sums attribute and signal pairs", rows: []ProductReadiness{
+			row(checkout, finding.SignalTraces, []string{"service.name"}, []string{"service.namespace"}, nil, nil),
+			row(checkout, finding.SignalLogs, []string{"service.name", "service.namespace"}, nil, nil, nil),
+		}, wantSignals: map[finding.Signal]scoring.Ratio{finding.SignalTraces: ratio(1, 2), finding.SignalLogs: ratio(2, 2)}, wantOverall: ratio(3, 4)},
+		{name: "overall not checkable when nothing is missing and something is unknown", rows: []ProductReadiness{
+			row(checkout, finding.SignalTraces, []string{"service.name"}, nil, nil, nil),
+			row(checkout, finding.SignalMetrics, []string{"service.name"}, nil, []string{"service.instance.id"}, nil),
+		}, wantSignals: map[finding.Signal]scoring.Ratio{finding.SignalTraces: ratio(1, 1), finding.SignalMetrics: notCheckable}, wantOverall: notCheckable},
+		{name: "overall partial when one signal misses and another is unknown", rows: []ProductReadiness{
+			row(checkout, finding.SignalTraces, []string{"service.name"}, []string{"service.namespace"}, nil, nil),
+			row(checkout, finding.SignalMetrics, []string{"service.name"}, nil, []string{"service.instance.id"}, nil),
+		}, wantSignals: map[finding.Signal]scoring.Ratio{finding.SignalTraces: ratio(1, 2), finding.SignalMetrics: notCheckable}, wantOverall: ratio(2, 3)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			services := serviceReadiness(tt.rows)
+			if len(services) != 1 {
+				t.Fatalf("services = %+v, want one", services)
+			}
+			if services[0].Overall != tt.wantOverall {
+				t.Errorf("overall = %+v, want %+v", services[0].Overall, tt.wantOverall)
+			}
+			for signal, want := range tt.wantSignals {
+				if got := serviceSignalOf(t, services, checkout, signal, "knowledge-graph").Readiness; got != want {
+					t.Errorf("%s = %+v, want %+v", signal, got, want)
+				}
+			}
+		})
+	}
+
+	t.Run("a present attribute on one alias wins and recommended gaps must be shared", func(t *testing.T) {
+		services := serviceReadiness([]ProductReadiness{
+			row(checkout, finding.SignalMetrics, []string{"service.name"}, []string{"service.instance.id"}, nil, []string{"k8s.pod.name"}),
+			row(alias, finding.SignalMetrics, []string{"service.instance.id"}, nil, []string{"service.name"}, nil),
+		})
+		got := serviceSignalOf(t, services, alias, finding.SignalMetrics, "knowledge-graph")
+		if !slices.Equal(got.Present, []string{"service.name", "service.instance.id"}) || len(got.Missing) != 0 || len(got.Unknown) != 0 || len(got.MissingRecommended) != 0 || got.Readiness != ratio(2, 2) {
+			t.Errorf("merged = %+v", got)
+		}
+	})
+
+	t.Run("other services stay separate", func(t *testing.T) {
+		services := serviceReadiness([]ProductReadiness{
+			row(checkout, finding.SignalLogs, []string{"service.name"}, nil, nil, nil),
+			row(cart, finding.SignalLogs, nil, []string{"service.name"}, nil, nil),
+		})
+		if len(services) != 2 || serviceSignalOf(t, services, cart, finding.SignalLogs, "knowledge-graph").Readiness != ratio(0, 1) {
+			t.Errorf("services = %+v", services)
+		}
+	})
 }

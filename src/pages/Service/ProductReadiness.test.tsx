@@ -1,25 +1,31 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
-import { ProductReadiness as ReadinessRow } from '../../api/types';
+import { ServiceReadinessRow, SignalReadinessRow } from '../../api/types';
 import { ProductReadiness } from './ProductReadiness';
 
 const checkout = { kind: 'service' as const, namespace: 'shop', name: 'checkout' };
-const row = (
-  product: string,
-  product_name: string,
-  signal: ReadinessRow['signal'],
-  lists: Partial<ReadinessRow>
-): ReadinessRow => ({
-  owner: checkout,
-  signal,
-  product,
-  product_name,
-  readiness: { value: null, numerator: 0, denominator: 0 },
+const ratio = (value: number | null) => ({ value, numerator: 0, denominator: 0 });
+const signal = (name: SignalReadinessRow['signal'], value: number | null, lists: Partial<SignalReadinessRow>) => ({
+  signal: name,
+  readiness: ratio(value),
   present: [],
   missing: [],
   unknown: [],
   missing_recommended: [],
   ...lists,
+});
+const row = (
+  product: string,
+  product_name: string,
+  overall: number | null,
+  signals: SignalReadinessRow[]
+): ServiceReadinessRow => ({
+  kind: 'service',
+  name: 'checkout',
+  product,
+  product_name,
+  overall: ratio(overall),
+  signals,
 });
 
 describe('ProductReadiness', () => {
@@ -27,15 +33,19 @@ describe('ProductReadiness', () => {
     render(
       <ProductReadiness
         rows={[
-          row('knowledge-graph', 'Knowledge Graph', 'traces', {
-            present: ['service.name', 'service.namespace'],
-            missing: ['deployment.environment.name'],
-            missing_recommended: ['k8s.pod.name'],
-          }),
-          row('knowledge-graph', 'Knowledge Graph', 'metrics', { unknown: ['service.instance.id'] }),
-          row('application-observability', 'Application Observability', 'traces', { present: ['service.name'] }),
+          row('knowledge-graph', 'Knowledge Graph', 2 / 3, [
+            signal('traces', 2 / 3, {
+              present: ['service.name', 'service.namespace'],
+              missing: ['deployment.environment.name'],
+              missing_recommended: ['k8s.pod.name'],
+            }),
+            signal('metrics', null, { unknown: ['service.instance.id'] }),
+          ]),
+          row('application-observability', 'Application Observability', 1, [
+            signal('traces', 1, { present: ['service.name'] }),
+          ]),
         ]}
-        owners={[checkout]}
+        owner={checkout}
         signals={['metrics', 'traces', 'logs']}
       />
     );
@@ -53,7 +63,7 @@ describe('ProductReadiness', () => {
   });
 
   it('renders nothing when the service has no readiness rows', () => {
-    const { container } = render(<ProductReadiness rows={[]} owners={[checkout]} signals={['traces']} />);
+    const { container } = render(<ProductReadiness rows={[]} owner={checkout} signals={['traces']} />);
 
     expect(container).toBeEmptyDOMElement();
   });

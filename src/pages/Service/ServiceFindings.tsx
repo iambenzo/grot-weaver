@@ -206,8 +206,8 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
         <Text color="secondary">Also seen as: {identity.aliases.map(ownerLabel).join(', ')}</Text>
       )}
       <ProductReadiness
-        rows={assessment.result.product_readiness ?? []}
-        owners={[identity.owner, ...identity.aliases]}
+        rows={assessment.result.service_readiness ?? []}
+        owner={identity.owner}
         signals={SIGNALS.filter((candidate) => identity.signals.includes(candidate))}
       />
       <ResourceAttributes

@@ -123,16 +123,22 @@ export interface ResourceAttributeCheck {
   evidence: string;
 }
 
-export interface ProductReadiness {
-  owner: Owner;
+export interface SignalReadinessRow {
   signal: Signal;
-  product: string;
-  product_name: string;
   readiness: Ratio;
   present: string[];
   missing: string[];
   unknown: string[];
   missing_recommended: string[];
+}
+
+export interface ServiceReadinessRow {
+  kind: OwnerKind;
+  name: string;
+  product: string;
+  product_name: string;
+  overall: Ratio;
+  signals: SignalReadinessRow[];
 }
 
 export interface AssessmentResult {
@@ -146,7 +152,7 @@ export interface AssessmentResult {
   hops?: ServiceHops[];
   coverage?: Array<{ signal: Signal; coverage: Ratio; unmeasured?: number }>;
   resource_attributes?: ResourceAttributeCheck[];
-  product_readiness?: ProductReadiness[];
+  service_readiness?: ServiceReadinessRow[];
   owners: ScoreRow[];
   namespaces: ScoreRow[];
   signals: ScoreRow[];

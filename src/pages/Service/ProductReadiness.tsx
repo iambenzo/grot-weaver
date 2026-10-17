@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStyles2, Badge, Stack, Text } from '@grafana/ui';
-import { Owner, ProductReadiness as ReadinessRow, Signal } from '../../api/types';
+import { Owner, ServiceReadinessRow, Signal } from '../../api/types';
 import { SignalReadiness, serviceReadiness } from '../../assessment/readiness';
 import { testIds } from '../../components/testIds';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
@@ -10,14 +10,14 @@ import { getTableStyles } from './tableStyles';
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 
 interface ProductReadinessProps {
-  rows: ReadinessRow[];
-  owners: Owner[];
+  rows: ServiceReadinessRow[];
+  owner: Owner;
   signals: Signal[];
 }
 
-export function ProductReadiness({ rows, owners, signals }: ProductReadinessProps) {
+export function ProductReadiness({ rows, owner, signals }: ProductReadinessProps) {
   const styles = useStyles2(getTableStyles);
-  const products = serviceReadiness(rows, owners);
+  const products = serviceReadiness(rows, owner);
   if (products.length === 0) {
     return null;
   }
