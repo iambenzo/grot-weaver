@@ -28,7 +28,7 @@ import { createLimiter } from '../../datasources/limiter';
 import { Finding, Owner, Signal } from '../../api/types';
 import { lookupFindingLibraries, sameOwner } from '../../assessment/traceAssessment';
 import { ServiceIdentity, StackAssessment, mergeOwners, ownerKey } from '../../assessment/stackAssessment';
-import { evidenceTarget, exploreUrl } from '../../assessment/explore';
+import { evidenceTarget, exploreUrl, ownersIn } from '../../assessment/explore';
 import { libraryInfo } from '../../assessment/libraries';
 import { LibraryEvidence } from '../../inventory/traceLibraries';
 import { PluginSettings, concurrencyFrom } from '../../settings/settings';
@@ -301,7 +301,7 @@ function useLibraryEvidence(
       datasourceFor,
       window,
       { get: proxyGet, limit: createLimiter(concurrencyFrom(settings)) },
-      assessment.result.attributions.map((attribution) => attribution.owner)
+      (finding) => ownersIn(assessment.result.attributions, datasourceFor(finding))
     ).then((found) => !cancelled && setLoaded({ key: findings, value: found }));
     return () => {
       cancelled = true;

@@ -84,7 +84,15 @@ export async function collectTempoInventory(
     )
   ).flat();
   const services = await Promise.all(discovered.map((service) => collectService(context, service, keysMethod)));
-  const volumes = metricVolumes ?? (await sampledVolumes(context, discovered));
+  const volumes = metricVolumes
+    ? withSampled(
+        metricVolumes,
+        await sampledVolumes(
+          context,
+          discovered.filter(({ ref }) => volumeOf(metricVolumes, ref) === undefined)
+        )
+      )
+    : await sampledVolumes(context, discovered);
   services.forEach((service, index) => {
     service.span_count = volumeOf(volumes, discovered[index].ref) ?? 0;
   });
@@ -153,6 +161,13 @@ async function spanVolumes(context: CollectorContext): Promise<Volumes | undefin
     addVolume(volumes, label(SERVICE_NAME_TAG), label(SERVICE_NAMESPACE_TAG), spans);
   }
   return volumes;
+}
+
+function withSampled(measured: Volumes, sampled: Volumes): Volumes {
+  for (const [name, byNamespace] of sampled) {
+    byNamespace.forEach((spans, namespace) => addVolume(measured, name, namespace, spans));
+  }
+  return measured;
 }
 
 async function sampledVolumes(context: CollectorContext, services: DiscoveredService[]): Promise<Volumes> {

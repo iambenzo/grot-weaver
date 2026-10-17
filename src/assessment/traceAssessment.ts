@@ -69,7 +69,7 @@ export async function lookupFindingLibraries(
   datasourceFor: (finding: Finding) => string | undefined,
   window: QueryWindow,
   deps: Pick<Dependencies, 'get' | 'limit'>,
-  traceOwners: Owner[] = []
+  ownersBeside: (finding: Finding) => Owner[] = () => []
 ): Promise<Map<string, LibraryEvidence>> {
   const evidence = new Map<string, LibraryEvidence>();
   const metricsByDatasource = new Map<string, Promise<boolean>>();
@@ -87,7 +87,7 @@ export async function lookupFindingLibraries(
       const flagged: FlaggedKey = {
         serviceName: finding.owner.kind === 'unattributed' ? '' : finding.owner.name,
         serviceNamespace:
-          finding.owner.kind === 'unattributed' ? undefined : namespaceScope(finding.owner, traceOwners),
+          finding.owner.kind === 'unattributed' ? undefined : namespaceScope(finding.owner, ownersBeside(finding)),
         key: finding.observed,
         scope: finding.scope === 'resources' ? 'resource' : 'span',
       };

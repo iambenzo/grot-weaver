@@ -200,19 +200,21 @@ describe('collectTempoInventory', () => {
     expect(datasource.services.filter((service) => service.service_name === 'checkout')).toHaveLength(1);
   });
 
-  it('adds namespaces that tag values know about but the metrics result missed', async () => {
+  it('adds namespaces that tag values know about but the metrics result missed, with a sampled volume', async () => {
     const { get } = fakeTempo();
     const merged = (async (uid: string, requestPath: string, params: Record<string, string>) =>
       requestPath.includes('service.namespace')
         ? { tagValues: params.q.includes('checkout') ? [{ value: 'shop' }, { value: 'billing' }] : [] }
-        : get(uid, requestPath, params)) as ProxyGet;
+        : requestPath === '/api/search'
+          ? { traces: params.q.includes('"billing"') ? [{ spanSets: [{ matched: 4 }] }] : [] }
+          : get(uid, requestPath, params)) as ProxyGet;
 
     const { datasource } = await collectTempoInventory('tempo', merged, createLimiter(2), window);
 
     const checkout = datasource.services.filter((service) => service.service_name === 'checkout');
     expect(checkout.map((service) => [service.service_namespace, service.span_count])).toEqual([
       ['shop', 42],
-      ['billing', 0],
+      ['billing', 4],
     ]);
   });
 

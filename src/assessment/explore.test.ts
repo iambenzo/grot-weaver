@@ -121,4 +121,19 @@ describe('namespaceScope', () => {
       '{service_name="lone"}'
     );
   });
+
+  it('only counts same-named owners from the same datasource as proof of a split', () => {
+    const api = { kind: 'service' as const, name: 'api' };
+    const twoTempos = {
+      ...result,
+      attributions: [
+        { owner: api, datasource: 'tempo' },
+        { owner: { ...api, namespace: 'shop' }, datasource: 'tempo-eu' },
+      ],
+    } as unknown as AssessmentResult;
+
+    expect(evidenceTarget({ ...base, owner: api }, twoTempos, typeOf)?.query).toBe(
+      '{ resource.service.name = "api" && span.http.method != nil }'
+    );
+  });
 });

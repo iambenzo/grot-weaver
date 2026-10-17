@@ -57,6 +57,12 @@ function datasourceFor(finding: Finding, result: AssessmentResult): string | und
   }
 }
 
+export function ownersIn(attributions: Array<{ owner: Owner; datasource: string }>, datasource?: string): Owner[] {
+  return attributions
+    .filter((attribution) => attribution.datasource === datasource)
+    .map((attribution) => attribution.owner);
+}
+
 export function namespaceScope(owner: Owner, owners: Owner[]): string | undefined {
   if (owner.namespace) {
     return owner.namespace;
@@ -70,17 +76,11 @@ export function namespaceScope(owner: Owner, owners: Owner[]): string | undefine
 function evidenceQuery(finding: Finding, result: AssessmentResult): string | undefined {
   switch (finding.signal) {
     case 'traces':
-      return traceQuery(
-        finding,
-        result.attributions.map((attribution) => attribution.owner)
-      );
+      return traceQuery(finding, ownersIn(result.attributions, datasourceFor(finding, result)));
     case 'metrics':
       return metricQuery(finding, result);
     case 'logs':
-      return logQuery(
-        finding,
-        (result.log_attributions ?? []).map((attribution) => attribution.owner)
-      );
+      return logQuery(finding, ownersIn(result.log_attributions ?? [], datasourceFor(finding, result)));
   }
 }
 
