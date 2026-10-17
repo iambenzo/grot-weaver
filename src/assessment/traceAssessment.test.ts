@@ -77,25 +77,25 @@ describe('lookupFindingLibraries', () => {
   });
 
   it('filters on no namespace only when the owners beside the finding prove a split', async () => {
-    const queries: string[] = [];
-    const get = (async (_uid: string, requestPath: string, params: Record<string, string>) => {
-      queries.push(params.q);
-      return requestPath === '/api/metrics/query_range' ? { series: [] } : { traces: [] };
-    }) as ProxyGet;
-    const lookup = (beside: Array<Finding['owner']>) =>
-      lookupFindingLibraries(
+    const lookupQuery = async (beside: Array<Finding['owner']>) => {
+      const queries: string[] = [];
+      const get = (async (_uid: string, requestPath: string, params: Record<string, string>) => {
+        queries.push(params.q);
+        return requestPath === '/api/metrics/query_range' ? { series: [] } : { traces: [] };
+      }) as ProxyGet;
+      await lookupFindingLibraries(
         [base],
         () => 'tempo',
         window,
         { get, limit: createLimiter(1) },
         () => beside
       );
+      return queries.find((query) => query?.includes('span.http.method != nil'));
+    };
 
-    await lookup([]);
-    await lookup([owner, { ...owner, namespace: 'shop' }]);
-
-    const lookups = queries.filter((query) => query?.includes('span.http.method != nil'));
-    expect(lookups.some((query) => query.includes('resource.service.namespace = nil'))).toBe(true);
-    expect(lookups.some((query) => !query.includes('resource.service.namespace'))).toBe(true);
+    expect(await lookupQuery([])).toContain('{ resource.service.name = "checkout" && span.http.method != nil }');
+    expect(await lookupQuery([owner, { ...owner, namespace: 'shop' }])).toContain(
+      '{ resource.service.name = "checkout" && resource.service.namespace = nil && span.http.method != nil }'
+    );
   });
 });
