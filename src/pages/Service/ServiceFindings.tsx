@@ -296,10 +296,13 @@ function useLibraryEvidence(
     let cancelled = false;
     const datasourceFor = (finding: Finding) =>
       assessment.result.attributions.find((attribution) => sameOwner(attribution.owner, finding.owner))?.datasource;
-    lookupFindingLibraries(findings, datasourceFor, window, {
-      get: proxyGet,
-      limit: createLimiter(concurrencyFrom(settings)),
-    }).then((found) => !cancelled && setLoaded({ key: findings, value: found }));
+    lookupFindingLibraries(
+      findings,
+      datasourceFor,
+      window,
+      { get: proxyGet, limit: createLimiter(concurrencyFrom(settings)) },
+      assessment.result.attributions.map((attribution) => attribution.owner)
+    ).then((found) => !cancelled && setLoaded({ key: findings, value: found }));
     return () => {
       cancelled = true;
     };

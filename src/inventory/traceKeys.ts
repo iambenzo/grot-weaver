@@ -22,6 +22,7 @@ export interface KeysContext {
 export interface SampledKeys {
   resource: string[];
   span: string[];
+  namespaces: string[];
 }
 
 interface TagsResponse {
@@ -77,19 +78,21 @@ export async function sampleServiceKeys(
   );
   const resource = new Set<string>();
   const span = new Set<string>();
+  const namespaces = new Set<string>();
   for (const resourceSpans of traces.flatMap(resourceSpansOf)) {
     const attributes = resourceSpans.resource?.attributes ?? [];
     if (!belongsTo(attributes, service)) {
       continue;
     }
     attributes.forEach((attribute) => resource.add(attribute.key));
+    namespaces.add(stringAttribute(attributes, SERVICE_NAMESPACE_KEY));
     for (const scopeSpans of resourceSpans.scopeSpans ?? []) {
       for (const sampled of scopeSpans.spans ?? []) {
         (sampled.attributes ?? []).forEach((attribute) => span.add(attribute.key));
       }
     }
   }
-  return { resource: [...resource].sort(), span: [...span].sort() };
+  return { resource: [...resource].sort(), span: [...span].sort(), namespaces: [...namespaces].sort() };
 }
 
 async function spanTags(context: KeysContext, filter?: string): Promise<string[]> {
@@ -105,10 +108,13 @@ function resourceSpansOf(response: TraceResponse): OtlpResourceSpans[] {
   return response.trace?.resourceSpans ?? response.resourceSpans ?? response.batches ?? [];
 }
 
+function stringAttribute(attributes: OtlpAttribute[], key: string): string {
+  return attributes.find((attribute) => attribute.key === key)?.value?.stringValue ?? '';
+}
+
 function belongsTo(attributes: OtlpAttribute[], service: ServiceRef): boolean {
-  const value = (key: string) => attributes.find((attribute) => attribute.key === key)?.value?.stringValue ?? '';
   return (
-    value(SERVICE_NAME_KEY) === service.name &&
-    (service.namespace === undefined || value(SERVICE_NAMESPACE_KEY) === service.namespace)
+    stringAttribute(attributes, SERVICE_NAME_KEY) === service.name &&
+    (service.namespace === undefined || stringAttribute(attributes, SERVICE_NAMESPACE_KEY) === service.namespace)
   );
 }

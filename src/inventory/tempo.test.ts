@@ -200,6 +200,57 @@ describe('collectTempoInventory', () => {
     expect(datasource.services.filter((service) => service.service_name === 'checkout')).toHaveLength(1);
   });
 
+  it('adds namespaces that tag values know about but the metrics result missed', async () => {
+    const { get } = fakeTempo();
+    const merged = (async (uid: string, requestPath: string, params: Record<string, string>) =>
+      requestPath.includes('service.namespace')
+        ? { tagValues: params.q.includes('checkout') ? [{ value: 'shop' }, { value: 'billing' }] : [] }
+        : get(uid, requestPath, params)) as ProxyGet;
+
+    const { datasource } = await collectTempoInventory('tempo', merged, createLimiter(2), window);
+
+    const checkout = datasource.services.filter((service) => service.service_name === 'checkout');
+    expect(checkout.map((service) => [service.service_namespace, service.span_count])).toEqual([
+      ['shop', 42],
+      ['billing', 0],
+    ]);
+  });
+
+  it('takes the namespace from the trace sample when Tempo ignores the tag filter', async () => {
+    const { get } = fakeTempo(['/api/metrics/query_range']);
+    const sampling = (async (uid: string, requestPath: string, params: Record<string, string>) => {
+      if (requestPath === '/api/v2/search/tags') {
+        return { scopes: [{ name: 'span', tags: ['a'] }] };
+      }
+      if (requestPath === '/api/search') {
+        return { traces: params.q?.includes('checkout') ? [{ traceID: 't' }] : [] };
+      }
+      if (requestPath.startsWith('/api/v2/traces/')) {
+        return {
+          trace: {
+            resourceSpans: [
+              {
+                resource: {
+                  attributes: [
+                    { key: 'service.name', value: { stringValue: 'checkout' } },
+                    { key: 'service.namespace', value: { stringValue: 'shop' } },
+                  ],
+                },
+                scopeSpans: [],
+              },
+            ],
+          },
+        };
+      }
+      return get(uid, requestPath, params);
+    }) as ProxyGet;
+
+    const { datasource } = await collectTempoInventory('tempo', sampling, createLimiter(2), window);
+
+    expect(datasource.services.find((service) => service.service_name === 'checkout')?.service_namespace).toBe('shop');
+    expect(datasource.services.find((service) => service.service_name === 'inventory')?.service_namespace).toBe('');
+  });
+
   it('filters per service with q and scope', async () => {
     const { get, calls } = fakeTempo();
 

@@ -66,6 +66,12 @@ describe('createProxyGet', () => {
     expect(added.mock.invocationCallOrder[0]).toBeLessThan(removed.mock.invocationCallOrder[0]);
   });
 
+  it('resolves with the last response once the request completes', async () => {
+    fetch.mockReturnValue(of({ data: 'first' }, { data: 'last' }));
+
+    await expect(createProxyGet()('ds', '/api/v1/labels', {})).resolves.toBe('last');
+  });
+
   it('does not send a request once the signal has aborted', async () => {
     fetch.mockClear();
     const controller = new AbortController();

@@ -192,4 +192,23 @@ describe('assessment store', () => {
 
     expect(retryDatasource).toHaveBeenCalledTimes(1);
   });
+
+  it('ignores a click on a retry that is already running', async () => {
+    const runs = controlledRuns(assessStack as jest.Mock);
+    const retries = controlledRuns(retryDatasource as jest.Mock);
+    const { store } = storeAt({ nowMs: 0 });
+    const run = store.acquire('a', window, settings);
+    runs[0].resolve(assessment);
+    await settle();
+
+    store.retry(run, 'loki');
+    await settle();
+    store.retry(run, 'loki');
+    retries[0].resolve(assessment);
+    await settle();
+    store.retry(run, 'loki');
+    await settle();
+
+    expect(retryDatasource).toHaveBeenCalledTimes(2);
+  });
 });

@@ -11,6 +11,7 @@ import {
 import { CollectionError, TraceDatasource } from '../inventory/types';
 import { QueryWindow } from '../window/window';
 import { ScoreInventory } from '../api/score';
+import { namespaceScope } from './explore';
 import { FetchSpanGroupRules } from '../api/catalogue';
 import { AssessmentResult, Finding, Owner } from '../api/types';
 
@@ -67,7 +68,8 @@ export async function lookupFindingLibraries(
   findings: Finding[],
   datasourceFor: (finding: Finding) => string | undefined,
   window: QueryWindow,
-  deps: Pick<Dependencies, 'get' | 'limit'>
+  deps: Pick<Dependencies, 'get' | 'limit'>,
+  traceOwners: Owner[] = []
 ): Promise<Map<string, LibraryEvidence>> {
   const evidence = new Map<string, LibraryEvidence>();
   const metricsByDatasource = new Map<string, Promise<boolean>>();
@@ -84,7 +86,8 @@ export async function lookupFindingLibraries(
       }
       const flagged: FlaggedKey = {
         serviceName: finding.owner.kind === 'unattributed' ? '' : finding.owner.name,
-        serviceNamespace: finding.owner.kind === 'unattributed' ? undefined : (finding.owner.namespace ?? ''),
+        serviceNamespace:
+          finding.owner.kind === 'unattributed' ? undefined : namespaceScope(finding.owner, traceOwners),
         key: finding.observed,
         scope: finding.scope === 'resources' ? 'resource' : 'span',
       };

@@ -54,7 +54,7 @@ interface CollectorContext {
 
 interface DiscoveredService {
   ref: ServiceRef;
-  namespace: string;
+  namespace?: string;
 }
 
 export function serviceFilter(service: ServiceRef): string {
@@ -79,12 +79,7 @@ export async function collectTempoInventory(
   const discovered = (
     await Promise.all(
       (serviceNames ?? []).map(async (name) =>
-        servicesByNamespace(
-          name,
-          metricVolumes?.get(name)
-            ? [...metricVolumes.get(name)!.keys()]
-            : await namespacesFromTags(context, name, filterIgnored)
-        )
+        servicesByNamespace(name, await discoverNamespaces(context, name, metricVolumes?.get(name), filterIgnored))
       )
     )
   ).flat();
@@ -101,7 +96,10 @@ export async function collectTempoInventory(
   return collection;
 }
 
-function servicesByNamespace(name: string, namespaces: string[]): DiscoveredService[] {
+function servicesByNamespace(name: string, namespaces: string[] | undefined): DiscoveredService[] {
+  if (namespaces === undefined) {
+    return [{ ref: { name } }];
+  }
   const distinct = [...new Set(namespaces)];
   if (distinct.length > 1) {
     return distinct.map((namespace) => ({ ref: { name, namespace }, namespace }));
@@ -109,18 +107,27 @@ function servicesByNamespace(name: string, namespaces: string[]): DiscoveredServ
   return [{ ref: { name }, namespace: distinct[0] ?? '' }];
 }
 
-async function namespacesFromTags(context: CollectorContext, name: string, filterIgnored: boolean): Promise<string[]> {
+async function discoverNamespaces(
+  context: CollectorContext,
+  name: string,
+  measured: Map<string, number> | undefined,
+  filterIgnored: boolean
+): Promise<string[] | undefined> {
+  const fromMetrics = measured ? [...measured.keys()] : [];
+  if (filterIgnored) {
+    return measured ? fromMetrics : undefined;
+  }
   const step = `namespace for service "${name}"`;
   const values = await guarded(context, step, () => tagValues(context, SERVICE_NAMESPACE_TAG, serviceFilter({ name })));
-  const namespaces = [...new Set((values ?? []).filter(Boolean))];
-  if (filterIgnored) {
-    return namespaces.slice(0, 1);
+  const tagged = (values ?? []).filter(Boolean);
+  if (measured) {
+    return [...fromMetrics, ...tagged];
   }
-  if (namespaces.length === 0) {
+  if (tagged.length === 0) {
     return [];
   }
   const withoutNamespace = await guarded(context, step, () => hasSpans(context, { name, namespace: '' }));
-  return withoutNamespace ? [...namespaces, ''] : namespaces;
+  return withoutNamespace ? [...tagged, ''] : tagged;
 }
 
 async function hasSpans(context: CollectorContext, service: ServiceRef): Promise<boolean> {
@@ -169,6 +176,10 @@ async function sampledVolumes(context: CollectorContext, services: DiscoveredSer
   return volumes;
 }
 
+function soleNamespace(namespaces: string[] | undefined): string {
+  return namespaces?.length === 1 ? namespaces[0] : '';
+}
+
 function describe(service: ServiceRef): string {
   return service.namespace ? `service "${service.namespace}/${service.name}"` : `service "${service.name}"`;
 }
@@ -184,11 +195,11 @@ async function collectService(
     collectKeys(context, ref, filter, keysMethod, step),
     collectSDK(context, filter, step),
   ]);
-  const { resourceKeys, spanKeys } = keys;
+  const { resourceKeys, spanKeys, namespaces } = keys;
   const spanGroups = await collectSpanGroups(context, ref, spanKeys ?? [], step);
   return {
     service_name: ref.name,
-    service_namespace: namespace,
+    service_namespace: namespace ?? soleNamespace(namespaces),
     span_count: 0,
     resource_keys: observations(resourceKeys),
     span_keys: observations(spanKeys),
@@ -203,10 +214,10 @@ async function collectKeys(
   filter: string,
   keysMethod: KeysMethod,
   step: (what: string) => string
-): Promise<{ resourceKeys?: string[]; spanKeys?: string[] }> {
+): Promise<{ resourceKeys?: string[]; spanKeys?: string[]; namespaces?: string[] }> {
   if (keysMethod === 'sample') {
     const sampled = await guarded(context, step('sampled keys'), () => sampleServiceKeys(context, service, filter));
-    return { resourceKeys: sampled?.resource, spanKeys: sampled?.span };
+    return { resourceKeys: sampled?.resource, spanKeys: sampled?.span, namespaces: sampled?.namespaces };
   }
   const [resourceKeys, spanKeys] = await Promise.all([
     guarded(context, step('resource keys'), () => scopedTags(context, 'resource', filter)),

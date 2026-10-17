@@ -57,22 +57,38 @@ function datasourceFor(finding: Finding, result: AssessmentResult): string | und
   }
 }
 
+export function namespaceScope(owner: Owner, owners: Owner[]): string | undefined {
+  if (owner.namespace) {
+    return owner.namespace;
+  }
+  const split = owners.some(
+    (other) => other.kind === owner.kind && other.name === owner.name && Boolean(other.namespace)
+  );
+  return split ? '' : undefined;
+}
+
 function evidenceQuery(finding: Finding, result: AssessmentResult): string | undefined {
   switch (finding.signal) {
     case 'traces':
-      return traceQuery(finding);
+      return traceQuery(
+        finding,
+        result.attributions.map((attribution) => attribution.owner)
+      );
     case 'metrics':
       return metricQuery(finding, result);
     case 'logs':
-      return logQuery(finding);
+      return logQuery(
+        finding,
+        (result.log_attributions ?? []).map((attribution) => attribution.owner)
+      );
   }
 }
 
-function traceQuery(finding: Finding): string {
+function traceQuery(finding: Finding, owners: Owner[]): string {
   const service = serviceFilterExpression(
     finding.owner.kind === 'unattributed'
       ? { name: '' }
-      : { name: finding.owner.name, namespace: finding.owner.namespace ?? '' }
+      : { name: finding.owner.name, namespace: namespaceScope(finding.owner, owners) }
   );
   if (
     !finding.observed ||
@@ -119,11 +135,11 @@ function ownerMatcher(owner: Owner, result: AssessmentResult): string {
   return `, job="${escapeString(job)}"`;
 }
 
-function logQuery(finding: Finding): string {
+function logQuery(finding: Finding, owners: Owner[]): string {
   const selector =
     finding.owner.kind === 'unattributed'
       ? '{service_name="unknown_service"}'
-      : streamSelector({ name: finding.owner.name, namespace: finding.owner.namespace ?? '' });
+      : streamSelector({ name: finding.owner.name, namespace: namespaceScope(finding.owner, owners) });
   if (!finding.observed || finding.type === 'missing_service_name' || finding.type === 'sdk_default_service_name') {
     return selector;
   }

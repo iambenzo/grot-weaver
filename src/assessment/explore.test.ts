@@ -1,5 +1,5 @@
 import { AssessmentResult, Finding } from '../api/types';
-import { evidenceTarget, exploreUrl } from './explore';
+import { evidenceTarget, exploreUrl, namespaceScope } from './explore';
 
 const checkout = { kind: 'service' as const, namespace: 'shop', name: 'checkout' };
 const result = {
@@ -88,5 +88,37 @@ describe('exploreUrl', () => {
     const prom = decodeURIComponent(exploreUrl({ uid: 'prom', type: 'prometheus', query: 'up' }, 'now-1h', 'now'));
     expect(prom).toMatch(/^\/explore\?schemaVersion=1&panes=/);
     expect(prom).toContain('"expr":"up"');
+  });
+});
+
+describe('namespaceScope', () => {
+  const api = { kind: 'service' as const, name: 'api' };
+
+  it('uses the owner namespace when it has one', () => {
+    expect(namespaceScope({ ...api, namespace: 'shop' }, [])).toBe('shop');
+  });
+
+  it('scopes to no namespace only when a same-named owner proves the name was split', () => {
+    expect(namespaceScope(api, [api, { ...api, namespace: 'shop' }])).toBe('');
+  });
+
+  it('leaves the namespace open when nothing proves a split', () => {
+    expect(namespaceScope(api, [api, { ...api, kind: 'unattributed' as const, namespace: 'shop' }])).toBeUndefined();
+  });
+
+  it('builds name-only drill-downs for an unsplit owner without a namespace', () => {
+    const lone = { kind: 'service' as const, name: 'lone' };
+    const loneResult = {
+      ...result,
+      attributions: [{ owner: lone, datasource: 'tempo' }],
+      log_attributions: [{ owner: lone, datasource: 'loki' }],
+    } as unknown as AssessmentResult;
+
+    expect(evidenceTarget({ ...base, owner: lone }, loneResult, typeOf)?.query).toBe(
+      '{ resource.service.name = "lone" && span.http.method != nil }'
+    );
+    expect(evidenceTarget({ ...base, owner: lone, signal: 'logs', observed: '' }, loneResult, typeOf)?.query).toBe(
+      '{service_name="lone"}'
+    );
   });
 });

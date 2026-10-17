@@ -47,7 +47,11 @@ describe('sampleServiceKeys', () => {
 
     const keys = await sampleServiceKeys(context(get, 3), { name: 'flagd' }, '{ resource.service.name = "flagd" }');
 
-    expect(keys).toEqual({ resource: ['service.name'], span: ['net.peer.name', 'net.peer.port', 'rpc.system'] });
+    expect(keys).toEqual({
+      resource: ['service.name'],
+      span: ['net.peer.name', 'net.peer.port', 'rpc.system'],
+      namespaces: [''],
+    });
     expect(calls[0]).toMatchObject({
       path: '/api/search',
       params: { limit: '3', q: '{ resource.service.name = "flagd" }' },

@@ -29,6 +29,7 @@ export function fetchData<T>(request: BackendSrvRequest, signal?: AbortSignal): 
       return;
     }
     let subscription: Subscription | undefined;
+    let last: { value: T } | undefined;
     const onAbort = () => {
       subscription?.unsubscribe();
       reject(abortError());
@@ -41,9 +42,12 @@ export function fetchData<T>(request: BackendSrvRequest, signal?: AbortSignal): 
     subscription = getBackendSrv()
       .fetch<T>(request)
       .subscribe({
-        next: (response) => settle(() => resolve(response.data)),
+        next: (response) => {
+          last = { value: response.data };
+        },
         error: (error: unknown) => settle(() => reject(error)),
-        complete: () => settle(() => reject(new Error(`no response from ${request.url}`))),
+        complete: () =>
+          settle(() => (last ? resolve(last.value) : reject(new Error(`no response from ${request.url}`)))),
       });
   });
 }

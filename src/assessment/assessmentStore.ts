@@ -93,14 +93,17 @@ export function createAssessmentStore(
       .then((assessment) => patch(run, { assessment, progress: assessment.progress, message: undefined }))
       .catch((error: unknown) => patch(run, { message: messageOf(error) }));
 
-  const enqueue = (run: ActiveRun, next: () => Start | undefined) => {
+  const enqueue = (run: ActiveRun, next: () => Start | undefined, settled: () => void = () => undefined) => {
     const idle = run.running === 0;
     run.running++;
     const step = () => {
       const begin = next();
       return begin && !run.controller.signal.aborted ? execute(run, begin) : undefined;
     };
-    run.queue = (idle ? Promise.resolve(step()) : run.queue.then(step)).finally(() => run.running--);
+    run.queue = (idle ? Promise.resolve(step()) : run.queue.then(step)).finally(() => {
+      run.running--;
+      settled();
+    });
   };
 
   const abandon = (run: ActiveRun) => {
@@ -158,11 +161,14 @@ export function createAssessmentStore(
         return;
       }
       active.queuedRetries.add(uid);
-      enqueue(active, () => {
-        active.queuedRetries.delete(uid);
-        const base = active.state.assessment;
-        return base && ((deps) => retryDatasource(base, uid, active.window, active.settings, deps));
-      });
+      enqueue(
+        active,
+        () => {
+          const base = active.state.assessment;
+          return base && ((deps) => retryDatasource(base, uid, active.window, active.settings, deps));
+        },
+        () => active.queuedRetries.delete(uid)
+      );
     },
   };
 }
