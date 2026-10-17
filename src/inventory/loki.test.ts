@@ -293,6 +293,27 @@ describe('unknown parts', () => {
   });
 });
 
+describe('request cost', () => {
+  it('makes three requests per service plus three stack-wide ones when index volume answers', async () => {
+    const names = Array.from({ length: 50 }, (_, index) => `svc-${index}`);
+    const { get, calls } = fakeLoki({
+      serviceNames: names,
+      series: [{ service_name: 'svc', service_namespace: 'shop' }],
+      volumes: names.map((name) => ({ metric: { service_name: name, service_namespace: 'shop' }, bytes: 1 })),
+    });
+
+    const { datasource, errors } = await collectLokiInventory('loki', get, createLimiter(8), window);
+
+    expect(errors).toEqual([]);
+    expect(datasource.services).toHaveLength(names.length);
+    for (const name of names) {
+      const selector = (call: { params: Record<string, string> }) => call.params.query ?? call.params['match[]'] ?? '';
+      expect(calls.filter((call) => selector(call).includes(`"${name}"`))).toHaveLength(3);
+    }
+    expect(calls).toHaveLength(3 + 3 * names.length);
+  });
+});
+
 describe('scorer limits', () => {
   it('skips a Loki datasource with more services than the scorer accepts', async () => {
     const { get, calls } = fakeLoki({

@@ -482,3 +482,23 @@ describe('scorer limits', () => {
     });
   });
 });
+
+describe('request cost', () => {
+  it('makes one owner query per 40 names plus four stack-wide requests when nothing needs label checks', async () => {
+    const names = Array.from({ length: 401 }, (_, index) => `m_${index}`);
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath, params) => {
+      if (requestPath === '/api/v1/label/__name__/values') {
+        return { status: 'success', data: names };
+      }
+      if (params.query?.startsWith('count by (__name__, job')) {
+        return { status: 'success', data: { result: [{ metric: { __name__: 'm_0', job: 'api' }, value: [1, '1'] }] } };
+      }
+      return undefined;
+    });
+
+    const { errors } = await collectPrometheusInventory('prom', get, createLimiter(8), window);
+
+    expect(errors).toEqual([]);
+    expect(calls).toHaveLength(4 + Math.ceil(names.length / 40));
+  });
+});

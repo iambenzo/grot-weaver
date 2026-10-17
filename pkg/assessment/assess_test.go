@@ -38,7 +38,7 @@ func keysFromFixture(t *testing.T, path string) []KeyObservation {
 	return keys
 }
 
-func newAssessor(t *testing.T) *Assessor {
+func newAssessor(t testing.TB) *Assessor {
 	t.Helper()
 	loaded, err := catalogue.LoadEmbedded()
 	if err != nil {

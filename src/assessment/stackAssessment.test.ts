@@ -1,4 +1,5 @@
-import { ProxyGet } from '../datasources/proxy';
+import { Observable } from 'rxjs';
+import { ProxyGet, createProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { AssessmentResult } from '../api/types';
 import { Inventory } from '../inventory/types';
@@ -12,6 +13,13 @@ import {
   retryDatasource,
   seriesPresenceAttributes,
 } from './stackAssessment';
+
+const fetch = jest.fn();
+
+jest.mock('@grafana/runtime', () => ({
+  ...jest.requireActual('@grafana/runtime'),
+  getBackendSrv: () => ({ fetch }),
+}));
 
 const checkout = { kind: 'service' as const, namespace: 'shop', name: 'checkout' };
 
@@ -314,5 +322,36 @@ describe('progress, partial results and retry', () => {
       keysMethod: 'tags',
       volumeMethod: 'metrics',
     });
+  });
+});
+
+describe('cancellation through the collectors', () => {
+  it('starts no new datasource request after the run is aborted and cancels the ones in flight', async () => {
+    const unsubscribed = jest.fn();
+    fetch.mockReset();
+    fetch.mockImplementation(() => new Observable(() => unsubscribed));
+    const controller = new AbortController();
+    const score = jest.fn(async () => ({}) as AssessmentResult);
+    const running = assessStack(
+      { metrics: [], traces: [{ uid: 'tempo', type: 'tempo', name: 'Tempo' }], logs: [] },
+      { startSeconds: 0, endSeconds: 3600 },
+      {},
+      {
+        get: createProxyGet(controller.signal),
+        limit: createLimiter(2),
+        score,
+        spanGroupRules: async () => [],
+        namesNeedingLabels: async () => [],
+      }
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const startedBeforeAbort = fetch.mock.calls.length;
+
+    controller.abort();
+    await running;
+
+    expect(startedBeforeAbort).toBe(2);
+    expect(fetch).toHaveBeenCalledTimes(startedBeforeAbort);
+    expect(unsubscribed).toHaveBeenCalledTimes(startedBeforeAbort);
   });
 });

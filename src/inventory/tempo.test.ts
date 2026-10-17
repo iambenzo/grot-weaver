@@ -498,3 +498,40 @@ describe('unknown parts', () => {
     expect(datasource.services.every((service) => service.span_count === 0)).toBe(true);
   });
 });
+
+describe('request cost', () => {
+  it('makes three requests per service plus five stack-wide ones when TraceQL metrics answer', async () => {
+    const names = Array.from({ length: 50 }, (_, index) => `svc-${index}`);
+    const calls: Call[] = [];
+    const get = (async (_uid: string, requestPath: string, params: Record<string, string>) => {
+      calls.push({ path: requestPath, params });
+      if (requestPath === '/api/v2/search/tag/resource.service.name/values') {
+        return { tagValues: names.map((value) => ({ value })) };
+      }
+      if (requestPath === '/api/metrics/query_range') {
+        return {
+          series: names.map((name) => ({
+            labels: [
+              { key: 'resource.service.name', value: { stringValue: name } },
+              { key: 'resource.service.namespace', value: { stringValue: 'shop' } },
+            ],
+            samples: [{ timestampMs: '1', value: 1 }],
+          })),
+        };
+      }
+      if (requestPath === '/api/v2/search/tags') {
+        return { scopes: params.q?.includes('svc-') ? [{ name: params.scope, tags: ['a'] }] : [] };
+      }
+      return { tagValues: [{ value: 'shop' }] };
+    }) as ProxyGet;
+
+    const { datasource, errors } = await collectTempoInventory('tempo', get, createLimiter(8), window);
+
+    expect(errors).toEqual([]);
+    expect(datasource.services).toHaveLength(names.length);
+    for (const name of names) {
+      expect(calls.filter((call) => call.params.q?.includes(`"${name}"`))).toHaveLength(3);
+    }
+    expect(calls).toHaveLength(5 + 3 * names.length);
+  });
+});
