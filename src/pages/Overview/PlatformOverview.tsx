@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { SceneComponentProps, SceneObjectBase, SceneObjectState, SceneTimeRange, sceneGraph } from '@grafana/scenes';
 import { Alert, Badge, Stack, Tab, TabsBar, Text } from '@grafana/ui';
 import { Signal } from '../../api/types';
@@ -13,7 +13,6 @@ import {
 } from '../../components/StackStatus/StackStatus';
 import { PluginSettings, isUpstreamCheckEnabled } from '../../settings/settings';
 import { UpstreamBanner } from '../../upstream/UpstreamBanner';
-import { toQueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { SERVICES_HELP, TOP_VIOLATIONS_HELP } from '../../components/SectionHeading/guides';
@@ -38,8 +37,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const { settings } = model.useState();
   const timeRangeObject = sceneGraph.getTimeRange(model) as SceneTimeRange;
   const { value: timeRange } = timeRangeObject.useState();
-  const window = useMemo(() => toQueryWindow(timeRange), [timeRange]);
-  const load = useStackAssessment(settings, window);
+  const load = useStackAssessment(settings, timeRange);
   const [signal, setSignal] = useState<Signal>('metrics');
 
   if (load.status === 'loading') {

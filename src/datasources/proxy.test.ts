@@ -1,5 +1,5 @@
-import { of } from 'rxjs';
-import { discoverDatasources, proxyGet } from './proxy';
+import { Observable, of } from 'rxjs';
+import { createProxyGet, discoverDatasources, proxyGet } from './proxy';
 
 const getList = jest.fn();
 const fetch = jest.fn();
@@ -38,5 +38,30 @@ describe('proxyGet', () => {
       showErrorAlert: false,
       showSuccessAlert: false,
     });
+  });
+});
+
+describe('createProxyGet', () => {
+  it('cancels the request and rejects with an abort error when the signal aborts', async () => {
+    const unsubscribed = jest.fn();
+    fetch.mockReturnValue(new Observable(() => unsubscribed));
+    const controller = new AbortController();
+
+    const pending = createProxyGet(controller.signal)('ds', '/api/v1/labels', {});
+    controller.abort();
+
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+    expect(unsubscribed).toHaveBeenCalled();
+  });
+
+  it('does not send a request once the signal has aborted', async () => {
+    fetch.mockClear();
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(createProxyGet(controller.signal)('ds', '/api/v1/labels', {})).rejects.toMatchObject({
+      name: 'AbortError',
+    });
+    expect(fetch).not.toHaveBeenCalled();
   });
 });

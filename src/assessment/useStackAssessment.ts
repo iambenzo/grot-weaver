@@ -1,20 +1,12 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { proxyGet } from '../datasources/proxy';
-import { createLimiter } from '../datasources/limiter';
-import { scoreInventory } from '../api/score';
-import { fetchMetricsNeedingLabels, fetchRenamedAttributes, fetchSpanGroupRules } from '../api/catalogue';
-import { fetchProducts } from '../api/products';
+import { useEffect, useState } from 'react';
+import { TimeRange } from '@grafana/data';
 import { LabelProgress } from '../inventory/prometheus';
-import { PluginSettings, concurrencyFrom } from '../settings/settings';
-import { QueryWindow } from '../window/window';
-import {
-  DatasourceProgress,
-  StackAssessment,
-  StackDependencies,
-  assessStack,
-  discoverStack,
-  retryDatasource,
-} from './stackAssessment';
+import { PluginSettings } from '../settings/settings';
+import { QueryWindow, toQueryWindow } from '../window/window';
+import { DatasourceProgress, StackAssessment } from './stackAssessment';
+import { AssessmentStore, Run, RunState, createAssessmentStore, runKey } from './assessmentStore';
+
+export { messageOf } from './assessmentStore';
 
 export interface Keyed<K, V> {
   key: K;
@@ -33,46 +25,35 @@ export type Load =
       retry: (uid: string) => void;
     };
 
-interface RunState {
-  progress: DatasourceProgress[];
-  labels?: LabelProgress;
-  assessment?: StackAssessment;
-  message?: string;
-}
+const sharedStore = createAssessmentStore();
 
-interface RetryRequest {
-  uid: string;
-  base: StackAssessment;
-}
+export function useStackAssessment(
+  settings: PluginSettings,
+  timeRange: TimeRange,
+  store: AssessmentStore = sharedStore
+): Load {
+  const key = runKey(settings, timeRange.raw);
+  const [snapshot, setSnapshot] = useState<Keyed<string, { run: Run; state: RunState }>>();
 
-type Start = (deps: StackDependencies) => Promise<StackAssessment>;
-
-export function useStackAssessment(settings: PluginSettings, window: QueryWindow): Load {
-  const [run, setRun] = useState<Keyed<QueryWindow, RunState>>();
-  const [retryRequest, setRetryRequest] = useState<Keyed<QueryWindow, RetryRequest>>();
-
-  useEffect(
-    () => startRun(window, settings, setRun, (deps) => assessStack(discoverStack(settings), window, settings, deps)),
-    [settings, window]
-  );
   useEffect(() => {
-    if (!retryRequest || retryRequest.key !== window) {
-      return;
-    }
-    const { uid, base } = retryRequest.value;
-    return startRun(window, settings, setRun, (deps) => retryDatasource(base, uid, window, settings, deps));
-  }, [retryRequest, settings, window]);
+    const run = store.acquire(key, toQueryWindow(timeRange), settings);
+    const update = () => setSnapshot({ key, value: { run, state: run.state } });
+    update();
+    return store.subscribe(run, update);
+  }, [key, settings, timeRange, store]);
 
-  const state = run?.key === window ? run.value : { progress: [] };
+  if (!snapshot || snapshot.key !== key) {
+    return { status: 'loading', progress: [] };
+  }
+  const { run, state } = snapshot.value;
   if (state.assessment) {
-    const base = state.assessment;
     return {
       status: 'ready',
-      assessment: base,
-      window,
+      assessment: state.assessment,
+      window: run.window,
       progress: state.progress,
       labels: state.labels,
-      retry: (uid) => setRetryRequest({ key: window, value: { uid, base } }),
+      retry: (uid) => store.retry(run, uid),
     };
   }
   if (state.message !== undefined) {
@@ -81,48 +62,8 @@ export function useStackAssessment(settings: PluginSettings, window: QueryWindow
   return { status: 'loading', progress: state.progress, labels: state.labels };
 }
 
-function startRun(
-  window: QueryWindow,
-  settings: PluginSettings,
-  setRun: Dispatch<SetStateAction<Keyed<QueryWindow, RunState> | undefined>>,
-  start: Start
-): () => void {
-  let cancelled = false;
-  const patch = (update: Partial<RunState>) =>
-    !cancelled &&
-    setRun((current) => ({
-      key: window,
-      value: { ...(current?.key === window ? current.value : { progress: [] }), ...update },
-    }));
-  start({
-    get: proxyGet,
-    limit: createLimiter(concurrencyFrom(settings)),
-    score: scoreInventory,
-    spanGroupRules: fetchSpanGroupRules,
-    namesNeedingLabels: fetchMetricsNeedingLabels,
-    renamedAttributes: fetchRenamedAttributes,
-    products: fetchProducts,
-    onLabelProgress: (labels) => patch({ labels }),
-    onProgress: (progress) => patch({ progress }),
-    onPartial: (assessment) => patch({ assessment }),
-  })
-    .then((assessment) => patch({ assessment, progress: assessment.progress, message: undefined }))
-    .catch((error: unknown) => patch({ message: messageOf(error) }));
-  return () => {
-    cancelled = true;
-  };
-}
-
 export function loadingText(load: { labels?: LabelProgress }): string {
   const labels =
     load.labels && load.labels.total > 0 ? ` Checking metric labels ${load.labels.done}/${load.labels.total}.` : '';
   return `Collecting telemetry names and scoring them…${labels}`;
-}
-
-export function messageOf(error: unknown): string {
-  if (error && typeof error === 'object') {
-    const candidate = error as { data?: { error?: string; message?: string }; message?: string };
-    return candidate.data?.error ?? candidate.data?.message ?? candidate.message ?? 'unknown error';
-  }
-  return String(error);
 }

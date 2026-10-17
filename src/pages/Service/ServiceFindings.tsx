@@ -32,7 +32,7 @@ import { evidenceTarget, exploreUrl } from '../../assessment/explore';
 import { libraryInfo } from '../../assessment/libraries';
 import { LibraryEvidence } from '../../inventory/traceLibraries';
 import { PluginSettings, concurrencyFrom } from '../../settings/settings';
-import { QueryWindow, toQueryWindow } from '../../window/window';
+import { QueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
 import { FindingsTable } from './FindingsTable';
@@ -97,8 +97,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   const { service, namespace, signal, settings } = model.useState();
   const timeRangeObject = sceneGraph.getTimeRange(model) as SceneTimeRange;
   const { value: timeRange } = timeRangeObject.useState();
-  const window = useMemo(() => toQueryWindow(timeRange), [timeRange]);
-  const load = useStackAssessment(settings, window);
+  const load = useStackAssessment(settings, timeRange);
 
   if (load.status === 'loading') {
     return <LoadingProgress progress={load.progress} labels={load.labels} />;
