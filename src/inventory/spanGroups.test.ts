@@ -30,8 +30,14 @@ describe('applicableRules', () => {
 
 describe('spanGroupQuery', () => {
   it('filters on service, kind and the identifying attribute, and selects the group attributes', () => {
-    expect(spanGroupQuery('checkout', httpServer)).toBe(
+    expect(spanGroupQuery({ name: 'checkout' }, httpServer)).toBe(
       '{ resource.service.name = "checkout" && kind = server && span.http.request.method != nil } | select(span.http.request.method, span.url.path, span.url.scheme, span.http.route)'
+    );
+  });
+
+  it('also filters on the namespace when the service has one', () => {
+    expect(spanGroupQuery({ name: 'checkout', namespace: 'shop' }, httpServer)).toContain(
+      '{ resource.service.name = "checkout" && resource.service.namespace = "shop" && kind = server'
     );
   });
 });
@@ -60,7 +66,7 @@ describe('sampleSpanGroup', () => {
 
     const sample = await sampleSpanGroup(
       { uid: 'tempo', get, limit: createLimiter(1), window: { startSeconds: 1, endSeconds: 2 } },
-      'checkout',
+      { name: 'checkout' },
       httpServer
     );
 

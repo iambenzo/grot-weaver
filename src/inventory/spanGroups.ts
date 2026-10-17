@@ -2,7 +2,7 @@ import { SpanGroupRule } from '../api/catalogue';
 import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, tempoWindowParams } from '../window/window';
-import { attributeSelector, serviceFilterExpression } from './traceql';
+import { ServiceRef, attributeSelector, serviceFilterExpression } from './traceql';
 import { SpanGroupSample } from './types';
 
 const DEFAULT_SAMPLE_LIMIT = 20;
@@ -25,22 +25,22 @@ export function applicableRules(rules: SpanGroupRule[], spanKeys: string[]): Spa
   return rules.filter((rule) => present.has(rule.identifying));
 }
 
-export function spanGroupQuery(serviceName: string, rule: SpanGroupRule): string {
+export function spanGroupQuery(service: ServiceRef, rule: SpanGroupRule): string {
   const attributes = [...new Set([...rule.required, ...rule.recommended])].map((name) =>
     attributeSelector('span', name)
   );
-  const filter = `{ ${serviceFilterExpression(serviceName)} && kind = ${rule.span_kind} && ${attributeSelector('span', rule.identifying)} != nil }`;
+  const filter = `{ ${serviceFilterExpression(service)} && kind = ${rule.span_kind} && ${attributeSelector('span', rule.identifying)} != nil }`;
   return `${filter} | select(${attributes.join(', ')})`;
 }
 
 export async function sampleSpanGroup(
   context: SamplerContext,
-  serviceName: string,
+  service: ServiceRef,
   rule: SpanGroupRule
 ): Promise<SpanGroupSample> {
   const params = {
     ...tempoWindowParams(context.window),
-    q: spanGroupQuery(serviceName, rule),
+    q: spanGroupQuery(service, rule),
     limit: String(context.sampleLimit ?? DEFAULT_SAMPLE_LIMIT),
     spss: SPANS_PER_SPAN_SET,
   };

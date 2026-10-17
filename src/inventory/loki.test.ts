@@ -8,7 +8,7 @@ const fixture = (name: string) =>
   JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../testdata/fixtures/local/loki/${name}`), 'utf8'));
 const window = { startSeconds: 100, endSeconds: 1900 };
 
-function fakeLoki(options: { detectedFieldsFail?: boolean } = {}) {
+function fakeLoki(options: { detectedFieldsFail?: boolean; series?: Array<Record<string, string>> } = {}) {
   const calls: Array<{ path: string; params: Record<string, string>; headers?: Record<string, string> }> = [];
   const get = (async (
     _uid: string,
@@ -23,7 +23,7 @@ function fakeLoki(options: { detectedFieldsFail?: boolean } = {}) {
       case '/loki/api/v1/label/service_name/values':
         return { status: 'success', data: ['checkout'] };
       case '/loki/api/v1/series':
-        return fixture('series-checkout.json');
+        return options.series ? { status: 'success', data: options.series } : fixture('series-checkout.json');
       case '/loki/api/v1/detected_fields':
         if (options.detectedFieldsFail) {
           throw { status: 404, data: { message: 'not found' } };
@@ -78,6 +78,32 @@ describe('collectLokiInventory', () => {
     expect(sampleCall?.headers).toEqual({ 'X-Loki-Response-Encoding-Flags': 'categorize-labels' });
   });
 
+  it('splits a service name used in several namespaces, including streams without one', async () => {
+    const { get, calls } = fakeLoki({
+      series: [
+        { service_name: 'checkout', service_namespace: 'shop', env: 'prod' },
+        { service_name: 'checkout', service_namespace: 'billing' },
+        { service_name: 'checkout' },
+      ],
+    });
+
+    const { datasource, errors } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(errors).toEqual([]);
+    expect(datasource.services.map((service) => [service.service_namespace, service.stream_labels])).toEqual([
+      ['shop', ['env', 'service_name', 'service_namespace']],
+      ['billing', ['service_name', 'service_namespace']],
+      ['', ['service_name']],
+    ]);
+    expect(
+      calls.filter((call) => call.path === '/loki/api/v1/detected_fields').map((call) => call.params.query)
+    ).toEqual([
+      '{service_name="checkout", service_namespace="shop"}',
+      '{service_name="checkout", service_namespace="billing"}',
+      '{service_name="checkout", service_namespace=""}',
+    ]);
+  });
+
   it('falls back to a larger sample for keys when detected fields are unavailable', async () => {
     const { get, calls } = fakeLoki({ detectedFieldsFail: true });
 
@@ -97,7 +123,12 @@ describe('collectLokiInventory', () => {
 
 describe('streamSelector', () => {
   it('escapes the service name', () => {
-    expect(streamSelector('integrations/db-o11y')).toBe('{service_name="integrations/db-o11y"}');
-    expect(streamSelector('we"ird')).toBe('{service_name="we\\"ird"}');
+    expect(streamSelector({ name: 'integrations/db-o11y' })).toBe('{service_name="integrations/db-o11y"}');
+    expect(streamSelector({ name: 'we"ird' })).toBe('{service_name="we\\"ird"}');
+  });
+
+  it('matches the namespace, and its absence, when one is given', () => {
+    expect(streamSelector({ name: 'api', namespace: 'shop' })).toBe('{service_name="api", service_namespace="shop"}');
+    expect(streamSelector({ name: 'api', namespace: '' })).toBe('{service_name="api", service_namespace=""}');
   });
 });

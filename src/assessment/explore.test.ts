@@ -22,12 +22,17 @@ const base: Finding = {
 
 describe('evidenceTarget', () => {
   it.each([
-    ['trace attribute', base, 'tempo', '{ resource.service.name = "checkout" && span.http.method != nil }'],
+    [
+      'trace attribute',
+      base,
+      'tempo',
+      '{ resource.service.name = "checkout" && resource.service.namespace = "shop" && span.http.method != nil }',
+    ],
     [
       'resource attribute',
       { ...base, scope: 'resources', observed: 'telemetry.auto.version' },
       'tempo',
-      '{ resource.service.name = "checkout" && resource.telemetry.auto.version != nil }',
+      '{ resource.service.name = "checkout" && resource.service.namespace = "shop" && resource.telemetry.auto.version != nil }',
     ],
     [
       'metric name',

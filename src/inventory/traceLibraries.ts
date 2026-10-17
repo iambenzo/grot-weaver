@@ -29,6 +29,7 @@ export interface LibraryEvidence {
 
 export interface FlaggedKey {
   serviceName: string;
+  serviceNamespace?: string;
   key: string;
   scope: 'resource' | 'span';
 }
@@ -48,7 +49,7 @@ export interface LookupContext {
 }
 
 export function flaggedKeyFilter(flagged: FlaggedKey): string {
-  return `{ ${serviceFilterExpression(flagged.serviceName)} && ${attributeSelector(flagged.scope, flagged.key)} != nil }`;
+  return `{ ${serviceFilterExpression({ name: flagged.serviceName, namespace: flagged.serviceNamespace })} && ${attributeSelector(flagged.scope, flagged.key)} != nil }`;
 }
 
 export async function probeTraceQLMetrics(context: LookupContext): Promise<boolean> {

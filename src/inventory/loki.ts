@@ -1,7 +1,7 @@
 import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, lokiWindowParams, prometheusLookback } from '../window/window';
-import { CollectionError, LogDatasource, LogKeysMethod, LogService, SDK } from './types';
+import { CollectionError, LogDatasource, LogKeysMethod, LogService, SDK, ServiceRef } from './types';
 import { guardStep } from './guard';
 
 const SERVICE_NAME = 'service_name';
@@ -48,8 +48,16 @@ export interface LokiCollection {
   errors: CollectionError[];
 }
 
-export function streamSelector(serviceName: string): string {
-  return `{${SERVICE_NAME}="${serviceName.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"}`;
+export function streamSelector(service: ServiceRef): string {
+  const matchers = [`${SERVICE_NAME}="${escapeLabelValue(service.name)}"`];
+  if (service.namespace !== undefined) {
+    matchers.push(`${SERVICE_NAMESPACE}="${escapeLabelValue(service.namespace)}"`);
+  }
+  return `{${matchers.join(', ')}}`;
+}
+
+function escapeLabelValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
 export async function collectLokiInventory(
@@ -66,20 +74,46 @@ export async function collectLokiInventory(
       lokiGet<string[]>(context, `/loki/api/v1/label/${SERVICE_NAME}/values`, lokiWindowParams(window))
     ),
   ]);
-  const services = await Promise.all((serviceNames ?? []).map((name) => collectService(context, name)));
+  const services = (await Promise.all((serviceNames ?? []).map((name) => collectServices(context, name)))).flat();
   return { datasource: { uid, labels: [...(labels ?? [])].sort(), services }, errors: context.errors };
 }
 
-async function collectService(context: Context, serviceName: string): Promise<LogService> {
-  const step = (what: string) => `${what} for service "${serviceName}"`;
-  const selector = streamSelector(serviceName);
-  const [series, detected, sample, volume] = await Promise.all([
-    guarded(context, step('streams'), () =>
+async function collectServices(context: Context, name: string): Promise<LogService[]> {
+  const series =
+    (await guarded(context, `streams for service "${name}"`, () =>
       lokiGet<Array<Record<string, string>>>(context, '/loki/api/v1/series', {
         ...lokiWindowParams(context.window),
-        'match[]': selector,
+        'match[]': streamSelector({ name }),
       })
-    ),
+    )) ?? [];
+  const namespaceOf = (labels: Record<string, string>) => labels[SERVICE_NAMESPACE] ?? '';
+  const namespaces = [...new Set(series.map(namespaceOf))];
+  if (namespaces.length <= 1) {
+    return [await collectService(context, { name }, series, namespaces[0] ?? '')];
+  }
+  return Promise.all(
+    namespaces.map((namespace) =>
+      collectService(
+        context,
+        { name, namespace },
+        series.filter((labels) => namespaceOf(labels) === namespace),
+        namespace
+      )
+    )
+  );
+}
+
+async function collectService(
+  context: Context,
+  service: ServiceRef,
+  series: Array<Record<string, string>>,
+  namespace: string
+): Promise<LogService> {
+  const where =
+    service.namespace === undefined ? service.name : `${service.namespace || '(no namespace)'}/${service.name}`;
+  const step = (what: string) => `${what} for service "${where}"`;
+  const selector = streamSelector(service);
+  const [detected, sample, volume] = await Promise.all([
     detectedFieldKeys(context, selector),
     guarded(context, step('sample'), () => sampleStreams(context, selector, VALUES_SAMPLE_LIMIT)),
     guarded(context, step('volume'), () => logVolume(context, selector)),
@@ -95,12 +129,11 @@ async function collectService(context: Context, serviceName: string): Promise<Lo
       )) ?? keySample;
   }
   const metadataKeys = detected ?? keysOf(keySample);
-  const streamLabels = [...new Set((series ?? []).flatMap((labels) => Object.keys(labels)))].sort();
-  const namespaces = [...new Set((series ?? []).map((labels) => labels[SERVICE_NAMESPACE]).filter(Boolean))];
+  const streamLabels = [...new Set(series.flatMap((labels) => Object.keys(labels)))].sort();
 
   return {
-    service_name: serviceName,
-    service_namespace: namespaces[0] ?? '',
+    service_name: service.name,
+    service_namespace: namespace,
     stream_labels: streamLabels,
     metadata_keys: metadataKeys,
     keys_method: method,

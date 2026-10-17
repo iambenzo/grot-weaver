@@ -78,6 +78,82 @@ describe('collectTempoInventory', () => {
     expect(calls.every((call) => call.params.start === '100' && call.params.end === '200')).toBe(true);
   });
 
+  it('splits a service name used in several namespaces into one service per namespace', async () => {
+    const calls: Call[] = [];
+    const get = (async (_uid: string, requestPath: string, params: Record<string, string>) => {
+      calls.push({ path: requestPath, params });
+      if (requestPath === '/api/v2/search/tag/resource.service.name/values') {
+        return { tagValues: [{ type: 'string', value: 'api' }] };
+      }
+      if (requestPath.includes('service.namespace')) {
+        return {
+          tagValues: [
+            { type: 'string', value: 'shop' },
+            { type: 'string', value: 'billing' },
+          ],
+        };
+      }
+      if (requestPath === '/api/metrics/query_range') {
+        const series = (namespace: string, spans: number) => ({
+          labels: [
+            { key: 'resource.service.name', value: { stringValue: 'api' } },
+            { key: 'resource.service.namespace', value: { stringValue: namespace } },
+          ],
+          samples: [{ timestampMs: '1', value: spans }],
+        });
+        return { series: [series('shop', 7), series('billing', 5)] };
+      }
+      if (requestPath === '/api/v2/search/tags') {
+        if (!params.q || params.q.includes('semconv-compliance-filter-probe')) {
+          return { scopes: [] };
+        }
+        return { scopes: [{ name: params.scope, tags: [params.q.includes('shop') ? 'http.route' : 'rpc.method'] }] };
+      }
+      return { tagValues: [] };
+    }) as ProxyGet;
+
+    const { datasource, errors } = await collectTempoInventory('tempo', get, createLimiter(2), window);
+
+    expect(errors).toEqual([]);
+    expect(
+      datasource.services.map((service) => ({
+        namespace: service.service_namespace,
+        spans: service.span_count,
+        keys: service.span_keys.map((key) => key.key),
+      }))
+    ).toEqual([
+      { namespace: 'shop', spans: 7, keys: ['http.route'] },
+      { namespace: 'billing', spans: 5, keys: ['rpc.method'] },
+    ]);
+    expect(
+      calls.some(
+        (call) => call.params.q === '{ resource.service.name = "api" && resource.service.namespace = "billing" }'
+      )
+    ).toBe(true);
+  });
+
+  it('sums every namespace into one service when the name has at most one namespace', async () => {
+    const { get } = fakeTempo();
+    const volumes = (async (uid: string, requestPath: string, params: Record<string, string>) =>
+      requestPath === '/api/metrics/query_range'
+        ? {
+            series: ['shop', ''].map((namespace) => ({
+              labels: [
+                { key: 'resource.service.name', value: { stringValue: 'checkout' } },
+                { key: 'resource.service.namespace', value: { stringValue: namespace } },
+              ],
+              samples: [{ timestampMs: '1', value: 10 }],
+            })),
+          }
+        : get(uid, requestPath, params)) as ProxyGet;
+
+    const { datasource } = await collectTempoInventory('tempo', volumes, createLimiter(2), window);
+
+    const checkout = datasource.services.filter((service) => service.service_name === 'checkout');
+    expect(checkout).toHaveLength(1);
+    expect(checkout[0]).toMatchObject({ service_namespace: 'shop', span_count: 20 });
+  });
+
   it('filters per service with q and scope', async () => {
     const { get, calls } = fakeTempo();
 
@@ -197,6 +273,12 @@ describe('serviceFilter', () => {
     ['', '{ resource.service.name = "" }'],
     ['we"ird\\name', '{ resource.service.name = "we\\"ird\\\\name" }'],
   ])('escapes %p', (name, expected) => {
-    expect(serviceFilter(name)).toBe(expected);
+    expect(serviceFilter({ name })).toBe(expected);
+  });
+
+  it('adds the namespace when there is one', () => {
+    expect(serviceFilter({ name: 'checkout', namespace: 'sh"op' })).toBe(
+      '{ resource.service.name = "checkout" && resource.service.namespace = "sh\\"op" }'
+    );
   });
 });

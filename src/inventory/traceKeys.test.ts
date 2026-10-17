@@ -45,7 +45,7 @@ describe('sampleServiceKeys', () => {
         : { batches: [service('flagd', ['rpc.system', 'net.peer.port'])] };
     }) as ProxyGet;
 
-    const keys = await sampleServiceKeys(context(get, 3), 'flagd', '{ resource.service.name = "flagd" }');
+    const keys = await sampleServiceKeys(context(get, 3), { name: 'flagd' }, '{ resource.service.name = "flagd" }');
 
     expect(keys).toEqual({ resource: ['service.name'], span: ['net.peer.name', 'net.peer.port', 'rpc.system'] });
     expect(calls[0]).toMatchObject({
@@ -53,6 +53,26 @@ describe('sampleServiceKeys', () => {
       params: { limit: '3', q: '{ resource.service.name = "flagd" }' },
     });
     expect(calls.slice(1).map((call) => call.path)).toEqual(['/api/v2/traces/t1', '/api/v2/traces/t2']);
+  });
+
+  it('keeps only resource spans from the requested namespace', async () => {
+    const service = (namespace: string, key: string) => ({
+      resource: {
+        attributes: [
+          { key: 'service.name', value: { stringValue: 'api' } },
+          { key: 'service.namespace', value: { stringValue: namespace } },
+        ],
+      },
+      scopeSpans: [{ spans: [{ attributes: [{ key }] }] }],
+    });
+    const get = (async (_uid: string, requestPath: string) =>
+      requestPath === '/api/search'
+        ? { traces: [{ traceID: 't' }] }
+        : { trace: { resourceSpans: [service('shop', 'http.route'), service('billing', 'rpc.method')] } }) as ProxyGet;
+
+    expect((await sampleServiceKeys(context(get), { name: 'api', namespace: 'shop' }, '{ }')).span).toEqual([
+      'http.route',
+    ]);
   });
 
   it('matches spans without a service name to the nameless service', async () => {
@@ -67,6 +87,6 @@ describe('sampleServiceKeys', () => {
             },
           }) as ProxyGet;
 
-    expect((await sampleServiceKeys(context(get), '', '{ }')).span).toEqual(['a']);
+    expect((await sampleServiceKeys(context(get), { name: '' }, '{ }')).span).toEqual(['a']);
   });
 });

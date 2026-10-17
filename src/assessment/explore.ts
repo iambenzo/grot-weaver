@@ -68,7 +68,11 @@ function evidenceQuery(finding: Finding, result: AssessmentResult): string | und
 }
 
 function traceQuery(finding: Finding): string {
-  const service = serviceFilterExpression(finding.owner.kind === 'unattributed' ? '' : finding.owner.name);
+  const service = serviceFilterExpression(
+    finding.owner.kind === 'unattributed'
+      ? { name: '' }
+      : { name: finding.owner.name, namespace: finding.owner.namespace }
+  );
   if (
     !finding.observed ||
     finding.type === 'required_attribute_not_present' ||

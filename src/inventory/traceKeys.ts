@@ -1,6 +1,7 @@
 import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, tempoWindowParams } from '../window/window';
+import { ServiceRef } from './traceql';
 
 export type KeysMethod = 'tags' | 'sample';
 
@@ -8,6 +9,7 @@ const FILTER_PROBE_SERVICE = 'semconv-compliance-filter-probe';
 const IGNORED_FILTER_SHARE = 0.9;
 const DEFAULT_KEY_SAMPLE_TRACES = 5;
 const SERVICE_NAME_KEY = 'service.name';
+const SERVICE_NAMESPACE_KEY = 'service.namespace';
 
 export interface KeysContext {
   uid: string;
@@ -56,7 +58,7 @@ export async function isTagFilterIgnored(context: KeysContext): Promise<boolean>
 
 export async function sampleServiceKeys(
   context: KeysContext,
-  serviceName: string,
+  service: ServiceRef,
   filter: string
 ): Promise<SampledKeys> {
   const traceLimit = Math.min(context.sampleLimit ?? DEFAULT_KEY_SAMPLE_TRACES, DEFAULT_KEY_SAMPLE_TRACES);
@@ -77,7 +79,7 @@ export async function sampleServiceKeys(
   const span = new Set<string>();
   for (const resourceSpans of traces.flatMap(resourceSpansOf)) {
     const attributes = resourceSpans.resource?.attributes ?? [];
-    if (serviceNameOf(attributes) !== serviceName) {
+    if (!belongsTo(attributes, service)) {
       continue;
     }
     attributes.forEach((attribute) => resource.add(attribute.key));
@@ -103,6 +105,10 @@ function resourceSpansOf(response: TraceResponse): OtlpResourceSpans[] {
   return response.trace?.resourceSpans ?? response.resourceSpans ?? response.batches ?? [];
 }
 
-function serviceNameOf(attributes: OtlpAttribute[]): string {
-  return attributes.find((attribute) => attribute.key === SERVICE_NAME_KEY)?.value?.stringValue ?? '';
+function belongsTo(attributes: OtlpAttribute[], service: ServiceRef): boolean {
+  const value = (key: string) => attributes.find((attribute) => attribute.key === key)?.value?.stringValue ?? '';
+  return (
+    value(SERVICE_NAME_KEY) === service.name &&
+    (!service.namespace || value(SERVICE_NAMESPACE_KEY) === service.namespace)
+  );
 }

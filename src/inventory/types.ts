@@ -1,3 +1,8 @@
+export interface ServiceRef {
+  name: string;
+  namespace?: string;
+}
+
 export interface Window {
   start: number;
   end: number;

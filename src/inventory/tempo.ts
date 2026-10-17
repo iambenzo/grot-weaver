@@ -4,7 +4,7 @@ import { QueryWindow, tempoWindowParams } from '../window/window';
 import { SpanGroupRule } from '../api/catalogue';
 import { CollectionError, KeyObservation, SDK, SpanGroupSample, TraceDatasource, TraceService } from './types';
 import { applicableRules, sampleSpanGroup } from './spanGroups';
-import { serviceFilterExpression } from './traceql';
+import { ServiceRef, serviceFilterExpression } from './traceql';
 import { queryMetricsRange } from './traceqlMetrics';
 import { KeysMethod, isTagFilterIgnored, sampleServiceKeys } from './traceKeys';
 import { guardStep } from './guard';
@@ -51,8 +51,15 @@ interface CollectorContext {
   sampleLimit?: number;
 }
 
-export function serviceFilter(serviceName: string): string {
-  return `{ ${serviceFilterExpression(serviceName)} }`;
+interface DiscoveredService {
+  ref: ServiceRef;
+  namespace: string;
+}
+
+type Volumes = Map<string, Map<string, number>>;
+
+export function serviceFilter(service: ServiceRef): string {
+  return `{ ${serviceFilterExpression(service)} }`;
 }
 
 export async function collectTempoInventory(
@@ -69,14 +76,15 @@ export async function collectTempoInventory(
     isTagFilterIgnored(context).catch(() => false),
   ]);
   const keysMethod: KeysMethod = filterIgnored ? 'sample' : 'tags';
+  const discovered = (await Promise.all((serviceNames ?? []).map((name) => discoverNamespaces(context, name)))).flat();
   const [services, metricVolumes] = await Promise.all([
-    Promise.all((serviceNames ?? []).map((name) => collectService(context, name, keysMethod))),
+    Promise.all(discovered.map((service) => collectService(context, service, keysMethod))),
     spanVolumes(context),
   ]);
-  const volumes = metricVolumes ?? (await sampledVolumes(context, serviceNames ?? []));
-  for (const service of services) {
-    service.span_count = volumes.get(service.service_name) ?? 0;
-  }
+  const volumes = metricVolumes ?? (await sampledVolumes(context, discovered));
+  services.forEach((service, index) => {
+    service.span_count = volumeOf(volumes, discovered[index].ref);
+  });
   const collection: TempoCollection = { datasource: { uid, services }, errors: context.errors };
   if (services.length > 0) {
     collection.volumeMethod = metricVolumes ? 'metrics' : 'sample';
@@ -85,59 +93,94 @@ export async function collectTempoInventory(
   return collection;
 }
 
-async function spanVolumes(context: CollectorContext): Promise<Map<string, number> | undefined> {
+async function discoverNamespaces(context: CollectorContext, name: string): Promise<DiscoveredService[]> {
+  const namespaces = await guarded(context, `namespace for service "${name}"`, () =>
+    tagValues(context, SERVICE_NAMESPACE_TAG, serviceFilter({ name }))
+  );
+  const distinct = [...new Set((namespaces ?? []).filter(Boolean))];
+  if (distinct.length > 1) {
+    return distinct.map((namespace) => ({ ref: { name, namespace }, namespace }));
+  }
+  return [{ ref: { name }, namespace: distinct[0] ?? '' }];
+}
+
+function addVolume(volumes: Volumes, name: string, namespace: string, spans: number) {
+  const byNamespace = volumes.get(name) ?? new Map<string, number>();
+  byNamespace.set(namespace, (byNamespace.get(namespace) ?? 0) + spans);
+  volumes.set(name, byNamespace);
+}
+
+function volumeOf(volumes: Volumes, service: ServiceRef): number {
+  const byNamespace = volumes.get(service.name);
+  if (!byNamespace) {
+    return 0;
+  }
+  if (service.namespace) {
+    return byNamespace.get(service.namespace) ?? 0;
+  }
+  return [...byNamespace.values()].reduce((total, spans) => total + spans, 0);
+}
+
+async function spanVolumes(context: CollectorContext): Promise<Volumes | undefined> {
   let series;
   try {
-    series = await queryMetricsRange(context, `{ } | count_over_time() by (${SERVICE_NAME_TAG})`);
+    series = await queryMetricsRange(
+      context,
+      `{ } | count_over_time() by (${SERVICE_NAME_TAG}, ${SERVICE_NAMESPACE_TAG})`
+    );
   } catch {
     return undefined;
   }
-  const volumes = new Map<string, number>();
+  const volumes: Volumes = new Map();
   for (const entry of series) {
-    const name = entry.labels?.find((label) => label.key === SERVICE_NAME_TAG)?.value?.stringValue ?? '';
+    const label = (key: string) => entry.labels?.find((candidate) => candidate.key === key)?.value?.stringValue ?? '';
     const spans = (entry.samples ?? []).reduce((total, sample) => total + (sample.value ?? 0), 0);
-    volumes.set(name, (volumes.get(name) ?? 0) + spans);
+    addVolume(volumes, label(SERVICE_NAME_TAG), label(SERVICE_NAMESPACE_TAG), spans);
   }
   return volumes;
 }
 
-async function sampledVolumes(context: CollectorContext, serviceNames: string[]): Promise<Map<string, number>> {
-  const counts = await Promise.all(
-    serviceNames.map(async (name) => {
+async function sampledVolumes(context: CollectorContext, services: DiscoveredService[]): Promise<Volumes> {
+  const volumes: Volumes = new Map();
+  await Promise.all(
+    services.map(async ({ ref }) => {
       const params = {
         ...tempoWindowParams(context.window),
-        q: serviceFilter(name),
+        q: serviceFilter(ref),
         limit: String(context.sampleLimit ?? DEFAULT_VOLUME_SAMPLE_LIMIT),
       };
-      const response = await guarded(context, `span volume sample for service "${name}"`, () =>
+      const response = await guarded(context, `span volume sample for ${describe(ref)}`, () =>
         context.limit(() => context.get<SearchResponse>(context.uid, '/api/search', params))
       );
       const spans = (response?.traces ?? [])
         .flatMap((trace) => trace.spanSets ?? [])
         .reduce((total, set) => total + (set.matched ?? 0), 0);
-      return [name, spans] as const;
+      addVolume(volumes, ref.name, ref.namespace ?? '', spans);
     })
   );
-  return new Map(counts);
+  return volumes;
+}
+
+function describe(service: ServiceRef): string {
+  return service.namespace ? `service "${service.namespace}/${service.name}"` : `service "${service.name}"`;
 }
 
 async function collectService(
   context: CollectorContext,
-  serviceName: string,
+  { ref, namespace }: DiscoveredService,
   keysMethod: KeysMethod
 ): Promise<TraceService> {
-  const filter = serviceFilter(serviceName);
-  const step = (what: string) => `${what} for service "${serviceName}"`;
-  const [keys, namespaces, sdk] = await Promise.all([
-    collectKeys(context, serviceName, filter, keysMethod, step),
-    guarded(context, step('namespace'), () => tagValues(context, SERVICE_NAMESPACE_TAG, filter)),
+  const filter = serviceFilter(ref);
+  const step = (what: string) => `${what} for ${describe(ref)}`;
+  const [keys, sdk] = await Promise.all([
+    collectKeys(context, ref, filter, keysMethod, step),
     collectSDK(context, filter, step),
   ]);
   const { resourceKeys, spanKeys } = keys;
-  const spanGroups = await collectSpanGroups(context, serviceName, spanKeys ?? [], step);
+  const spanGroups = await collectSpanGroups(context, ref, spanKeys ?? [], step);
   return {
-    service_name: serviceName,
-    service_namespace: namespaces?.[0] ?? '',
+    service_name: ref.name,
+    service_namespace: namespace,
     span_count: 0,
     resource_keys: observations(resourceKeys),
     span_keys: observations(spanKeys),
@@ -148,13 +191,13 @@ async function collectService(
 
 async function collectKeys(
   context: CollectorContext,
-  serviceName: string,
+  service: ServiceRef,
   filter: string,
   keysMethod: KeysMethod,
   step: (what: string) => string
 ): Promise<{ resourceKeys?: string[]; spanKeys?: string[] }> {
   if (keysMethod === 'sample') {
-    const sampled = await guarded(context, step('sampled keys'), () => sampleServiceKeys(context, serviceName, filter));
+    const sampled = await guarded(context, step('sampled keys'), () => sampleServiceKeys(context, service, filter));
     return { resourceKeys: sampled?.resource, spanKeys: sampled?.span };
   }
   const [resourceKeys, spanKeys] = await Promise.all([
@@ -166,13 +209,13 @@ async function collectKeys(
 
 async function collectSpanGroups(
   context: CollectorContext,
-  serviceName: string,
+  service: ServiceRef,
   spanKeys: string[],
   step: (what: string) => string
 ): Promise<SpanGroupSample[]> {
   const samples = await Promise.all(
     applicableRules(context.spanGroupRules, spanKeys).map((rule) =>
-      guarded(context, step(`span group ${rule.id}`), () => sampleSpanGroup(context, serviceName, rule))
+      guarded(context, step(`span group ${rule.id}`), () => sampleSpanGroup(context, service, rule))
     )
   );
   return samples.filter((sample): sample is SpanGroupSample => sample !== undefined && sample.sampled > 0);
