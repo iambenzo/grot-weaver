@@ -3,6 +3,7 @@ import { Limiter } from '../datasources/limiter';
 import { QueryWindow, lokiWindowParams } from '../window/window';
 import { CollectionError, LogDatasource, LogKeysMethod, LogService, SDK, ServiceRef } from './types';
 import { guardStep } from './guard';
+import { MAX_LOG_SERVICES, limitError } from './limits';
 import { Volumes, addVolume, volumeOf } from './volumes';
 
 const SERVICE_NAME = 'service_name';
@@ -84,7 +85,20 @@ export async function collectLokiInventory(
     indexVolumes(context).catch(() => undefined),
   ]);
   context.volumes = volumes;
+  const notScanned = (count: number): LokiCollection => ({
+    datasource: { uid, labels: [], services: [] },
+    errors: [
+      ...context.errors,
+      limitError(uid, 'service names', count, MAX_LOG_SERVICES, 'this datasource was not scanned'),
+    ],
+  });
+  if ((serviceNames ?? []).length > MAX_LOG_SERVICES) {
+    return notScanned(serviceNames!.length);
+  }
   const services = (await Promise.all((serviceNames ?? []).map((name) => collectServices(context, name)))).flat();
+  if (services.length > MAX_LOG_SERVICES) {
+    return notScanned(services.length);
+  }
   return { datasource: { uid, labels: [...(labels ?? [])].sort(), services }, errors: context.errors };
 }
 

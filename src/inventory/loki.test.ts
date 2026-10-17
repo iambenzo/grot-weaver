@@ -3,6 +3,7 @@ import path from 'path';
 import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { collectLokiInventory, streamSelector } from './loki';
+import { MAX_LOG_SERVICES } from './limits';
 
 const fixture = (name: string) =>
   JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../testdata/fixtures/local/loki/${name}`), 'utf8'));
@@ -13,6 +14,7 @@ interface FakeLokiOptions {
   series?: Array<Record<string, string>>;
   volumes?: Array<{ metric: Record<string, string>; bytes: number }>;
   volumeFails?: boolean;
+  serviceNames?: string[];
 }
 
 function fakeLoki(options: FakeLokiOptions = {}) {
@@ -28,7 +30,7 @@ function fakeLoki(options: FakeLokiOptions = {}) {
       case '/loki/api/v1/labels':
         return fixture('labels.json');
       case '/loki/api/v1/label/service_name/values':
-        return { status: 'success', data: ['checkout'] };
+        return { status: 'success', data: options.serviceNames ?? ['checkout'] };
       case '/loki/api/v1/series':
         return options.series ? { status: 'success', data: options.series } : fixture('series-checkout.json');
       case '/loki/api/v1/detected_fields':
@@ -195,6 +197,22 @@ describe('collectLokiInventory', () => {
         .map((call) => call.params.limit)
         .sort()
     ).toEqual(['20', '5']);
+  });
+});
+
+describe('scorer limits', () => {
+  it('skips a Loki datasource with more services than the scorer accepts', async () => {
+    const { get, calls } = fakeLoki({
+      serviceNames: Array.from({ length: MAX_LOG_SERVICES + 1 }, (_, index) => `svc-${index}`),
+    });
+
+    const { datasource, errors } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(datasource.services).toEqual([]);
+    expect(calls.some((call) => call.path === '/loki/api/v1/series')).toBe(false);
+    expect(errors.map((error) => error.message)).toContain(
+      `${MAX_LOG_SERVICES + 1} found, over the ${MAX_LOG_SERVICES} the scorer accepts, so this datasource was not scanned`
+    );
   });
 });
 

@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -125,8 +127,13 @@ func Test_CallResource_nameFormsListsEveryStoredSpelling(t *testing.T) {
 
 func postScore(t *testing.T, app *App, body []byte) *backend.CallResourceResponse {
 	t.Helper()
+	return postScoreWith(t, app, body, nil)
+}
+
+func postScoreWith(t *testing.T, app *App, body []byte, headers map[string][]string) *backend.CallResourceResponse {
+	t.Helper()
 	var sender capturingSender
-	request := &backend.CallResourceRequest{Method: http.MethodPost, Path: "score", Body: body}
+	request := &backend.CallResourceRequest{Method: http.MethodPost, Path: "score", Body: body, Headers: headers}
 	if err := app.CallResource(context.Background(), request, &sender); err != nil {
 		t.Fatalf("call resource: %v", err)
 	}
@@ -215,4 +222,62 @@ func Test_CallResource_products(t *testing.T) {
 	if !slices.ContainsFunc(products, func(p product.Product) bool { return p.ID == "knowledge-graph" }) {
 		t.Errorf("products = %+v, want knowledge-graph", products)
 	}
+}
+
+func gzipped(t *testing.T, data []byte) []byte {
+	t.Helper()
+	var buffer bytes.Buffer
+	writer := gzip.NewWriter(&buffer)
+	if _, err := writer.Write(data); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return buffer.Bytes()
+}
+
+func Test_CallResource_score_compression(t *testing.T) {
+	app := newTestApp(t)
+	valid := []byte(`{"inventory":{"window":{"start":1,"end":2},"traces":[{"uid":"tempo","services":[{"service_name":"checkout","span_count":3,"span_keys":[{"key":"http.method"}]}]}]}}`)
+	gzipRequest := map[string][]string{"Content-Encoding": {"gzip"}}
+
+	t.Run("gzip request body is decoded", func(t *testing.T) {
+		response := postScoreWith(t, app, gzipped(t, valid), gzipRequest)
+		if response.Status != http.StatusOK {
+			t.Fatalf("status = %d, body %s", response.Status, response.Body)
+		}
+		var result assessment.Result
+		if err := json.Unmarshal(response.Body, &result); err != nil || len(result.Owners) != 1 {
+			t.Errorf("result = %+v, err %v", result, err)
+		}
+	})
+
+	t.Run("response is gzipped when the client accepts it", func(t *testing.T) {
+		response := postScoreWith(t, app, valid, map[string][]string{"Accept-Encoding": {"gzip, deflate, br"}})
+		if got := response.Headers["Content-Encoding"]; !slices.Equal(got, []string{"gzip"}) {
+			t.Fatalf("content encoding = %v", got)
+		}
+		reader, err := gzip.NewReader(bytes.NewReader(response.Body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var result assessment.Result
+		if err := json.NewDecoder(reader).Decode(&result); err != nil || len(result.Owners) != 1 {
+			t.Errorf("result = %+v, err %v", result, err)
+		}
+	})
+
+	t.Run("decompressed body over the limit is rejected", func(t *testing.T) {
+		bomb := gzipped(t, []byte(`{"inventory":{"traces":[{"uid":"`+strings.Repeat("x", maxDecodedScoreRequestBytes)+`"}]}}`))
+		if got := postScoreWith(t, app, bomb, gzipRequest).Status; got != http.StatusRequestEntityTooLarge {
+			t.Errorf("status = %d, want %d", got, http.StatusRequestEntityTooLarge)
+		}
+	})
+
+	t.Run("body that is not gzip is rejected", func(t *testing.T) {
+		if got := postScoreWith(t, app, valid, gzipRequest).Status; got != http.StatusBadRequest {
+			t.Errorf("status = %d, want %d", got, http.StatusBadRequest)
+		}
+	})
 }

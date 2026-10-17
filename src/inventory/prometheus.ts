@@ -3,6 +3,7 @@ import { Limiter } from '../datasources/limiter';
 import { QueryWindow, prometheusLookback, prometheusWindowParams } from '../window/window';
 import { CollectionError, MetricDatasource, MetricOwner, OwnerLabelKeys } from './types';
 import { errorMessage, guardStep, toCollectionError } from './guard';
+import { MAX_METRIC_NAMES, MAX_OWNERS_PER_SOURCE, MAX_TARGET_INFO_SERIES, limitError } from './limits';
 import {
   Batch,
   MAX_OWNER_ATTEMPTS_PER_BATCH,
@@ -125,7 +126,22 @@ export async function collectPrometheusInventory(
       (await instantQuery(context, collectorsQuery(window))).map((sample) => sample.metric)
     ),
   ]);
+  const empty = (step: string, count: number, max: number): PrometheusCollection => ({
+    datasource: { uid, names: [], target_info: [], owners: [], label_keys: [], collectors: [] },
+    errors: [...context.errors, limitError(uid, step, count, max, 'this datasource was not scanned')],
+  });
+  if ((names ?? []).length > MAX_METRIC_NAMES) {
+    return empty('metric names', names!.length, MAX_METRIC_NAMES);
+  }
+  if ((targetInfo ?? []).length > MAX_TARGET_INFO_SERIES) {
+    context.errors.push(
+      limitError(uid, 'target_info series', targetInfo!.length, MAX_TARGET_INFO_SERIES, 'target_info was not used')
+    );
+  }
   const owners = await collectOwners(context, names ?? []);
+  if (owners.length > MAX_OWNERS_PER_SOURCE) {
+    return empty('owners', owners.length, MAX_OWNERS_PER_SOURCE);
+  }
   const needing = new Set((await guarded(context, 'metric matches', () => namesNeedingLabels(names ?? []))) ?? []);
   const labelKeys = await collectLabelKeys(
     context,
@@ -136,7 +152,7 @@ export async function collectPrometheusInventory(
     datasource: {
       uid,
       names: names ?? [],
-      target_info: targetInfo ?? [],
+      target_info: (targetInfo ?? []).length > MAX_TARGET_INFO_SERIES ? [] : (targetInfo ?? []),
       owners,
       label_keys: labelKeys,
       collectors: collectors ?? [],

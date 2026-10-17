@@ -9,18 +9,38 @@ export type ScoreInventory = (
   signal?: AbortSignal
 ) => Promise<AssessmentResult>;
 
-export const scoreInventory: ScoreInventory = async (inventory, volumeWeighted, signal) =>
-  withLists(
+export const scoreInventory: ScoreInventory = async (inventory, volumeWeighted, signal) => {
+  const body = { inventory, volume_weighted: volumeWeighted };
+  const zipped = await gzipJson(body);
+  return withLists(
     await fetchData<AssessmentResult>(
       {
         url: `/api/plugins/${pluginJson.id}/resources/score`,
         method: 'POST',
-        data: { inventory, volume_weighted: volumeWeighted },
+        data: zipped ?? body,
+        headers: zipped ? { 'Content-Type': 'application/json', 'Content-Encoding': 'gzip' } : undefined,
         showErrorAlert: false,
       },
       signal
     )
   );
+};
+
+export async function gzipJson(value: unknown): Promise<Blob | undefined> {
+  if (typeof CompressionStream === 'undefined') {
+    return undefined;
+  }
+  const compression = new CompressionStream('gzip');
+  const writer = compression.writable.getWriter();
+  void writer.write(new TextEncoder().encode(JSON.stringify(value)));
+  void writer.close();
+  const chunks: BlobPart[] = [];
+  const reader = compression.readable.getReader();
+  for (let read = await reader.read(); !read.done; read = await reader.read()) {
+    chunks.push(new Uint8Array(read.value));
+  }
+  return new Blob(chunks, { type: 'application/json' });
+}
 
 export function withLists(result: AssessmentResult): AssessmentResult {
   return {

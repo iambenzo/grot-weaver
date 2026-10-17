@@ -3,6 +3,7 @@ import path from 'path';
 import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { MAX_OWNER_ATTEMPTS_PER_BATCH, SERIES_HOURS_PER_QUERY } from './queryBudget';
+import { MAX_METRIC_NAMES } from './limits';
 import {
   MAX_LABEL_KEY_CALLS,
   anonymousOwnersQuery,
@@ -438,5 +439,24 @@ describe('label key budget', () => {
     expect(checked.some((matcher) => matcher.includes(`job="svc-${MAX_LABEL_KEY_CALLS + 1}"`))).toBe(true);
     expect(errors).toEqual([]);
     expect(labelChecks).toEqual({ checked: MAX_LABEL_KEY_CALLS, total: MAX_LABEL_KEY_CALLS + 2 });
+  });
+});
+
+describe('scorer limits', () => {
+  it('skips a datasource with more metric names than the scorer accepts, before querying owners', async () => {
+    const names = Array.from({ length: MAX_METRIC_NAMES + 1 }, (_, index) => `m_${index}`);
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath) =>
+      requestPath === '/api/v1/label/__name__/values' ? { status: 'success', data: names } : undefined
+    );
+
+    const { datasource, errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    expect(datasource.names).toEqual([]);
+    expect(calls.some((call) => call.params.query?.startsWith('count by (__name__, job'))).toBe(false);
+    expect(errors).toContainEqual({
+      datasource: 'prom',
+      step: 'metric names',
+      message: `${MAX_METRIC_NAMES + 1} found, over the ${MAX_METRIC_NAMES} the scorer accepts, so this datasource was not scanned`,
+    });
   });
 });

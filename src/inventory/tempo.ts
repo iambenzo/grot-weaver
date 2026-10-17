@@ -8,6 +8,7 @@ import { ServiceRef, serviceFilterExpression } from './traceql';
 import { MetricsSeries, labelValue, queryMetricsRange, spanTotal } from './traceqlMetrics';
 import { KeysMethod, isTagFilterIgnored, sampleServiceKeys } from './traceKeys';
 import { guardStep } from './guard';
+import { MAX_TRACE_SERVICES, limitError } from './limits';
 import { Volumes, addVolume, volumeOf } from './volumes';
 
 const SERVICE_NAME_TAG = 'resource.service.name';
@@ -88,6 +89,9 @@ export async function collectTempoInventory(
     isTagFilterIgnored(context).catch(() => false),
     measureServices(context),
   ]);
+  if ((serviceNames ?? []).length > MAX_TRACE_SERVICES) {
+    return notScanned(context, serviceNames!.length);
+  }
   const metricVolumes = measured?.volumes;
   const keysMethod: KeysMethod = filterIgnored ? 'sample' : 'tags';
   const discovered = (
@@ -97,6 +101,9 @@ export async function collectTempoInventory(
       )
     )
   ).flat();
+  if (discovered.length > MAX_TRACE_SERVICES) {
+    return notScanned(context, discovered.length);
+  }
   const services = await Promise.all(
     discovered.map((service) => collectService(context, service, keysMethod, measured))
   );
@@ -114,6 +121,16 @@ export async function collectTempoInventory(
     collection.keysMethod = keysMethod;
   }
   return collection;
+}
+
+function notScanned(context: CollectorContext, count: number): TempoCollection {
+  return {
+    datasource: { uid: context.uid, services: [] },
+    errors: [
+      ...context.errors,
+      limitError(context.uid, 'service names', count, MAX_TRACE_SERVICES, 'this datasource was not scanned'),
+    ],
+  };
 }
 
 function servicesByNamespace(name: string, namespaces: string[] | undefined): DiscoveredService[] {

@@ -4,6 +4,7 @@ import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { collectTempoInventory, serviceFilter } from './tempo';
 import { SpanGroupRule } from '../api/catalogue';
+import { MAX_TRACE_SERVICES } from './limits';
 
 const fixtures = path.resolve(__dirname, '../../testdata/fixtures/local/tempo');
 const readFixture = (name: string) => JSON.parse(fs.readFileSync(path.join(fixtures, name), 'utf8'));
@@ -439,6 +440,24 @@ describe('serviceFilter', () => {
   it('adds the namespace when there is one', () => {
     expect(serviceFilter({ name: 'checkout', namespace: 'sh"op' })).toBe(
       '{ resource.service.name = "checkout" && resource.service.namespace = "sh\\"op" }'
+    );
+  });
+});
+
+describe('scorer limits', () => {
+  it('skips a Tempo datasource with more services than the scorer accepts', async () => {
+    const { get, calls } = fakeTempo();
+    const many = (async (uid: string, requestPath: string, params: Record<string, string>) =>
+      requestPath === '/api/v2/search/tag/resource.service.name/values'
+        ? { tagValues: Array.from({ length: MAX_TRACE_SERVICES + 1 }, (_, index) => ({ value: `svc-${index}` })) }
+        : get(uid, requestPath, params)) as ProxyGet;
+
+    const { datasource, errors } = await collectTempoInventory('tempo', many, createLimiter(2), window);
+
+    expect(datasource.services).toEqual([]);
+    expect(calls.some((call) => call.path === '/api/v2/search/tags' && call.params.q?.includes('svc-'))).toBe(false);
+    expect(errors.map((error) => error.message)).toContain(
+      `${MAX_TRACE_SERVICES + 1} found, over the ${MAX_TRACE_SERVICES} the scorer accepts, so this datasource was not scanned`
     );
   });
 });
