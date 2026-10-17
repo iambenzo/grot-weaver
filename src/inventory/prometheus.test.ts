@@ -3,7 +3,7 @@ import path from 'path';
 import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import { MAX_OWNER_ATTEMPTS_PER_BATCH, SERIES_HOURS_PER_QUERY } from './queryBudget';
-import { MAX_METRIC_NAMES } from './limits';
+import { MAX_METRIC_NAMES, MAX_TARGET_INFO_SERIES } from './limits';
 import {
   MAX_LABEL_KEY_CALLS,
   anonymousOwnersQuery,
@@ -443,6 +443,28 @@ describe('label key budget', () => {
 });
 
 describe('scorer limits', () => {
+  it('drops collector rows over the limit but still scans the datasource', async () => {
+    const rows = Array.from({ length: MAX_TARGET_INFO_SERIES + 1 }, (_, index) => ({
+      metric: { job: `collector-${index}` },
+      value: [1, '1'],
+    }));
+    const { get } = fakePrometheus('local', undefined, (_requestPath, params) =>
+      params.query?.includes('otelcol_receiver_accepted_') ? { status: 'success', data: { result: rows } } : undefined
+    );
+
+    const { datasource, errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    expect(datasource.collectors).toEqual([]);
+    expect(datasource.owners.length).toBeGreaterThan(0);
+    expect(errors).toEqual([
+      {
+        datasource: 'prom',
+        step: 'collector self-metrics',
+        message: `${MAX_TARGET_INFO_SERIES + 1} found, over the ${MAX_TARGET_INFO_SERIES} the scorer accepts, so collector self-metrics were not used`,
+      },
+    ]);
+  });
+
   it('skips a datasource with more metric names than the scorer accepts, before querying owners', async () => {
     const names = Array.from({ length: MAX_METRIC_NAMES + 1 }, (_, index) => `m_${index}`);
     const { get, calls } = fakePrometheus('local', undefined, (requestPath) =>

@@ -32,14 +32,18 @@ export async function gzipJson(value: unknown): Promise<Blob | undefined> {
   }
   const compression = new CompressionStream('gzip');
   const writer = compression.writable.getWriter();
-  void writer.write(new TextEncoder().encode(JSON.stringify(value)));
-  void writer.close();
+  const written = writer.write(new TextEncoder().encode(JSON.stringify(value))).then(() => writer.close());
+  const [chunks] = await Promise.all([drain(compression.readable), written]);
+  return new Blob(chunks, { type: 'application/json' });
+}
+
+async function drain(readable: ReadableStream<Uint8Array>): Promise<BlobPart[]> {
   const chunks: BlobPart[] = [];
-  const reader = compression.readable.getReader();
+  const reader = readable.getReader();
   for (let read = await reader.read(); !read.done; read = await reader.read()) {
     chunks.push(new Uint8Array(read.value));
   }
-  return new Blob(chunks, { type: 'application/json' });
+  return chunks;
 }
 
 export function withLists(result: AssessmentResult): AssessmentResult {

@@ -275,6 +275,46 @@ func Test_CallResource_score_compression(t *testing.T) {
 		}
 	})
 
+	t.Run("gzip with a corrupt checksum is rejected", func(t *testing.T) {
+		zipped := gzipped(t, valid)
+		zipped[len(zipped)-5] ^= 0xff
+		if got := postScoreWith(t, app, zipped, gzipRequest).Status; got != http.StatusBadRequest {
+			t.Errorf("status = %d, want %d", got, http.StatusBadRequest)
+		}
+	})
+
+	t.Run("data after the JSON value is rejected", func(t *testing.T) {
+		for name, body := range map[string][]byte{
+			"plain": append(slices.Clone(valid), []byte(` {"inventory":{}}`)...),
+			"gzip":  gzipped(t, append(slices.Clone(valid), []byte(`garbage`)...)),
+		} {
+			headers := map[string][]string(nil)
+			if name == "gzip" {
+				headers = gzipRequest
+			}
+			if got := postScoreWith(t, app, body, headers).Status; got != http.StatusBadRequest {
+				t.Errorf("%s: status = %d, want %d", name, got, http.StatusBadRequest)
+			}
+		}
+	})
+
+	t.Run("content encoding is matched without regard to case", func(t *testing.T) {
+		response := postScoreWith(t, app, gzipped(t, valid), map[string][]string{"Content-Encoding": {"GZip"}})
+		if response.Status != http.StatusOK {
+			t.Errorf("status = %d, body %s", response.Status, response.Body)
+		}
+	})
+
+	t.Run("gzip refused with q=0 gets a plain response that varies by encoding", func(t *testing.T) {
+		response := postScoreWith(t, app, valid, map[string][]string{"Accept-Encoding": {"br, gzip;q=0"}})
+		if got := response.Headers["Content-Encoding"]; len(got) != 0 {
+			t.Errorf("content encoding = %v, want none", got)
+		}
+		if got := response.Headers["Vary"]; !slices.Equal(got, []string{"Accept-Encoding"}) {
+			t.Errorf("vary = %v", got)
+		}
+	})
+
 	t.Run("body that is not gzip is rejected", func(t *testing.T) {
 		if got := postScoreWith(t, app, valid, gzipRequest).Status; got != http.StatusBadRequest {
 			t.Errorf("status = %d, want %d", got, http.StatusBadRequest)

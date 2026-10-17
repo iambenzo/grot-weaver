@@ -1,6 +1,10 @@
 import { Observable } from 'rxjs';
 import { gunzipSync } from 'zlib';
-import { CompressionStream as NodeCompressionStream } from 'stream/web';
+import {
+  CompressionStream as NodeCompressionStream,
+  ReadableStream as NodeReadableStream,
+  WritableStream as NodeWritableStream,
+} from 'stream/web';
 import { TextEncoder as NodeTextEncoder } from 'util';
 import { gzipJson, scoreInventory, withLists } from './score';
 import { Inventory } from '../inventory/types';
@@ -50,6 +54,20 @@ describe('gzipJson', () => {
     globals.CompressionStream = undefined;
 
     await expect(gzipJson({ a: 1 })).resolves.toBeUndefined();
+  });
+
+  it('rejects instead of leaving a failed compression unhandled', async () => {
+    globals.CompressionStream = class {
+      readable = new NodeReadableStream({ start: (controller) => controller.close() });
+      writable = new NodeWritableStream({
+        write: () => {
+          throw new Error('compression failed');
+        },
+      });
+    };
+    globals.TextEncoder = original.TextEncoder ?? NodeTextEncoder;
+
+    await expect(gzipJson({ a: 1 })).rejects.toThrow('compression failed');
   });
 
   it('compresses the JSON body with gzip', async () => {

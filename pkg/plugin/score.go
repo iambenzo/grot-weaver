@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/iambenzo/otel-semconv-compliance/pkg/assessment"
@@ -40,6 +41,10 @@ func (a *App) handleScore(w http.ResponseWriter, req *http.Request) {
 		writeJSON(w, decodeStatus(err), errorResponse{Error: "decode request: " + err.Error()})
 		return
 	}
+	if err := requireEnd(decoder); err != nil {
+		writeJSON(w, decodeStatus(err), errorResponse{Error: "decode request: " + err.Error()})
+		return
+	}
 	if err := request.Inventory.Validate(); err != nil {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: err.Error()})
 		return
@@ -50,7 +55,7 @@ func (a *App) handleScore(w http.ResponseWriter, req *http.Request) {
 
 func scoreBody(w http.ResponseWriter, req *http.Request) (io.Reader, error) {
 	wire := http.MaxBytesReader(w, req.Body, maxScoreRequestBytes)
-	if req.Header.Get("Content-Encoding") != gzipEncoding {
+	if !strings.EqualFold(strings.TrimSpace(req.Header.Get("Content-Encoding")), gzipEncoding) {
 		return wire, nil
 	}
 	unzipped, err := gzip.NewReader(wire)
@@ -60,8 +65,37 @@ func scoreBody(w http.ResponseWriter, req *http.Request) (io.Reader, error) {
 	return http.MaxBytesReader(w, io.NopCloser(unzipped), maxDecodedScoreRequestBytes), nil
 }
 
+func requireEnd(decoder *json.Decoder) error {
+	var extra json.RawMessage
+	err := decoder.Decode(&extra)
+	if err == io.EOF {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return errors.New("unexpected data after the request body")
+}
+
+func acceptsGzip(header string) bool {
+	for _, coding := range strings.Split(header, ",") {
+		name, params, _ := strings.Cut(coding, ";")
+		if !strings.EqualFold(strings.TrimSpace(name), gzipEncoding) {
+			continue
+		}
+		quality, found := strings.CutPrefix(strings.TrimSpace(params), "q=")
+		if !found {
+			return true
+		}
+		value, err := strconv.ParseFloat(strings.TrimSpace(quality), 64)
+		return err == nil && value > 0
+	}
+	return false
+}
+
 func writeCompressibleJSON(w http.ResponseWriter, req *http.Request, status int, body any) {
-	if !strings.Contains(req.Header.Get("Accept-Encoding"), gzipEncoding) {
+	w.Header().Add("Vary", "Accept-Encoding")
+	if !acceptsGzip(req.Header.Get("Accept-Encoding")) {
 		writeJSON(w, status, body)
 		return
 	}

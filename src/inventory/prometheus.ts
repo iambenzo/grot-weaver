@@ -138,6 +138,17 @@ export async function collectPrometheusInventory(
       limitError(uid, 'target_info series', targetInfo!.length, MAX_TARGET_INFO_SERIES, 'target_info was not used')
     );
   }
+  if ((collectors ?? []).length > MAX_TARGET_INFO_SERIES) {
+    context.errors.push(
+      limitError(
+        uid,
+        'collector self-metrics',
+        collectors!.length,
+        MAX_TARGET_INFO_SERIES,
+        'collector self-metrics were not used'
+      )
+    );
+  }
   const owners = await collectOwners(context, names ?? []);
   if (owners.length > MAX_OWNERS_PER_SOURCE) {
     return empty('owners', owners.length, MAX_OWNERS_PER_SOURCE);
@@ -155,7 +166,7 @@ export async function collectPrometheusInventory(
       target_info: (targetInfo ?? []).length > MAX_TARGET_INFO_SERIES ? [] : (targetInfo ?? []),
       owners,
       label_keys: labelKeys,
-      collectors: collectors ?? [],
+      collectors: (collectors ?? []).length > MAX_TARGET_INFO_SERIES ? [] : (collectors ?? []),
       ...(presenceAttributes.length > 0 && { resource_label_checks: presenceAttributes }),
     },
     errors: context.errors,
