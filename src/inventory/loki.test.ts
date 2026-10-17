@@ -257,6 +257,14 @@ describe('unknown parts', () => {
     ]);
   });
 
+  it('marks stream labels and namespace unknown when there are no streams and no index entry', async () => {
+    const { get } = fakeLoki({ series: [], volumes: [] });
+
+    const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(datasource.services[0].unknown).toEqual(['stream_labels', 'service_namespace']);
+  });
+
   it('scopes queries to the one indexed namespace when the streams call fails', async () => {
     const { get, calls } = fakeLoki({ seriesFails: true });
 

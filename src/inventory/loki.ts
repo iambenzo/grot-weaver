@@ -119,9 +119,7 @@ async function collectServices(context: Context, name: string): Promise<LogServi
     ? []
     : fromIndex
       ? ['stream_labels']
-      : fetched === undefined
-        ? ['stream_labels', 'service_namespace']
-        : [];
+      : ['stream_labels', 'service_namespace'];
   if (namespaces.length <= 1) {
     const ref = fromIndex && namespaces.length === 1 ? { name, namespace: namespaces[0] } : { name };
     return [await collectService(context, ref, series, namespaces[0] ?? '', unknown)];
