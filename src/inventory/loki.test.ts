@@ -240,6 +240,34 @@ describe('unknown parts', () => {
     ]);
   });
 
+  it('uses the index volume namespaces when the streams call answers with no streams', async () => {
+    const { get } = fakeLoki({
+      series: [],
+      volumes: [
+        { metric: { service_name: 'checkout', service_namespace: 'shop' }, bytes: 30 },
+        { metric: { service_name: 'checkout', service_namespace: 'billing' }, bytes: 12 },
+      ],
+    });
+
+    const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(datasource.services.map((service) => [service.service_namespace, service.unknown])).toEqual([
+      ['shop', ['stream_labels']],
+      ['billing', ['stream_labels']],
+    ]);
+  });
+
+  it('scopes queries to the one indexed namespace when the streams call fails', async () => {
+    const { get, calls } = fakeLoki({ seriesFails: true });
+
+    const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(datasource.services[0]).toMatchObject({ service_namespace: 'shop', unknown: ['stream_labels'] });
+    expect(calls.find((call) => call.path === '/loki/api/v1/detected_fields')?.params.query).toBe(
+      '{service_name="checkout", service_namespace="shop"}'
+    );
+  });
+
   it('marks volume unknown when neither index volume nor index stats answer', async () => {
     const { get } = fakeLoki({ volumeFails: true, statsFails: true });
 

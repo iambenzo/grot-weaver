@@ -112,12 +112,19 @@ async function collectServices(context: Context, name: string): Promise<LogServi
   const series = fetched ?? [];
   const namespaceOf = (labels: Record<string, string>) => labels[SERVICE_NAMESPACE] ?? '';
   const indexed = context.volumes?.get(name);
-  const fromIndex = fetched === undefined && indexed !== undefined;
+  const streamsMissing = series.length === 0;
+  const fromIndex = streamsMissing && indexed !== undefined;
   const namespaces = fromIndex ? [...indexed.keys()] : [...new Set(series.map(namespaceOf))];
-  const unknown: UnknownPart[] =
-    fetched !== undefined ? [] : fromIndex ? ['stream_labels'] : ['stream_labels', 'service_namespace'];
+  const unknown: UnknownPart[] = !streamsMissing
+    ? []
+    : fromIndex
+      ? ['stream_labels']
+      : fetched === undefined
+        ? ['stream_labels', 'service_namespace']
+        : [];
   if (namespaces.length <= 1) {
-    return [await collectService(context, { name }, series, namespaces[0] ?? '', unknown)];
+    const ref = fromIndex && namespaces.length === 1 ? { name, namespace: namespaces[0] } : { name };
+    return [await collectService(context, ref, series, namespaces[0] ?? '', unknown)];
   }
   return Promise.all(
     namespaces.map((namespace) =>
