@@ -147,3 +147,7 @@ export function ownersOfKind(result: AssessmentResult, kind: Owner['kind']): Own
 export function coverageFor(result: AssessmentResult, signal: Signal): Ratio | undefined {
   return result.coverage?.find((row) => row.signal === signal)?.coverage;
 }
+
+export function unmeasuredFor(result: AssessmentResult, signal: Signal): number {
+  return result.coverage?.find((row) => row.signal === signal)?.unmeasured ?? 0;
+}

@@ -144,7 +144,7 @@ export interface AssessmentResult {
   log_attributions?: LogAttribution[];
   datasources?: DatasourceSummary[];
   hops?: ServiceHops[];
-  coverage?: Array<{ signal: Signal; coverage: Ratio }>;
+  coverage?: Array<{ signal: Signal; coverage: Ratio; unmeasured?: number }>;
   resource_attributes?: ResourceAttributeCheck[];
   product_readiness?: ProductReadiness[];
   owners: ScoreRow[];

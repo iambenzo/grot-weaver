@@ -190,6 +190,36 @@ func Test_Assess_aSourceThatKnowsOutranksOneThatCouldNotTell(t *testing.T) {
 	}
 }
 
+func Test_Assess_coverageCountsServicesWithUnmeasuredVolume(t *testing.T) {
+	inventory := Inventory{
+		Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{
+			{ServiceName: "checkout", SpanCount: 10},
+			{ServiceName: "cart", Unknown: []UnknownPart{UnknownVolume}},
+		}}},
+		Logs: []LogDatasource{{UID: "loki", Services: []LogService{{ServiceName: "checkout", Volume: 4}}}},
+	}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	unmeasured := map[finding.Signal]int{}
+	for _, row := range result.Coverage {
+		unmeasured[row.Signal] = row.Unmeasured
+	}
+	if unmeasured[finding.SignalTraces] != 1 || unmeasured[finding.SignalLogs] != 0 {
+		t.Errorf("unmeasured = %v, want traces 1 and logs 0", unmeasured)
+	}
+}
+
+func Test_Inventory_Validate_rejectsDuplicateUnknownParts(t *testing.T) {
+	inventory := Inventory{Window: Window{Start: 1, End: 2}, Logs: []LogDatasource{{UID: "loki", Services: []LogService{
+		{ServiceName: "checkout", Unknown: []UnknownPart{UnknownVolume, UnknownVolume}},
+	}}}}
+
+	if err := inventory.Validate(); !errors.Is(err, ErrInvalidInventory) {
+		t.Errorf("err = %v, want ErrInvalidInventory", err)
+	}
+}
+
 func Test_Inventory_Validate_rejectsUnrecognisedUnknownParts(t *testing.T) {
 	inventory := Inventory{Window: Window{Start: 1, End: 2}, Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{
 		{ServiceName: "checkout", Unknown: []UnknownPart{"everything"}},

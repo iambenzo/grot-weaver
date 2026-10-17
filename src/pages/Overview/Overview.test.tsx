@@ -34,6 +34,16 @@ describe('ScoreTiles', () => {
   });
 });
 
+describe('ScoreTiles coverage', () => {
+  it('says how many services were left out because their volume was not measured', () => {
+    render(
+      <ScoreTiles signal="logs" row={undefined} coverage={{ value: 1, numerator: 4, denominator: 4 }} unmeasured={2} />
+    );
+
+    expect(screen.getByText('100%, 2 unmeasured')).toBeInTheDocument();
+  });
+});
+
 describe('ServicesTable', () => {
   it('links each service to the developer view with its namespace and window', () => {
     const row = {

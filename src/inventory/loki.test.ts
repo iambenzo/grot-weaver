@@ -209,12 +209,35 @@ describe('collectLokiInventory', () => {
 });
 
 describe('unknown parts', () => {
-  it('marks stream labels and namespace unknown when the streams call fails', async () => {
-    const { get } = fakeLoki({ seriesFails: true });
+  it('marks stream labels and namespace unknown when the streams call fails and the index cannot help', async () => {
+    const { get } = fakeLoki({ seriesFails: true, volumeFails: true });
 
     const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window);
 
     expect(datasource.services[0].unknown).toEqual(['stream_labels', 'service_namespace']);
+  });
+
+  it('splits by the index volume namespaces when the streams call fails, leaving only stream labels unknown', async () => {
+    const { get, calls } = fakeLoki({
+      seriesFails: true,
+      volumes: [
+        { metric: { service_name: 'checkout', service_namespace: 'shop' }, bytes: 30 },
+        { metric: { service_name: 'checkout', service_namespace: 'billing' }, bytes: 12 },
+      ],
+    });
+
+    const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(datasource.services.map((service) => [service.service_namespace, service.volume, service.unknown])).toEqual([
+      ['shop', 30, ['stream_labels']],
+      ['billing', 12, ['stream_labels']],
+    ]);
+    expect(
+      calls.filter((call) => call.path === '/loki/api/v1/detected_fields').map((call) => call.params.query)
+    ).toEqual([
+      '{service_name="checkout", service_namespace="shop"}',
+      '{service_name="checkout", service_namespace="billing"}',
+    ]);
   });
 
   it('marks volume unknown when neither index volume nor index stats answer', async () => {

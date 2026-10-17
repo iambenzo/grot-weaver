@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SceneComponentProps, SceneObjectBase, SceneObjectState, SceneTimeRange, sceneGraph } from '@grafana/scenes';
 import { Alert, Badge, Stack, Tab, TabsBar, Text } from '@grafana/ui';
 import { Signal } from '../../api/types';
-import { coverageFor, groupViolations, serviceRows } from '../../assessment/overview';
+import { coverageFor, groupViolations, serviceRows, unmeasuredFor } from '../../assessment/overview';
 import { StackAssessment } from '../../assessment/stackAssessment';
 import { useStackAssessment } from '../../assessment/useStackAssessment';
 import {
@@ -83,6 +83,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
             signal={candidate}
             row={result.signals.find((row) => row.signal === candidate)}
             coverage={coverageFor(result, candidate)}
+            unmeasured={unmeasuredFor(result, candidate)}
           />
         ))}
       </Stack>

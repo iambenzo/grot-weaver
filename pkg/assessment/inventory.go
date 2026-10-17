@@ -71,9 +71,12 @@ func validateUnknown(parts []UnknownPart) error {
 	if len(parts) > len(unknownParts) {
 		return fmt.Errorf("%w: more unknown parts than exist", ErrInvalidInventory)
 	}
-	for _, part := range parts {
+	for index, part := range parts {
 		if !slices.Contains(unknownParts, part) {
 			return fmt.Errorf("%w: unknown part %q", ErrInvalidInventory, part)
+		}
+		if slices.Contains(parts[:index], part) {
+			return fmt.Errorf("%w: unknown part %q listed twice", ErrInvalidInventory, part)
 		}
 	}
 	return nil

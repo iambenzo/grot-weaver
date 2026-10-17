@@ -13,6 +13,7 @@ interface ScoreTilesProps {
   signal: Signal;
   row?: ScoreRow;
   coverage?: Ratio;
+  unmeasured?: number;
 }
 
 export function formatRatio(ratio?: Ratio): string {
@@ -22,7 +23,7 @@ export function formatRatio(ratio?: Ratio): string {
   return `${Math.round(ratio.value * 100)}%`;
 }
 
-export function ScoreTiles({ signal, row, coverage }: ScoreTilesProps) {
+export function ScoreTiles({ signal, row, coverage, unmeasured = 0 }: ScoreTilesProps) {
   const styles = useStyles2(getStyles);
   const scores = row?.scores;
   const tiles: Array<[string, string, string]> = [
@@ -46,7 +47,13 @@ export function ScoreTiles({ signal, row, coverage }: ScoreTilesProps) {
     ],
     ['Deprecated', String(scores?.deprecated ?? 0), 'Distinct deprecated names in use'],
     ['Unclassified', String(scores?.unclassified ?? 0), 'Names in a semconv namespace that match nothing'],
-    ['Coverage', formatRatio(coverage), 'Share of volume that is SDK-origin and attributed to a service'],
+    [
+      'Coverage',
+      unmeasured > 0 ? `${formatRatio(coverage)}, ${unmeasured} unmeasured` : formatRatio(coverage),
+      unmeasured > 0
+        ? `Share of volume that is SDK-origin and attributed to a service; ${unmeasured} services are left out because their volume could not be measured`
+        : 'Share of volume that is SDK-origin and attributed to a service',
+    ],
   ];
   return (
     <Stack direction="column" gap={1} data-testid={testIds.overview.tiles}>

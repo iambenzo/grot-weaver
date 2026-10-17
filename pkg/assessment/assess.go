@@ -70,12 +70,20 @@ type collected struct {
 	collectors         []Collector
 	totals             map[finding.Signal]float64
 	coverage           map[finding.Signal]scoring.Ratio
+	unmeasured         map[finding.Signal]int
 	resources          resourceCollector
 }
 
 type SignalCoverage struct {
-	Signal   finding.Signal `json:"signal"`
-	Coverage scoring.Ratio  `json:"coverage"`
+	Signal     finding.Signal `json:"signal"`
+	Coverage   scoring.Ratio  `json:"coverage"`
+	Unmeasured int            `json:"unmeasured,omitempty"`
+}
+
+func (c *collected) noteUnmeasured(signal finding.Signal, unknown []UnknownPart) {
+	if slices.Contains(unknown, UnknownVolume) {
+		c.unmeasured[signal]++
+	}
 }
 
 func (c *collected) cover(signal finding.Signal, volume float64, attributed bool) {
@@ -91,7 +99,7 @@ func (c *collected) coverageRows() []SignalCoverage {
 	rows := []SignalCoverage{}
 	for _, signal := range []finding.Signal{finding.SignalMetrics, finding.SignalTraces, finding.SignalLogs} {
 		if ratio, seen := c.coverage[signal]; seen {
-			rows = append(rows, SignalCoverage{Signal: signal, Coverage: ratio})
+			rows = append(rows, SignalCoverage{Signal: signal, Coverage: ratio, Unmeasured: c.unmeasured[signal]})
 		}
 	}
 	return rows
@@ -138,7 +146,7 @@ func (a *Assessor) withCustomNamespaces(namespaces []string) *Assessor {
 }
 
 func (a *Assessor) assess(inv Inventory, options scoring.Options) Result {
-	gathered := collected{totals: map[finding.Signal]float64{}, hopContexts: map[finding.Owner]hopContext{}, coverage: map[finding.Signal]scoring.Ratio{}}
+	gathered := collected{totals: map[finding.Signal]float64{}, hopContexts: map[finding.Owner]hopContext{}, coverage: map[finding.Signal]scoring.Ratio{}, unmeasured: map[finding.Signal]int{}}
 	for _, datasource := range inv.Traces {
 		for _, service := range datasource.Services {
 			a.assessTraceService(datasource.UID, service, &gathered)
@@ -182,6 +190,7 @@ func (a *Assessor) assessTraceService(datasource string, service TraceService, i
 	into.checks = append(into.checks, resolution.Checks...)
 	into.totals[finding.SignalTraces] += service.SpanCount
 	into.cover(finding.SignalTraces, service.SpanCount, owner.Kind == finding.OwnerService)
+	into.noteUnmeasured(finding.SignalTraces, service.Unknown)
 	into.resources.observe(owner, finding.SignalTraces, traceResource(service))
 
 	at := finding.Observation{Owner: owner, Signal: finding.SignalTraces}

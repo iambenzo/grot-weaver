@@ -40,6 +40,7 @@ func (a *Assessor) assessLogService(datasource string, service LogService, into 
 	into.totals[finding.SignalLogs] += service.Volume
 	into.resources.observe(owner, finding.SignalLogs, logResource(service))
 	into.cover(finding.SignalLogs, service.Volume, owner.Kind == finding.OwnerService && len(service.OTLPMarkers) > 0)
+	into.noteUnmeasured(finding.SignalLogs, service.Unknown)
 
 	library := logLibrary(service.ScopeNames)
 	at := finding.Observation{Owner: owner, Signal: finding.SignalLogs, Volume: service.Volume}
