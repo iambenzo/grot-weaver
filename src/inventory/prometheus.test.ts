@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
+import { MAX_OWNER_ATTEMPTS_PER_BATCH } from './queryBudget';
 import {
   MAX_LABEL_KEY_CALLS,
   anonymousOwnersQuery,
@@ -317,6 +318,53 @@ describe('bounded owner queries', () => {
     expect(ownerCalls(calls).filter((call) => call.params.query.includes('[21600s]'))).toHaveLength(4);
   });
 
+  it('stops splitting a batch once its query budget is used up', async () => {
+    const names = Array.from({ length: 40 }, (_, index) => `heavy_${index}`);
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath, params) => {
+      if (requestPath === '/api/v1/label/__name__/values') {
+        return { status: 'success', data: names };
+      }
+      if (params.query?.startsWith('count by (__name__, job')) {
+        throw chunkLimit;
+      }
+      return undefined;
+    });
+
+    const { errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    expect(ownerCalls(calls).length).toBe(MAX_OWNER_ATTEMPTS_PER_BATCH + 1);
+    expect(errors.filter((error) => error.message.startsWith('stopped splitting'))).toHaveLength(1);
+  });
+
+  it('keeps the owners of a half that succeeded when the other half fails', async () => {
+    const { get } = fakePrometheus('local', undefined, (requestPath, params) => {
+      if (requestPath === '/api/v1/label/__name__/values') {
+        return { status: 'success', data: ['good_total', 'bad_total'] };
+      }
+      const query = params.query ?? '';
+      if (!query.startsWith('count by (__name__, job')) {
+        return undefined;
+      }
+      if (query.includes('|')) {
+        throw chunkLimit;
+      }
+      if (query.includes('bad_total')) {
+        throw { status: 500, data: { error: 'boom' } };
+      }
+      return {
+        status: 'success',
+        data: { result: [{ metric: { __name__: 'good_total', job: 'api' }, value: [1, '2'] }] },
+      };
+    });
+
+    const { datasource, errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    expect(datasource.owners).toEqual([{ metric: 'good_total', labels: { job: 'api' }, series: 2 }]);
+    expect(errors).toEqual([
+      { datasource: 'prom', step: 'owners batch 1/1', message: 'boom (for bad_total)', status: 500 },
+    ]);
+  });
+
   it('does not split on errors that are not query limits', async () => {
     const { get, calls } = fakePrometheus('local', undefined, (_requestPath, params) => {
       if (params.query?.startsWith('count by (__name__, job')) {
@@ -336,7 +384,7 @@ describe('bounded owner queries', () => {
 });
 
 describe('label key budget', () => {
-  it('checks only the busiest pairs and reports the rest as skipped', async () => {
+  it('checks only the busiest pairs and reports the cap as a limit', async () => {
     const owners = Array.from({ length: MAX_LABEL_KEY_CALLS + 2 }, (_, index) => ({
       metric: { __name__: 'http_server_request_duration_seconds_bucket', job: `svc-${index}` },
       value: [1, String(index + 1)],
@@ -345,20 +393,19 @@ describe('label key budget', () => {
       params.query?.startsWith('count by (__name__, job') ? { status: 'success', data: { result: owners } } : undefined
     );
 
-    const { errors } = await collectPrometheusInventory('prom', get, createLimiter(8), window, async () => [
-      'http_server_request_duration_seconds_bucket',
-    ]);
+    const { errors, labelChecks } = await collectPrometheusInventory(
+      'prom',
+      get,
+      createLimiter(8),
+      window,
+      async () => ['http_server_request_duration_seconds_bucket']
+    );
 
     const checked = calls.filter((call) => call.path === '/api/v1/labels').map((call) => call.params['match[]']);
     expect(checked).toHaveLength(MAX_LABEL_KEY_CALLS);
     expect(checked.some((matcher) => matcher.includes('job="svc-0"'))).toBe(false);
     expect(checked.some((matcher) => matcher.includes(`job="svc-${MAX_LABEL_KEY_CALLS + 1}"`))).toBe(true);
-    expect(errors).toEqual([
-      {
-        datasource: 'prom',
-        step: 'label keys',
-        message: `checked label keys for the ${MAX_LABEL_KEY_CALLS} busiest of ${MAX_LABEL_KEY_CALLS + 2} metric and owner pairs; the rest were skipped to bound the scan`,
-      },
-    ]);
+    expect(errors).toEqual([]);
+    expect(labelChecks).toEqual({ checked: MAX_LABEL_KEY_CALLS, total: MAX_LABEL_KEY_CALLS + 2 });
   });
 });

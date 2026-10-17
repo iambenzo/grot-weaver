@@ -2,7 +2,7 @@ import { DatasourceRef, ProxyGet, discoverDatasources } from '../datasources/pro
 import { Limiter } from '../datasources/limiter';
 import { VolumeMethod, collectTempoInventory } from '../inventory/tempo';
 import { KeysMethod } from '../inventory/traceKeys';
-import { collectPrometheusInventory, LabelProgress, NamesNeedingLabels } from '../inventory/prometheus';
+import { collectPrometheusInventory, LabelChecks, LabelProgress, NamesNeedingLabels } from '../inventory/prometheus';
 import { collectLokiInventory } from '../inventory/loki';
 import { CollectionError, Inventory, LogDatasource, MetricDatasource, TraceDatasource } from '../inventory/types';
 import { isPermissionDenied } from '../inventory/guard';
@@ -33,6 +33,7 @@ export interface DatasourceProgress {
   errors: CollectionError[];
   volumeMethod?: VolumeMethod;
   keysMethod?: KeysMethod;
+  labelChecks?: LabelChecks;
 }
 
 export interface Collection {
@@ -44,6 +45,7 @@ export interface Collection {
   logs?: LogDatasource;
   volumeMethod?: VolumeMethod;
   keysMethod?: KeysMethod;
+  labelChecks?: LabelChecks;
 }
 
 export interface StackAssessment {
@@ -189,7 +191,13 @@ async function collect(
       deps.onLabelProgress,
       presenceAttributes
     );
-    return { ref, signal, errors: collected.errors, metrics: withStrategyOverride(collected.datasource, settings) };
+    return {
+      ref,
+      signal,
+      errors: collected.errors,
+      metrics: withStrategyOverride(collected.datasource, settings),
+      labelChecks: collected.labelChecks,
+    };
   }
   const limit = sampleLimit(settings.logSampleLimit, DEFAULT_LOG_SAMPLE_LIMIT);
   const collected = await collectLokiInventory(ref.uid, deps.get, deps.limit, window, limit);
@@ -243,6 +251,7 @@ function progressOf(datasources: DatasourcesBySignal, collections: Collection[])
       errors: collection.errors,
       volumeMethod: collection.volumeMethod,
       keysMethod: collection.keysMethod,
+      labelChecks: collection.labelChecks,
     };
   });
 }

@@ -2,13 +2,22 @@ import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, prometheusLookback, prometheusWindowParams } from '../window/window';
 import { CollectionError, MetricDatasource, MetricOwner, OwnerLabelKeys } from './types';
-import { errorMessage, guardStep } from './guard';
-import { Batch, MAX_WINDOW_SPLITS, SeriesOf, isQueryLimitError, planBatches, sliceWindow } from './queryBudget';
+import { errorMessage, guardStep, toCollectionError } from './guard';
+import {
+  Batch,
+  MAX_OWNER_ATTEMPTS_PER_BATCH,
+  MAX_WINDOW_SPLITS,
+  SeriesOf,
+  isQueryLimitError,
+  planBatches,
+  sliceWindow,
+} from './queryBudget';
 
 const TARGET_INFO = 'target_info';
 const OWNER_LABELS = ['job', 'service_name', 'service_namespace', 'otel_scope_name', 'otel_scope_version'];
 export const MAX_LABEL_KEY_CALLS = 1000;
 const CARDINALITY_NAMES_LIMIT = '500';
+const NAMES_SHOWN_IN_ERRORS = 3;
 const PRESENCE_LABEL_PREFIX = 'semconv_has_';
 const REGEX_META = /[.*+?^${}()|[\]\\]/g;
 
@@ -33,11 +42,18 @@ interface Context {
   window: QueryWindow;
   presenceAttributes: string[];
   errors: CollectionError[];
+  labelChecks?: LabelChecks;
+}
+
+export interface LabelChecks {
+  checked: number;
+  total: number;
 }
 
 export interface PrometheusCollection {
   datasource: MetricDatasource;
   errors: CollectionError[];
+  labelChecks?: LabelChecks;
 }
 
 export type NamesNeedingLabels = (names: string[]) => Promise<string[]>;
@@ -127,6 +143,7 @@ export async function collectPrometheusInventory(
       ...(presenceAttributes.length > 0 && { resource_label_checks: presenceAttributes }),
     },
     errors: context.errors,
+    ...(context.labelChecks && { labelChecks: context.labelChecks }),
   };
 }
 
@@ -151,11 +168,7 @@ async function collectLabelKeys(
   const pairs = uniquePairs(owners);
   const checked = pairs.slice(0, MAX_LABEL_KEY_CALLS);
   if (checked.length < pairs.length) {
-    context.errors.push({
-      datasource: context.uid,
-      step: 'label keys',
-      message: `checked label keys for the ${checked.length} busiest of ${pairs.length} metric and owner pairs; the rest were skipped to bound the scan`,
-    });
+    context.labelChecks = { checked: checked.length, total: pairs.length };
   }
   let done = 0;
   onProgress({ done, total: checked.length });
@@ -232,11 +245,9 @@ async function collectOwners(context: Context, names: string[]): Promise<MetricO
     context.window
   );
   const owned = await Promise.all(
-    batches.map((batch, index) =>
-      guarded(context, `owners batch ${index + 1}/${batches.length}`, () => ownersAcross(context, batch))
-    )
+    batches.map((batch, index) => ownersAcross(context, batch, `owners batch ${index + 1}/${batches.length}`))
   );
-  return owned.flatMap((owners) => owners ?? []);
+  return owned.flat();
 }
 
 async function activeSeriesByName(context: Context): Promise<SeriesOf> {
@@ -258,8 +269,31 @@ async function activeSeriesByName(context: Context): Promise<SeriesOf> {
   }
 }
 
-async function ownersAcross(context: Context, batch: Batch): Promise<MetricOwner[]> {
-  const slices = await Promise.all(batch.windows.map((window) => boundedOwners(context, batch.names, window, 0)));
+interface SplitBudget {
+  attempts: number;
+  failures: Array<{ names: string[]; window: QueryWindow; error: unknown }>;
+  skipped: Set<string>;
+}
+
+async function ownersAcross(context: Context, batch: Batch, step: string): Promise<MetricOwner[]> {
+  const budget: SplitBudget = {
+    attempts: MAX_OWNER_ATTEMPTS_PER_BATCH + batch.windows.length,
+    failures: [],
+    skipped: new Set(),
+  };
+  const slices = await Promise.all(
+    batch.windows.map((window) => boundedOwners(context, batch.names, window, 0, budget))
+  );
+  for (const failure of budget.failures) {
+    context.errors.push(failureError(context, step, batch, failure));
+  }
+  if (budget.skipped.size > 0) {
+    context.errors.push({
+      datasource: context.uid,
+      step,
+      message: `stopped splitting after ${MAX_OWNER_ATTEMPTS_PER_BATCH} owner queries that hit Mimir limits; owners not collected for ${describeNames([...budget.skipped])}`,
+    });
+  }
   return mergeOwnerSlices(slices.flat());
 }
 
@@ -267,24 +301,50 @@ async function boundedOwners(
   context: Context,
   names: string[],
   window: QueryWindow,
-  windowSplits: number
+  windowSplits: number,
+  budget: SplitBudget
 ): Promise<MetricOwner[]> {
+  if (budget.attempts <= 0) {
+    names.forEach((name) => budget.skipped.add(name));
+    return [];
+  }
+  budget.attempts--;
   try {
     return await ownersForBatch(context, names, window);
   } catch (error) {
     const canSplit = names.length > 1 || windowSplits < MAX_WINDOW_SPLITS;
     if (!canSplit || !isQueryLimitError(errorMessage(error))) {
-      throw error;
+      budget.failures.push({ names, window, error });
+      return [];
     }
     const middle = Math.ceil(names.length / 2);
     const parts =
       names.length > 1
         ? [names.slice(0, middle), names.slice(middle)].map((half) =>
-            boundedOwners(context, half, window, windowSplits)
+            boundedOwners(context, half, window, windowSplits, budget)
           )
-        : sliceWindow(window, 2).map((slice) => boundedOwners(context, names, slice, windowSplits + 1));
+        : sliceWindow(window, 2).map((slice) => boundedOwners(context, names, slice, windowSplits + 1, budget));
     return mergeOwnerSlices((await Promise.all(parts)).flat());
   }
+}
+
+function failureError(
+  context: Context,
+  step: string,
+  batch: Batch,
+  failure: { names: string[]; window: QueryWindow; error: unknown }
+): CollectionError {
+  const collectionError = toCollectionError(context.uid, step, failure.error);
+  const wholeBatch = failure.names.length === batch.names.length && batch.windows.includes(failure.window);
+  return wholeBatch
+    ? collectionError
+    : { ...collectionError, message: `${collectionError.message} (for ${describeNames(failure.names)})` };
+}
+
+function describeNames(names: string[]): string {
+  const shown = names.slice(0, NAMES_SHOWN_IN_ERRORS).join(', ');
+  const more = names.length - NAMES_SHOWN_IN_ERRORS;
+  return more > 0 ? `${shown} and ${more} more` : shown;
 }
 
 function mergeOwnerSlices(owners: MetricOwner[]): MetricOwner[] {

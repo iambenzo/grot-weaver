@@ -3,6 +3,7 @@ import { QueryWindow } from '../window/window';
 export const SERIES_HOURS_PER_QUERY = 10_000_000;
 export const MAX_NAMES_PER_BATCH = 40;
 export const MAX_WINDOW_SPLITS = 6;
+export const MAX_OWNER_ATTEMPTS_PER_BATCH = 128;
 
 const SECONDS_PER_HOUR = 3600;
 const QUERY_LIMIT_ERROR = /err-mimir-max-[a-z-]+-per-query|exceeded the maximum number of/;

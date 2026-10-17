@@ -89,6 +89,16 @@ describe('FeatureLimits', () => {
     expect(limits).toHaveTextContent('Prometheus: unit not checkable');
   });
 
+  it('names capped label key checks as a limit, not a failure', () => {
+    const capped = { ...prom, state: 'ok' as const, labelChecks: { checked: 1000, total: 1500 } };
+
+    render(<FeatureLimits progress={[capped]} result={result({})} />);
+
+    expect(screen.getByTestId(testIds.status.limits)).toHaveTextContent(
+      'Prometheus: label keys checked for the 1000 busiest of 1500 metric and owner pairs'
+    );
+  });
+
   it('renders nothing without limits', () => {
     const { container } = render(<FeatureLimits progress={[prom]} result={result({})} />);
 
