@@ -34,7 +34,10 @@ function fakeTempo(failPaths: string[] = []): { get: ProxyGet; calls: Call[] } {
       return {
         series: [
           {
-            labels: [{ key: 'resource.service.name', value: { stringValue: 'checkout' } }],
+            labels: [
+              { key: 'resource.service.name', value: { stringValue: 'checkout' } },
+              { key: 'resource.service.namespace', value: { stringValue: 'shop' } },
+            ],
             samples: [
               { timestampMs: '1', value: 30 },
               { timestampMs: '2', value: 12 },
@@ -132,15 +135,15 @@ describe('collectTempoInventory', () => {
     ).toBe(true);
   });
 
-  it('sums every namespace into one service when the name has at most one namespace', async () => {
-    const { get } = fakeTempo();
+  it('splits off spans without a namespace, filtering them with nil', async () => {
+    const { get, calls } = fakeTempo();
     const volumes = (async (uid: string, requestPath: string, params: Record<string, string>) =>
       requestPath === '/api/metrics/query_range'
         ? {
-            series: ['shop', ''].map((namespace) => ({
+            series: ['shop', undefined].map((namespace) => ({
               labels: [
                 { key: 'resource.service.name', value: { stringValue: 'checkout' } },
-                { key: 'resource.service.namespace', value: { stringValue: namespace } },
+                ...(namespace ? [{ key: 'resource.service.namespace', value: { stringValue: namespace } }] : []),
               ],
               samples: [{ timestampMs: '1', value: 10 }],
             })),
@@ -150,8 +153,51 @@ describe('collectTempoInventory', () => {
     const { datasource } = await collectTempoInventory('tempo', volumes, createLimiter(2), window);
 
     const checkout = datasource.services.filter((service) => service.service_name === 'checkout');
-    expect(checkout).toHaveLength(1);
-    expect(checkout[0]).toMatchObject({ service_namespace: 'shop', span_count: 20 });
+    expect(checkout.map((service) => [service.service_namespace, service.span_count])).toEqual([
+      ['shop', 10],
+      ['', 10],
+    ]);
+    expect(
+      calls.some(
+        (call) => call.params.q === '{ resource.service.name = "checkout" && resource.service.namespace = nil }'
+      )
+    ).toBe(true);
+  });
+
+  it('probes for spans without a namespace when TraceQL metrics are unavailable', async () => {
+    const { get, calls } = fakeTempo(['/api/metrics/query_range']);
+    const probing = (async (uid: string, requestPath: string, params: Record<string, string>) =>
+      requestPath === '/api/search' && params.limit === '1'
+        ? { traces: params.q.includes('checkout') ? [{ traceID: 't' }] : [] }
+        : requestPath === '/api/search'
+          ? { traces: [] }
+          : get(uid, requestPath, params)) as ProxyGet;
+
+    const { datasource } = await collectTempoInventory('tempo', probing, createLimiter(2), window);
+
+    const checkout = datasource.services.filter((service) => service.service_name === 'checkout');
+    expect(checkout.map((service) => service.service_namespace)).toEqual(['shop', '']);
+    expect(calls.filter((call) => call.path.includes('service.namespace')).length).toBe(6);
+  });
+
+  it('does not split on namespaces when Tempo ignores the tag filter', async () => {
+    const { get } = fakeTempo(['/api/metrics/query_range']);
+    const ignoring = (async (uid: string, requestPath: string, params: Record<string, string>) => {
+      if (requestPath === '/api/v2/search/tags') {
+        return { scopes: [{ name: 'span', tags: ['a'] }] };
+      }
+      if (requestPath.includes('service.namespace')) {
+        return { tagValues: [{ value: 'shop' }, { value: 'billing' }] };
+      }
+      if (requestPath === '/api/search') {
+        return { traces: [] };
+      }
+      return get(uid, requestPath, params);
+    }) as ProxyGet;
+
+    const { datasource } = await collectTempoInventory('tempo', ignoring, createLimiter(2), window);
+
+    expect(datasource.services.filter((service) => service.service_name === 'checkout')).toHaveLength(1);
   });
 
   it('filters per service with q and scope', async () => {

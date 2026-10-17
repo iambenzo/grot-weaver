@@ -12,7 +12,13 @@ export function escapeString(value: string): string {
 
 export function serviceFilterExpression(service: ServiceRef): string {
   const byName = `${SERVICE_NAME_TAG} = "${escapeString(service.name)}"`;
-  return service.namespace ? `${byName} && ${SERVICE_NAMESPACE_TAG} = "${escapeString(service.namespace)}"` : byName;
+  if (service.namespace === undefined) {
+    return byName;
+  }
+  if (service.namespace === '') {
+    return `${byName} && ${SERVICE_NAMESPACE_TAG} = nil`;
+  }
+  return `${byName} && ${SERVICE_NAMESPACE_TAG} = "${escapeString(service.namespace)}"`;
 }
 
 export function attributeSelector(scope: 'resource' | 'span', key: string): string {

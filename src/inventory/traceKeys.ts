@@ -109,6 +109,6 @@ function belongsTo(attributes: OtlpAttribute[], service: ServiceRef): boolean {
   const value = (key: string) => attributes.find((attribute) => attribute.key === key)?.value?.stringValue ?? '';
   return (
     value(SERVICE_NAME_KEY) === service.name &&
-    (!service.namespace || value(SERVICE_NAMESPACE_KEY) === service.namespace)
+    (service.namespace === undefined || value(SERVICE_NAMESPACE_KEY) === service.namespace)
   );
 }

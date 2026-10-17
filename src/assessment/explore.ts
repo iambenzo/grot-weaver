@@ -1,5 +1,6 @@
 import { AssessmentResult, Finding, Owner } from '../api/types';
 import { attributeSelector, escapeString, serviceFilterExpression } from '../inventory/traceql';
+import { streamSelector } from '../inventory/loki';
 
 export interface ExploreTarget {
   uid: string;
@@ -71,7 +72,7 @@ function traceQuery(finding: Finding): string {
   const service = serviceFilterExpression(
     finding.owner.kind === 'unattributed'
       ? { name: '' }
-      : { name: finding.owner.name, namespace: finding.owner.namespace }
+      : { name: finding.owner.name, namespace: finding.owner.namespace ?? '' }
   );
   if (
     !finding.observed ||
@@ -122,7 +123,7 @@ function logQuery(finding: Finding): string {
   const selector =
     finding.owner.kind === 'unattributed'
       ? '{service_name="unknown_service"}'
-      : `{service_name="${escapeString(finding.owner.name)}"}`;
+      : streamSelector({ name: finding.owner.name, namespace: finding.owner.namespace ?? '' });
   if (!finding.observed || finding.type === 'missing_service_name' || finding.type === 'sdk_default_service_name') {
     return selector;
   }

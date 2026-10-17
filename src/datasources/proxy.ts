@@ -1,4 +1,5 @@
-import { getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
+import { Subscription } from 'rxjs';
+import { BackendSrvRequest, getBackendSrv, getDataSourceSrv } from '@grafana/runtime';
 
 export interface DatasourceRef {
   uid: string;
@@ -21,43 +22,45 @@ export function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
 }
 
+export function fetchData<T>(request: BackendSrvRequest, signal?: AbortSignal): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(abortError());
+      return;
+    }
+    let subscription: Subscription | undefined;
+    const onAbort = () => {
+      subscription?.unsubscribe();
+      reject(abortError());
+    };
+    const settle = (finish: () => void) => {
+      signal?.removeEventListener('abort', onAbort);
+      finish();
+    };
+    signal?.addEventListener('abort', onAbort, { once: true });
+    subscription = getBackendSrv()
+      .fetch<T>(request)
+      .subscribe({
+        next: (response) => settle(() => resolve(response.data)),
+        error: (error: unknown) => settle(() => reject(error)),
+        complete: () => settle(() => reject(new Error(`no response from ${request.url}`))),
+      });
+  });
+}
+
 export function createProxyGet(signal?: AbortSignal): ProxyGet {
   return <T>(uid: string, path: string, params: Record<string, string>, headers: Record<string, string> = {}) =>
-    new Promise<T>((resolve, reject) => {
-      if (signal?.aborted) {
-        reject(abortError());
-        return;
-      }
-      const onAbort = () => {
-        subscription.unsubscribe();
-        reject(abortError());
-      };
-      const detach = () => signal?.removeEventListener('abort', onAbort);
-      const subscription = getBackendSrv()
-        .fetch<T>({
-          url: `/api/datasources/proxy/uid/${encodeURIComponent(uid)}${path}`,
-          params,
-          headers,
-          method: 'GET',
-          showErrorAlert: false,
-          showSuccessAlert: false,
-        })
-        .subscribe({
-          next: (response) => {
-            detach();
-            resolve(response.data);
-          },
-          error: (error: unknown) => {
-            detach();
-            reject(error);
-          },
-          complete: () => {
-            detach();
-            reject(new Error(`no response from ${path}`));
-          },
-        });
-      signal?.addEventListener('abort', onAbort, { once: true });
-    });
+    fetchData<T>(
+      {
+        url: `/api/datasources/proxy/uid/${encodeURIComponent(uid)}${path}`,
+        params,
+        headers,
+        method: 'GET',
+        showErrorAlert: false,
+        showSuccessAlert: false,
+      },
+      signal
+    );
 }
 
 export const proxyGet: ProxyGet = createProxyGet();

@@ -1,4 +1,5 @@
-import { abortError, createProxyGet } from '../datasources/proxy';
+import { createProxyGet } from '../datasources/proxy';
+import { Inventory } from '../inventory/types';
 import { createLimiter } from '../datasources/limiter';
 import { scoreInventory } from '../api/score';
 import { fetchMetricsNeedingLabels, fetchRenamedAttributes, fetchSpanGroupRules } from '../api/catalogue';
@@ -52,8 +53,7 @@ export function browserDependencies(settings: PluginSettings, signal: AbortSigna
   return {
     get: createProxyGet(signal),
     limit: createLimiter(concurrencyFrom(settings)),
-    score: (...args: Parameters<typeof scoreInventory>) =>
-      signal.aborted ? Promise.reject(abortError()) : scoreInventory(...args),
+    score: (inventory: Inventory, volumeWeighted: boolean) => scoreInventory(inventory, volumeWeighted, signal),
     spanGroupRules: fetchSpanGroupRules,
     namesNeedingLabels: fetchMetricsNeedingLabels,
     renamedAttributes: fetchRenamedAttributes,

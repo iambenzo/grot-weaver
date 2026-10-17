@@ -1,22 +1,26 @@
-import { lastValueFrom } from 'rxjs';
-import { getBackendSrv } from '@grafana/runtime';
+import { fetchData } from '../datasources/proxy';
 import pluginJson from '../plugin.json';
 import { Inventory } from '../inventory/types';
 import { AssessmentResult } from './types';
 
-export type ScoreInventory = (inventory: Inventory, volumeWeighted: boolean) => Promise<AssessmentResult>;
+export type ScoreInventory = (
+  inventory: Inventory,
+  volumeWeighted: boolean,
+  signal?: AbortSignal
+) => Promise<AssessmentResult>;
 
-export const scoreInventory: ScoreInventory = async (inventory, volumeWeighted) => {
-  const response = await lastValueFrom(
-    getBackendSrv().fetch<AssessmentResult>({
-      url: `/api/plugins/${pluginJson.id}/resources/score`,
-      method: 'POST',
-      data: { inventory, volume_weighted: volumeWeighted },
-      showErrorAlert: false,
-    })
+export const scoreInventory: ScoreInventory = async (inventory, volumeWeighted, signal) =>
+  withLists(
+    await fetchData<AssessmentResult>(
+      {
+        url: `/api/plugins/${pluginJson.id}/resources/score`,
+        method: 'POST',
+        data: { inventory, volume_weighted: volumeWeighted },
+        showErrorAlert: false,
+      },
+      signal
+    )
   );
-  return withLists(response.data);
-};
 
 export function withLists(result: AssessmentResult): AssessmentResult {
   return {

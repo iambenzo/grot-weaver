@@ -56,7 +56,7 @@ describe('evidenceTarget', () => {
       'log key',
       { ...base, signal: 'logs', observed: 'http_method', scope: 'logs' },
       'loki',
-      '{service_name="checkout"} | http_method != ""',
+      '{service_name="checkout", service_namespace="shop"} | http_method != ""',
     ],
   ] as Array<[string, Finding, string, string]>)('%s', (_name, finding, uid, query) => {
     expect(evidenceTarget(finding, result, typeOf)).toEqual({ uid, type: types[uid], query });

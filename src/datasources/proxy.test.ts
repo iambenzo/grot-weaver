@@ -54,6 +54,18 @@ describe('createProxyGet', () => {
     expect(unsubscribed).toHaveBeenCalled();
   });
 
+  it('removes its abort listener when the response arrives synchronously', async () => {
+    fetch.mockReturnValue(of({ data: 'ok' }));
+    const controller = new AbortController();
+    const added = jest.spyOn(controller.signal, 'addEventListener');
+    const removed = jest.spyOn(controller.signal, 'removeEventListener');
+
+    await expect(createProxyGet(controller.signal)('ds', '/api/v1/labels', {})).resolves.toBe('ok');
+
+    expect(removed).toHaveBeenCalledWith('abort', added.mock.calls[0][1]);
+    expect(added.mock.invocationCallOrder[0]).toBeLessThan(removed.mock.invocationCallOrder[0]);
+  });
+
   it('does not send a request once the signal has aborted', async () => {
     fetch.mockClear();
     const controller = new AbortController();

@@ -84,7 +84,7 @@ export async function lookupFindingLibraries(
       }
       const flagged: FlaggedKey = {
         serviceName: finding.owner.kind === 'unattributed' ? '' : finding.owner.name,
-        serviceNamespace: finding.owner.kind === 'unattributed' ? undefined : finding.owner.namespace,
+        serviceNamespace: finding.owner.kind === 'unattributed' ? undefined : (finding.owner.namespace ?? ''),
         key: finding.observed,
         scope: finding.scope === 'resources' ? 'resource' : 'span',
       };

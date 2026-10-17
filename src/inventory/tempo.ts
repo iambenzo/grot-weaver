@@ -70,16 +70,25 @@ export async function collectTempoInventory(
   sampleLimit?: number
 ): Promise<TempoCollection> {
   const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit };
-  const [serviceNames, filterIgnored] = await Promise.all([
+  const [serviceNames, filterIgnored, metricVolumes] = await Promise.all([
     guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG)),
     isTagFilterIgnored(context).catch(() => false),
-  ]);
-  const keysMethod: KeysMethod = filterIgnored ? 'sample' : 'tags';
-  const discovered = (await Promise.all((serviceNames ?? []).map((name) => discoverNamespaces(context, name)))).flat();
-  const [services, metricVolumes] = await Promise.all([
-    Promise.all(discovered.map((service) => collectService(context, service, keysMethod))),
     spanVolumes(context),
   ]);
+  const keysMethod: KeysMethod = filterIgnored ? 'sample' : 'tags';
+  const discovered = (
+    await Promise.all(
+      (serviceNames ?? []).map(async (name) =>
+        servicesByNamespace(
+          name,
+          metricVolumes?.get(name)
+            ? [...metricVolumes.get(name)!.keys()]
+            : await namespacesFromTags(context, name, filterIgnored)
+        )
+      )
+    )
+  ).flat();
+  const services = await Promise.all(discovered.map((service) => collectService(context, service, keysMethod)));
   const volumes = metricVolumes ?? (await sampledVolumes(context, discovered));
   services.forEach((service, index) => {
     service.span_count = volumeOf(volumes, discovered[index].ref) ?? 0;
@@ -92,15 +101,32 @@ export async function collectTempoInventory(
   return collection;
 }
 
-async function discoverNamespaces(context: CollectorContext, name: string): Promise<DiscoveredService[]> {
-  const namespaces = await guarded(context, `namespace for service "${name}"`, () =>
-    tagValues(context, SERVICE_NAMESPACE_TAG, serviceFilter({ name }))
-  );
-  const distinct = [...new Set((namespaces ?? []).filter(Boolean))];
+function servicesByNamespace(name: string, namespaces: string[]): DiscoveredService[] {
+  const distinct = [...new Set(namespaces)];
   if (distinct.length > 1) {
     return distinct.map((namespace) => ({ ref: { name, namespace }, namespace }));
   }
   return [{ ref: { name }, namespace: distinct[0] ?? '' }];
+}
+
+async function namespacesFromTags(context: CollectorContext, name: string, filterIgnored: boolean): Promise<string[]> {
+  const step = `namespace for service "${name}"`;
+  const values = await guarded(context, step, () => tagValues(context, SERVICE_NAMESPACE_TAG, serviceFilter({ name })));
+  const namespaces = [...new Set((values ?? []).filter(Boolean))];
+  if (filterIgnored) {
+    return namespaces.slice(0, 1);
+  }
+  if (namespaces.length === 0) {
+    return [];
+  }
+  const withoutNamespace = await guarded(context, step, () => hasSpans(context, { name, namespace: '' }));
+  return withoutNamespace ? [...namespaces, ''] : namespaces;
+}
+
+async function hasSpans(context: CollectorContext, service: ServiceRef): Promise<boolean> {
+  const params = { ...tempoWindowParams(context.window), q: serviceFilter(service), limit: '1' };
+  const response = await context.limit(() => context.get<SearchResponse>(context.uid, '/api/search', params));
+  return (response.traces ?? []).length > 0;
 }
 
 async function spanVolumes(context: CollectorContext): Promise<Volumes | undefined> {
