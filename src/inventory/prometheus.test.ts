@@ -529,18 +529,39 @@ describe('service scope', () => {
     expect(datasource.names).toEqual(['a_total', 'b_total', 'c_total']);
     expect(
       calls.filter((call) => call.path === '/api/v1/label/__name__/values').map((call) => call.params['match[]'])
-    ).toEqual(['{job=~"(.+/)?check\\\\.out"}', '{service_name="check.out"}']);
-    expect(calls.find((call) => call.path === '/api/v1/series')?.params['match[]']).toBe(
-      'target_info{job=~"(.+/)?check\\\\.out"}'
-    );
+    ).toEqual(['{job=~"([^/]+/)?check\\\\.out", service_name=""}', '{service_name="check.out"}']);
+    expect(calls.filter((call) => call.path === '/api/v1/series').map((call) => call.params['match[]'])).toEqual([
+      'target_info{job=~"shop/checkout"}',
+    ]);
     expect(calls.some((call) => call.path === '/api/v1/cardinality/label_values')).toBe(false);
     const owners = calls.filter((call) => call.params.query?.startsWith('count by (__name__, job'));
     expect(
       owners.map(
         (call) =>
-          call.params.query.includes('job=~"(.+/)?check\\\\.out"') ||
+          call.params.query.includes('job=~"([^/]+/)?check\\\\.out", service_name=""') ||
           call.params.query.includes('service_name="check.out"')
       )
     ).toEqual([true, true]);
+  });
+
+  it('fetches target_info for the jobs of service_name owners, whatever those jobs are', async () => {
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath, params) => {
+      if (requestPath === '/api/v1/label/__name__/values') {
+        return { status: 'success', data: ['a_total'] };
+      }
+      if (params.query?.startsWith('count by (__name__, job')) {
+        const row = params.query.includes('service_name="checkout"')
+          ? { __name__: 'a_total', job: 'otel-collector', service_name: 'checkout' }
+          : { __name__: 'a_total', job: 'shop/checkout' };
+        return { status: 'success', data: { result: [{ metric: row, value: [1, '1'] }] } };
+      }
+      return undefined;
+    });
+
+    await collectPrometheusInventory('prom', get, createLimiter(4), window, undefined, undefined, [], 'checkout');
+
+    expect(calls.filter((call) => call.path === '/api/v1/series').map((call) => call.params['match[]'])).toEqual([
+      'target_info{job=~"shop/checkout|otel-collector"}',
+    ]);
   });
 });

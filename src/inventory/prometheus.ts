@@ -89,7 +89,7 @@ export function nameMatcher(names: string[], extra?: string): string {
 
 export function serviceScopeMatchers(service: string): string[] {
   return [
-    `job=~"(.+/)?${promqlString(service.replace(REGEX_META, '\\$&'))}"`,
+    `job=~"([^/]+/)?${promqlString(service.replace(REGEX_META, '\\$&'))}", service_name=""`,
     `service_name="${promqlString(service)}"`,
   ];
 }
@@ -141,9 +141,11 @@ export async function collectPrometheusInventory(
     errors: [],
     scope: service === undefined ? undefined : serviceScopeMatchers(service),
   };
-  const [names, targetInfo, collectors] = await Promise.all([
+  const [names, stackTargetInfo, collectors] = await Promise.all([
     guarded(context, 'metric names', () => metricNames(context)),
-    guarded(context, 'target_info series', () => targetInfoSeries(context)),
+    context.scope
+      ? Promise.resolve(undefined)
+      : guarded(context, 'target_info series', () => targetInfoSeries(context)),
     guarded(context, 'collector self-metrics', async () =>
       (await instantQuery(context, collectorsQuery(window))).map((sample) => sample.metric)
     ),
@@ -154,11 +156,6 @@ export async function collectPrometheusInventory(
   });
   if ((names ?? []).length > MAX_METRIC_NAMES) {
     return empty('metric names', names!.length, MAX_METRIC_NAMES);
-  }
-  if ((targetInfo ?? []).length > MAX_TARGET_INFO_SERIES) {
-    context.errors.push(
-      limitError(uid, 'target_info series', targetInfo!.length, MAX_TARGET_INFO_SERIES, 'target_info was not used')
-    );
   }
   if ((collectors ?? []).length > MAX_TARGET_INFO_SERIES) {
     context.errors.push(
@@ -172,6 +169,16 @@ export async function collectPrometheusInventory(
     );
   }
   const owners = await collectOwners(context, names ?? []);
+  const targetInfo = context.scope
+    ? await guarded(context, 'target_info series', () =>
+        targetInfoForJobs(context, [...new Set(owners.map((owner) => owner.labels.job).filter(Boolean))])
+      )
+    : stackTargetInfo;
+  if ((targetInfo ?? []).length > MAX_TARGET_INFO_SERIES) {
+    context.errors.push(
+      limitError(uid, 'target_info series', targetInfo!.length, MAX_TARGET_INFO_SERIES, 'target_info was not used')
+    );
+  }
   if (owners.length > MAX_OWNERS_PER_SOURCE) {
     return empty('owners', owners.length, MAX_OWNERS_PER_SOURCE);
   }
@@ -278,9 +285,23 @@ async function metricNames(context: Context): Promise<string[]> {
   return [...new Set(responses.flatMap((response) => response.data))].sort();
 }
 
+async function targetInfoForJobs(context: Context, jobs: string[]): Promise<Array<Record<string, string>>> {
+  if (jobs.length === 0) {
+    return [];
+  }
+  const alternatives = jobs.map((job) => promqlString(job.replace(REGEX_META, '\\$&')));
+  const params = {
+    ...prometheusWindowParams(context.window),
+    'match[]': `${TARGET_INFO}{job=~"${alternatives.join('|')}"}`,
+  };
+  const response = await context.limit(() =>
+    context.get<PrometheusResponse<Array<Record<string, string>>>>(context.uid, '/api/v1/series', params)
+  );
+  return response.data.map(({ __name__, ...labels }) => labels);
+}
+
 async function targetInfoSeries(context: Context): Promise<Array<Record<string, string>>> {
-  const selector = context.scope ? `${TARGET_INFO}{${context.scope[0]}}` : TARGET_INFO;
-  const params = { ...prometheusWindowParams(context.window), 'match[]': selector };
+  const params = { ...prometheusWindowParams(context.window), 'match[]': TARGET_INFO };
   const response = await context.limit(() =>
     context.get<PrometheusResponse<Array<Record<string, string>>>>(context.uid, '/api/v1/series', params)
   );
