@@ -90,12 +90,21 @@ describe('lookupFindingLibraries', () => {
         { get, limit: createLimiter(1) },
         () => beside
       );
-      return queries.find((query) => query?.includes('span.http.method != nil'));
+      return queries.filter((query) => query?.includes('span.http.method != nil'));
     };
 
-    expect(await lookupQuery([])).toContain('{ resource.service.name = "checkout" && span.http.method != nil }');
-    expect(await lookupQuery([owner, { ...owner, namespace: 'shop' }])).toContain(
-      '{ resource.service.name = "checkout" && resource.service.namespace = nil && span.http.method != nil }'
+    const unscoped = await lookupQuery([]);
+    const scoped = await lookupQuery([owner, { ...owner, namespace: 'shop' }]);
+
+    expect(unscoped).toHaveLength(2);
+    expect(scoped).toHaveLength(2);
+    unscoped.forEach((query) =>
+      expect(query).toContain('{ resource.service.name = "checkout" && span.http.method != nil }')
+    );
+    scoped.forEach((query) =>
+      expect(query).toContain(
+        '{ resource.service.name = "checkout" && resource.service.namespace = nil && span.http.method != nil }'
+      )
     );
   });
 });
