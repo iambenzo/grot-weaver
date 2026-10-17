@@ -197,12 +197,13 @@ function sdkFromLabels(entry: MetricsSeries, sdkTags: string[]): SDK {
   return sdk;
 }
 
+function belongsTo(entry: MeasuredSeries, service: ServiceRef): boolean {
+  return entry.name === service.name && (service.namespace === undefined || entry.namespace === service.namespace);
+}
+
 function heaviestFor(series: MeasuredSeries[], service: ServiceRef): MeasuredSeries | undefined {
   return series
-    .filter(
-      (entry) =>
-        entry.name === service.name && (service.namespace === undefined || entry.namespace === service.namespace)
-    )
+    .filter((entry) => belongsTo(entry, service))
     .reduce<MeasuredSeries | undefined>(
       (heaviest, entry) => (heaviest && heaviest.spans >= entry.spans ? heaviest : entry),
       undefined
@@ -316,11 +317,17 @@ async function collectSDK(
   if (!measured.distros) {
     return { ...fromMetrics.sdk, ...(await sdkFromTags(context, filter, step, ['distro'])) };
   }
-  const distro = heaviestFor(
-    measured.distros.filter((entry) => entry.sdk.distro),
-    service
-  )?.sdk.distro;
+  const distro = dominantDistro(measured.distros, service);
   return distro ? { ...fromMetrics.sdk, distro } : fromMetrics.sdk;
+}
+
+function dominantDistro(series: MeasuredSeries[], service: ServiceRef): string {
+  const spansByDistro = new Map<string, number>();
+  for (const entry of series.filter((candidate) => belongsTo(candidate, service))) {
+    const distro = entry.sdk.distro ?? '';
+    spansByDistro.set(distro, (spansByDistro.get(distro) ?? 0) + entry.spans);
+  }
+  return [...spansByDistro].reduce<[string, number]>((best, entry) => (entry[1] > best[1] ? entry : best), ['', -1])[0];
 }
 
 async function sdkFromTags(
