@@ -28,6 +28,10 @@ export function toCollectionError(datasource: string, step: string, error: unkno
   return collectionError;
 }
 
+export function errorMessage(error: unknown): string {
+  return toCollectionError('', '', error).message;
+}
+
 export function isPermissionDenied(error: CollectionError): boolean {
   return error.status !== undefined && PERMISSION_STATUSES.includes(error.status);
 }

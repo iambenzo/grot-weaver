@@ -3,6 +3,7 @@ import path from 'path';
 import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
 import {
+  MAX_LABEL_KEY_CALLS,
   anonymousOwnersQuery,
   collectPrometheusInventory,
   collectorsQuery,
@@ -17,12 +18,21 @@ const fixture = (target: string, name: string) =>
   JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../testdata/fixtures/${target}/prometheus/${name}`), 'utf8'));
 const window = { startSeconds: 1000, endSeconds: 1000 + 86400 };
 
-function fakePrometheus(target: string, failing?: string) {
+type Override = (requestPath: string, params: Record<string, string>) => unknown;
+
+function fakePrometheus(target: string, failing?: string, override?: Override) {
   const calls: Array<{ path: string; params: Record<string, string> }> = [];
   const get = (async (_uid: string, requestPath: string, params: Record<string, string>) => {
     calls.push({ path: requestPath, params });
     if (failing && requestPath === failing) {
       throw { status: 422, data: { error: 'too many series' } };
+    }
+    const overridden = override?.(requestPath, params);
+    if (overridden !== undefined) {
+      return overridden;
+    }
+    if (requestPath === '/api/v1/cardinality/label_values') {
+      return { labels: [{ cardinality: [] }] };
     }
     if (requestPath === '/api/v1/label/__name__/values') {
       return fixture(target, 'metric-names.json');
@@ -67,7 +77,9 @@ describe('collectPrometheusInventory', () => {
     expect(datasource.names.length).toBe(fixture('local', 'metric-names.json').data.length);
     expect(datasource.target_info.some((labels) => labels.job === 'node-via-otelcol-otlp')).toBe(true);
     expect(datasource.target_info.every((labels) => !('__name__' in labels))).toBe(true);
-    const nameCalls = calls.filter((call) => call.path !== '/api/v1/query');
+    const nameCalls = calls.filter(
+      (call) => call.path !== '/api/v1/query' && call.path !== '/api/v1/cardinality/label_values'
+    );
     expect(nameCalls.every((call) => call.params.start === '1000' && call.params.end === '87400')).toBe(true);
     expect(calls.filter((call) => call.path === '/api/v1/query').every((call) => call.params.time === '87400')).toBe(
       true
@@ -208,5 +220,145 @@ describe('queries', () => {
     expect(anonymousOwnersQuery(['up'], window)).toBe(
       'count by (__name__, instance) (last_over_time({__name__=~"up", job="", service_name=""}[86400s]))'
     );
+  });
+});
+
+describe('bounded owner queries', () => {
+  const chunkLimit = {
+    status: 422,
+    data: {
+      error: 'the query exceeded the maximum number of chunks (limit: 2000000 chunks) (err-mimir-max-chunks-per-query)',
+    },
+  };
+  const ownerCalls = (calls: Array<{ path: string; params: Record<string, string> }>) =>
+    calls.filter((call) => call.params.query?.startsWith('count by (__name__, job'));
+
+  it('packs names by active series so a heavy name gets its own window slices', async () => {
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath) =>
+      requestPath === '/api/v1/cardinality/label_values'
+        ? {
+            labels: [
+              { cardinality: [{ label_value: 'http_server_request_duration_seconds_bucket', series_count: 900_000 }] },
+            ],
+          }
+        : undefined
+    );
+
+    await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    const heavy = ownerCalls(calls).filter((call) =>
+      call.params.query.includes('http_server_request_duration_seconds_bucket')
+    );
+    expect(heavy).toHaveLength(3);
+    expect(heavy.every((call) => !call.params.query.includes('|'))).toBe(true);
+    expect(heavy.map((call) => call.params.time).sort()).toEqual(['29800', '58600', '87400']);
+    expect(heavy.every((call) => call.params.query.includes('[28800s]'))).toBe(true);
+  });
+
+  it('halves a batch that hits a Mimir query limit, then slices the window for a single name', async () => {
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath, params) => {
+      const query = params.query ?? '';
+      if (!query.startsWith('count by (__name__, job')) {
+        return undefined;
+      }
+      if (
+        query.includes('|') ||
+        (query.includes('http_server_request_duration_seconds_bucket') && query.includes('[86400s]'))
+      ) {
+        throw chunkLimit;
+      }
+      const result = query.includes('http_server_request_duration_seconds_bucket')
+        ? [
+            {
+              metric: { __name__: 'http_server_request_duration_seconds_bucket', job: 'shop/checkout' },
+              value: [1, '12'],
+            },
+          ]
+        : [];
+      return { status: 'success', data: { result } };
+    });
+
+    const { datasource, errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    expect(errors).toEqual([]);
+    const sliced = ownerCalls(calls).filter((call) => call.params.query.includes('[43200s]'));
+    expect(sliced.map((call) => call.params.time).sort()).toEqual(['44200', '87400']);
+    expect(datasource.owners.filter((owner) => owner.metric === 'http_server_request_duration_seconds_bucket')).toEqual(
+      [{ metric: 'http_server_request_duration_seconds_bucket', labels: { job: 'shop/checkout' }, series: 12 }]
+    );
+  });
+
+  it('still slices the window after halving a full batch down to one heavy name', async () => {
+    const names = [...Array.from({ length: 39 }, (_, index) => `light_${index}`), 'heavy_total'];
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath, params) => {
+      if (requestPath === '/api/v1/label/__name__/values') {
+        return { status: 'success', data: names };
+      }
+      const query = params.query ?? '';
+      if (!query.startsWith('count by (__name__, job')) {
+        return undefined;
+      }
+      if (
+        query.includes('heavy_total') &&
+        (query.includes('|') || query.includes('[86400s]') || query.includes('[43200s]'))
+      ) {
+        throw chunkLimit;
+      }
+      const result = query.includes('heavy_total')
+        ? [{ metric: { __name__: 'heavy_total', job: 'api' }, value: [1, '5'] }]
+        : [];
+      return { status: 'success', data: { result } };
+    });
+
+    const { datasource, errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    expect(errors).toEqual([]);
+    expect(datasource.owners).toEqual([{ metric: 'heavy_total', labels: { job: 'api' }, series: 5 }]);
+    expect(ownerCalls(calls).filter((call) => call.params.query.includes('[21600s]'))).toHaveLength(4);
+  });
+
+  it('does not split on errors that are not query limits', async () => {
+    const { get, calls } = fakePrometheus('local', undefined, (_requestPath, params) => {
+      if (params.query?.startsWith('count by (__name__, job')) {
+        throw { status: 500, data: { error: 'boom' } };
+      }
+      return undefined;
+    });
+
+    const { errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    const batches = Math.ceil(
+      (fixture('local', 'metric-names.json').data as string[]).filter((name) => !isRecordingRule(name)).length / 40
+    );
+    expect(ownerCalls(calls)).toHaveLength(batches);
+    expect(errors.every((error) => error.message === 'boom')).toBe(true);
+  });
+});
+
+describe('label key budget', () => {
+  it('checks only the busiest pairs and reports the rest as skipped', async () => {
+    const owners = Array.from({ length: MAX_LABEL_KEY_CALLS + 2 }, (_, index) => ({
+      metric: { __name__: 'http_server_request_duration_seconds_bucket', job: `svc-${index}` },
+      value: [1, String(index + 1)],
+    }));
+    const { get, calls } = fakePrometheus('local', undefined, (_requestPath, params) =>
+      params.query?.startsWith('count by (__name__, job') ? { status: 'success', data: { result: owners } } : undefined
+    );
+
+    const { errors } = await collectPrometheusInventory('prom', get, createLimiter(8), window, async () => [
+      'http_server_request_duration_seconds_bucket',
+    ]);
+
+    const checked = calls.filter((call) => call.path === '/api/v1/labels').map((call) => call.params['match[]']);
+    expect(checked).toHaveLength(MAX_LABEL_KEY_CALLS);
+    expect(checked.some((matcher) => matcher.includes('job="svc-0"'))).toBe(false);
+    expect(checked.some((matcher) => matcher.includes(`job="svc-${MAX_LABEL_KEY_CALLS + 1}"`))).toBe(true);
+    expect(errors).toEqual([
+      {
+        datasource: 'prom',
+        step: 'label keys',
+        message: `checked label keys for the ${MAX_LABEL_KEY_CALLS} busiest of ${MAX_LABEL_KEY_CALLS + 2} metric and owner pairs; the rest were skipped to bound the scan`,
+      },
+    ]);
   });
 });

@@ -2,17 +2,23 @@ import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, prometheusLookback, prometheusWindowParams } from '../window/window';
 import { CollectionError, MetricDatasource, MetricOwner, OwnerLabelKeys } from './types';
-import { guardStep } from './guard';
+import { errorMessage, guardStep } from './guard';
+import { Batch, MAX_WINDOW_SPLITS, SeriesOf, isQueryLimitError, planBatches, sliceWindow } from './queryBudget';
 
 const TARGET_INFO = 'target_info';
 const OWNER_LABELS = ['job', 'service_name', 'service_namespace', 'otel_scope_name', 'otel_scope_version'];
-const NAMES_PER_BATCH = 40;
+export const MAX_LABEL_KEY_CALLS = 1000;
+const CARDINALITY_NAMES_LIMIT = '500';
 const PRESENCE_LABEL_PREFIX = 'semconv_has_';
 const REGEX_META = /[.*+?^${}()|[\]\\]/g;
 
 interface PrometheusResponse<T> {
   status: string;
   data: T;
+}
+
+interface CardinalityResponse {
+  labels?: Array<{ cardinality?: Array<{ label_value: string; series_count: number }> }>;
 }
 
 interface VectorSample {
@@ -143,30 +149,48 @@ async function collectLabelKeys(
   onProgress: (progress: LabelProgress) => void
 ): Promise<OwnerLabelKeys[]> {
   const pairs = uniquePairs(owners);
+  const checked = pairs.slice(0, MAX_LABEL_KEY_CALLS);
+  if (checked.length < pairs.length) {
+    context.errors.push({
+      datasource: context.uid,
+      step: 'label keys',
+      message: `checked label keys for the ${checked.length} busiest of ${pairs.length} metric and owner pairs; the rest were skipped to bound the scan`,
+    });
+  }
   let done = 0;
-  onProgress({ done, total: pairs.length });
+  onProgress({ done, total: checked.length });
   const sets = await Promise.all(
-    pairs.map(async ({ metric, selector }) => {
+    checked.map(async ({ metric, selector }) => {
       const keys = await guarded(context, `label keys for ${metric}`, () =>
         labelNames(context, labelsMatcher(metric, selector))
       );
       done++;
-      onProgress({ done, total: pairs.length });
+      onProgress({ done, total: checked.length });
       return keys ? { metric, selector, keys } : undefined;
     })
   );
   return sets.filter((set): set is OwnerLabelKeys => set !== undefined);
 }
 
-function uniquePairs(owners: MetricOwner[]): Array<{ metric: string; selector: Record<string, string> }> {
-  const seen = new Map<string, { metric: string; selector: Record<string, string> }>();
+interface LabelPair {
+  metric: string;
+  selector: Record<string, string>;
+  series: number;
+}
+
+function uniquePairs(owners: MetricOwner[]): LabelPair[] {
+  const seen = new Map<string, LabelPair>();
   for (const owner of owners) {
     const selector = ownerSelector(owner);
-    if (selector) {
-      seen.set(`${owner.metric}|${JSON.stringify(selector)}`, { metric: owner.metric, selector });
+    if (!selector) {
+      continue;
     }
+    const key = `${owner.metric}|${JSON.stringify(selector)}`;
+    const pair = seen.get(key) ?? { metric: owner.metric, selector, series: 0 };
+    pair.series += owner.series;
+    seen.set(key, pair);
   }
-  return [...seen.values()];
+  return [...seen.values()].sort((a, b) => b.series - a.series);
 }
 
 async function labelNames(context: Context, matcher: string): Promise<string[]> {
@@ -201,20 +225,80 @@ export function isRecordingRule(name: string): boolean {
 }
 
 async function collectOwners(context: Context, names: string[]): Promise<MetricOwner[]> {
-  const batches = chunk(
+  const seriesOf = await activeSeriesByName(context);
+  const batches = planBatches(
     names.filter((name) => !isRecordingRule(name)),
-    NAMES_PER_BATCH
+    seriesOf,
+    context.window
   );
   const owned = await Promise.all(
     batches.map((batch, index) =>
-      guarded(context, `owners batch ${index + 1}/${batches.length}`, () => ownersForBatch(context, batch))
+      guarded(context, `owners batch ${index + 1}/${batches.length}`, () => ownersAcross(context, batch))
     )
   );
   return owned.flatMap((owners) => owners ?? []);
 }
 
-async function ownersForBatch(context: Context, batch: string[]): Promise<MetricOwner[]> {
-  const owners = (await instantQuery(context, ownersQuery(batch, context.window, context.presenceAttributes))).map(
+async function activeSeriesByName(context: Context): Promise<SeriesOf> {
+  try {
+    const response = await context.limit(() =>
+      context.get<CardinalityResponse>(context.uid, '/api/v1/cardinality/label_values', {
+        'label_names[]': '__name__',
+        limit: CARDINALITY_NAMES_LIMIT,
+      })
+    );
+    const counts = new Map(
+      (response.labels?.[0]?.cardinality ?? []).map((entry) => [entry.label_value, entry.series_count])
+    );
+    const truncated = counts.size >= Number(CARDINALITY_NAMES_LIMIT);
+    const floor = truncated ? Math.min(...counts.values()) : 0;
+    return (name) => counts.get(name) ?? floor;
+  } catch {
+    return () => 0;
+  }
+}
+
+async function ownersAcross(context: Context, batch: Batch): Promise<MetricOwner[]> {
+  const slices = await Promise.all(batch.windows.map((window) => boundedOwners(context, batch.names, window, 0)));
+  return mergeOwnerSlices(slices.flat());
+}
+
+async function boundedOwners(
+  context: Context,
+  names: string[],
+  window: QueryWindow,
+  windowSplits: number
+): Promise<MetricOwner[]> {
+  try {
+    return await ownersForBatch(context, names, window);
+  } catch (error) {
+    const canSplit = names.length > 1 || windowSplits < MAX_WINDOW_SPLITS;
+    if (!canSplit || !isQueryLimitError(errorMessage(error))) {
+      throw error;
+    }
+    const middle = Math.ceil(names.length / 2);
+    const parts =
+      names.length > 1
+        ? [names.slice(0, middle), names.slice(middle)].map((half) =>
+            boundedOwners(context, half, window, windowSplits)
+          )
+        : sliceWindow(window, 2).map((slice) => boundedOwners(context, names, slice, windowSplits + 1));
+    return mergeOwnerSlices((await Promise.all(parts)).flat());
+  }
+}
+
+function mergeOwnerSlices(owners: MetricOwner[]): MetricOwner[] {
+  const merged = new Map<string, MetricOwner>();
+  for (const owner of owners) {
+    const key = JSON.stringify([owner.metric, Object.entries(owner.labels).sort()]);
+    const existing = merged.get(key);
+    merged.set(key, existing && existing.series >= owner.series ? existing : owner);
+  }
+  return [...merged.values()];
+}
+
+async function ownersForBatch(context: Context, batch: string[], window: QueryWindow): Promise<MetricOwner[]> {
+  const owners = (await instantQuery(context, ownersQuery(batch, window, context.presenceAttributes), window)).map(
     toOwner
   );
   const anonymous = owners
@@ -223,12 +307,16 @@ async function ownersForBatch(context: Context, batch: string[]): Promise<Metric
   if (anonymous.length === 0) {
     return owners;
   }
-  const byInstance = (await instantQuery(context, anonymousOwnersQuery(anonymous, context.window))).map(toOwner);
+  const byInstance = (await instantQuery(context, anonymousOwnersQuery(anonymous, window), window)).map(toOwner);
   return [...owners.filter((owner) => owner.labels.job || owner.labels.service_name), ...byInstance];
 }
 
-async function instantQuery(context: Context, query: string): Promise<VectorSample[]> {
-  const params = { query, time: String(context.window.endSeconds) };
+async function instantQuery(
+  context: Context,
+  query: string,
+  window: QueryWindow = context.window
+): Promise<VectorSample[]> {
+  const params = { query, time: String(window.endSeconds) };
   const response = await context.limit(() =>
     context.get<PrometheusResponse<{ result: VectorSample[] }>>(context.uid, '/api/v1/query', params)
   );
@@ -238,14 +326,6 @@ async function instantQuery(context: Context, query: string): Promise<VectorSamp
 function toOwner(sample: VectorSample): MetricOwner {
   const { __name__, ...labels } = sample.metric;
   return { metric: __name__, labels, series: Number(sample.value[1]) };
-}
-
-function chunk<T>(items: T[], size: number): T[][] {
-  const chunks: T[][] = [];
-  for (let start = 0; start < items.length; start += size) {
-    chunks.push(items.slice(start, start + size));
-  }
-  return chunks;
 }
 
 function guarded<T>(context: Context, step: string, task: () => Promise<T>): Promise<T | undefined> {
