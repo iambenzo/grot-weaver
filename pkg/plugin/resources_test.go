@@ -315,6 +315,31 @@ func Test_CallResource_score_compression(t *testing.T) {
 		}
 	})
 
+	t.Run("accept encoding is parsed with every parameter and the wildcard", func(t *testing.T) {
+		for header, want := range map[string]bool{
+			"gzip":                true,
+			"GZIP;q=0.5":          true,
+			"gzip;foo=bar;q=0":    false,
+			"br, gzip;q=0":        false,
+			"*":                   true,
+			"*;q=0":               false,
+			"gzip;q=0, *":         false,
+			"br, deflate":         false,
+			"gzip;q=not-a-number": false,
+			"":                    false,
+		} {
+			if got := acceptsGzip(header); got != want {
+				t.Errorf("acceptsGzip(%q) = %v, want %v", header, got, want)
+			}
+		}
+	})
+
+	t.Run("whitespace after the JSON value is accepted", func(t *testing.T) {
+		if got := postScoreWith(t, app, append(slices.Clone(valid), []byte("\n  \t")...), nil).Status; got != http.StatusOK {
+			t.Errorf("status = %d, want %d", got, http.StatusOK)
+		}
+	})
+
 	t.Run("body that is not gzip is rejected", func(t *testing.T) {
 		if got := postScoreWith(t, app, valid, gzipRequest).Status; got != http.StatusBadRequest {
 			t.Errorf("status = %d, want %d", got, http.StatusBadRequest)

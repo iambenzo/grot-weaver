@@ -78,19 +78,33 @@ func requireEnd(decoder *json.Decoder) error {
 }
 
 func acceptsGzip(header string) bool {
+	wildcard := false
 	for _, coding := range strings.Split(header, ",") {
 		name, params, _ := strings.Cut(coding, ";")
-		if !strings.EqualFold(strings.TrimSpace(name), gzipEncoding) {
+		name = strings.TrimSpace(name)
+		if strings.EqualFold(name, gzipEncoding) {
+			return quality(params) > 0
+		}
+		if name == "*" {
+			wildcard = quality(params) > 0
+		}
+	}
+	return wildcard
+}
+
+func quality(params string) float64 {
+	for _, param := range strings.Split(params, ";") {
+		key, value, _ := strings.Cut(strings.TrimSpace(param), "=")
+		if !strings.EqualFold(strings.TrimSpace(key), "q") {
 			continue
 		}
-		quality, found := strings.CutPrefix(strings.TrimSpace(params), "q=")
-		if !found {
-			return true
+		parsed, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+		if err != nil {
+			return 0
 		}
-		value, err := strconv.ParseFloat(strings.TrimSpace(quality), 64)
-		return err == nil && value > 0
+		return parsed
 	}
-	return false
+	return 1
 }
 
 func writeCompressibleJSON(w http.ResponseWriter, req *http.Request, status int, body any) {
