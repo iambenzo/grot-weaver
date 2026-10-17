@@ -287,4 +287,21 @@ func Test_serviceReadiness(t *testing.T) {
 			t.Errorf("services = %+v", services)
 		}
 	})
+
+	t.Run("a single row is normalised and its input is left untouched", func(t *testing.T) {
+		input := row(checkout, finding.SignalTraces, []string{"service.name", "service.name"}, []string{"service.name", "service.namespace"}, nil, []string{"k8s.pod.name", "k8s.pod.name"})
+		before := slices.Clone(input.Missing)
+
+		got := serviceSignalOf(t, serviceReadiness([]ProductReadiness{input}), checkout, finding.SignalTraces, "knowledge-graph")
+
+		if !slices.Equal(got.Present, []string{"service.name"}) || !slices.Equal(got.Missing, []string{"service.namespace"}) || !slices.Equal(got.MissingRecommended, []string{"k8s.pod.name"}) {
+			t.Errorf("normalised = %+v", got)
+		}
+		if got.Unknown == nil || got.Readiness != ratio(1, 2) {
+			t.Errorf("unknown = %#v, readiness %+v", got.Unknown, got.Readiness)
+		}
+		if !slices.Equal(input.Missing, before) {
+			t.Errorf("input mutated to %v", input.Missing)
+		}
+	})
 }

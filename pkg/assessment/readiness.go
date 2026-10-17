@@ -111,18 +111,22 @@ func serviceReadiness(rows []ProductReadiness) []ServiceReadiness {
 
 func mergeSignal(signals []SignalReadiness, row ProductReadiness) []SignalReadiness {
 	index := slices.IndexFunc(signals, func(signal SignalReadiness) bool { return signal.Signal == row.Signal })
-	if index < 0 {
-		signal := SignalReadiness{Signal: row.Signal, Present: slices.Clone(row.Present), Missing: slices.Clone(row.Missing), Unknown: slices.Clone(row.Unknown), MissingRecommended: slices.Clone(row.MissingRecommended)}
-		signal.Readiness = shareOf(len(signal.Present), len(signal.Missing), len(signal.Unknown))
-		return append(signals, signal)
+	first := index < 0
+	if first {
+		signals = append(signals, SignalReadiness{Signal: row.Signal, Present: []string{}, Missing: []string{}, Unknown: []string{}, MissingRecommended: []string{}})
+		index = len(signals) - 1
 	}
 	merged := signals[index]
 	merged.Present = union(merged.Present, row.Present)
 	merged.Missing = without(union(merged.Missing, row.Missing), merged.Present)
 	merged.Unknown = without(without(union(merged.Unknown, row.Unknown), merged.Present), merged.Missing)
-	merged.MissingRecommended = slices.DeleteFunc(slices.Clone(merged.MissingRecommended), func(attribute string) bool {
-		return !slices.Contains(row.MissingRecommended, attribute)
-	})
+	if first {
+		merged.MissingRecommended = union(merged.MissingRecommended, row.MissingRecommended)
+	} else {
+		merged.MissingRecommended = slices.DeleteFunc(slices.Clone(merged.MissingRecommended), func(attribute string) bool {
+			return !slices.Contains(row.MissingRecommended, attribute)
+		})
+	}
 	merged.Readiness = shareOf(len(merged.Present), len(merged.Missing), len(merged.Unknown))
 	signals[index] = merged
 	return signals
