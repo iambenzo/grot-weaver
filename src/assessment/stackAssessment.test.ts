@@ -328,8 +328,17 @@ describe('progress, partial results and retry', () => {
 describe('cancellation through the collectors', () => {
   it('starts no new datasource request after the run is aborted and cancels the ones in flight', async () => {
     const unsubscribed = jest.fn();
+    let twoStarted: () => void = () => undefined;
+    const started = new Promise<void>((resolve) => {
+      twoStarted = resolve;
+    });
     fetch.mockReset();
-    fetch.mockImplementation(() => new Observable(() => unsubscribed));
+    fetch.mockImplementation(() => {
+      if (fetch.mock.calls.length === 2) {
+        twoStarted();
+      }
+      return new Observable(() => unsubscribed);
+    });
     const controller = new AbortController();
     const score = jest.fn(async () => ({}) as AssessmentResult);
     const running = assessStack(
@@ -344,7 +353,8 @@ describe('cancellation through the collectors', () => {
         namesNeedingLabels: async () => [],
       }
     );
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await started;
+    await Promise.resolve();
     const startedBeforeAbort = fetch.mock.calls.length;
 
     controller.abort();

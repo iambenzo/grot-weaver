@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-	"time"
+
+	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
 )
 
 func inventoryAtServiceLimit() Inventory {
@@ -36,28 +37,35 @@ func Test_Assess_scoresAnInventoryAtTheServiceLimit(t *testing.T) {
 		t.Fatalf("validate: %v", err)
 	}
 
-	started := time.Now()
 	result := newAssessor(t).Assess(inventory, scoringDefaults)
-	elapsed := time.Since(started)
 
 	if len(result.Attributions) != MaxServicesPerTrace || len(result.Logs) != MaxLogServices {
 		t.Errorf("attributions = %d traces and %d logs, want %d each", len(result.Attributions), len(result.Logs), MaxServicesPerTrace)
 	}
-	encoded, err := json.Marshal(result)
-	if err != nil {
-		t.Fatal(err)
+	if got, ok := findingFor(result, "svc-0", "http.method"); !ok || got.Type != finding.TypeDeprecated {
+		t.Errorf("svc-0 http.method finding = %+v, found %v, want deprecated", got, ok)
 	}
-	var zipped bytes.Buffer
-	writer := gzip.NewWriter(&zipped)
-	_, _ = writer.Write(encoded)
-	_ = writer.Close()
-	t.Logf("scored %d trace and %d log services in %s: %d findings, result %d MB raw, %d KB gzipped", MaxServicesPerTrace, MaxLogServices, elapsed, len(result.Findings), len(encoded)>>20, zipped.Len()>>10)
+	if len(result.Owners) < 2*MaxServicesPerTrace {
+		t.Errorf("owner score rows = %d, want one per service and signal", len(result.Owners))
+	}
 }
 
 func Benchmark_Assess_atTheServiceLimit(b *testing.B) {
 	inventory := inventoryAtServiceLimit()
 	assessor := newAssessor(b)
+	var result Result
 	for b.Loop() {
-		assessor.Assess(inventory, scoringDefaults)
+		result = assessor.Assess(inventory, scoringDefaults)
 	}
+	encoded, err := json.Marshal(result)
+	if err != nil {
+		b.Fatal(err)
+	}
+	var zipped bytes.Buffer
+	writer := gzip.NewWriter(&zipped)
+	_, _ = writer.Write(encoded)
+	_ = writer.Close()
+	b.ReportMetric(float64(len(result.Findings)), "findings")
+	b.ReportMetric(float64(len(encoded))/(1<<20), "result-MB")
+	b.ReportMetric(float64(zipped.Len())/(1<<10), "gzipped-KB")
 }
