@@ -5,7 +5,7 @@ import { SpanGroupRule } from '../api/catalogue';
 import { CollectionError, KeyObservation, SDK, SpanGroupSample, TraceDatasource, TraceService } from './types';
 import { applicableRules, sampleSpanGroup } from './spanGroups';
 import { ServiceRef, serviceFilterExpression } from './traceql';
-import { queryMetricsRange } from './traceqlMetrics';
+import { MetricsSeries, labelValue, queryMetricsRange, spanTotal } from './traceqlMetrics';
 import { KeysMethod, isTagFilterIgnored, sampleServiceKeys } from './traceKeys';
 import { guardStep } from './guard';
 import { Volumes, addVolume, volumeOf } from './volumes';
@@ -29,7 +29,7 @@ interface TagsResponse {
   scopes?: Array<{ name: string; tags?: string[] }>;
 }
 
-export type VolumeMethod = 'metrics' | 'sample';
+export type VolumeMethod = 'metrics' | 'mixed' | 'sample';
 
 export interface TempoCollection {
   datasource: TraceDatasource;
@@ -52,6 +52,19 @@ interface CollectorContext {
   sampleLimit?: number;
 }
 
+interface MeasuredSeries {
+  name: string;
+  namespace: string;
+  sdk: SDK;
+  spans: number;
+}
+
+interface Measured {
+  volumes: Volumes;
+  sdks: MeasuredSeries[];
+  distros?: MeasuredSeries[];
+}
+
 interface DiscoveredService {
   ref: ServiceRef;
   namespace?: string;
@@ -70,11 +83,12 @@ export async function collectTempoInventory(
   sampleLimit?: number
 ): Promise<TempoCollection> {
   const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit };
-  const [serviceNames, filterIgnored, metricVolumes] = await Promise.all([
+  const [serviceNames, filterIgnored, measured] = await Promise.all([
     guarded(context, 'service names', () => tagValues(context, SERVICE_NAME_TAG)),
     isTagFilterIgnored(context).catch(() => false),
-    spanVolumes(context),
+    measureServices(context),
   ]);
+  const metricVolumes = measured?.volumes;
   const keysMethod: KeysMethod = filterIgnored ? 'sample' : 'tags';
   const discovered = (
     await Promise.all(
@@ -83,22 +97,20 @@ export async function collectTempoInventory(
       )
     )
   ).flat();
-  const services = await Promise.all(discovered.map((service) => collectService(context, service, keysMethod)));
-  const volumes = metricVolumes
-    ? withSampled(
-        metricVolumes,
-        await sampledVolumes(
-          context,
-          discovered.filter(({ ref }) => volumeOf(metricVolumes, ref) === undefined)
-        )
-      )
-    : await sampledVolumes(context, discovered);
+  const services = await Promise.all(
+    discovered.map((service) => collectService(context, service, keysMethod, measured))
+  );
+  const unmeasured = metricVolumes
+    ? discovered.filter(({ ref }) => volumeOf(metricVolumes, ref) === undefined)
+    : discovered;
+  const sampled = await sampledVolumes(context, unmeasured);
+  const volumes = metricVolumes ? withSampled(metricVolumes, sampled) : sampled;
   services.forEach((service, index) => {
     service.span_count = volumeOf(volumes, discovered[index].ref) ?? 0;
   });
   const collection: TempoCollection = { datasource: { uid, services }, errors: context.errors };
   if (services.length > 0) {
-    collection.volumeMethod = metricVolumes ? 'metrics' : 'sample';
+    collection.volumeMethod = !metricVolumes ? 'sample' : unmeasured.length > 0 ? 'mixed' : 'metrics';
     collection.keysMethod = keysMethod;
   }
   return collection;
@@ -144,23 +156,57 @@ async function hasSpans(context: CollectorContext, service: ServiceRef): Promise
   return (response.traces ?? []).length > 0;
 }
 
-async function spanVolumes(context: CollectorContext): Promise<Volumes | undefined> {
-  let series;
+async function measureServices(context: CollectorContext): Promise<Measured | undefined> {
+  const sdkSeries = await spanSeries(context, [SDK_TAGS.name, SDK_TAGS.language, SDK_TAGS.version]);
+  if (!sdkSeries) {
+    return undefined;
+  }
+  const volumes: Volumes = new Map();
+  for (const series of sdkSeries) {
+    addVolume(volumes, series.name, series.namespace, series.spans);
+  }
+  return { volumes, sdks: sdkSeries, distros: await spanSeries(context, [SDK_TAGS.distro]) };
+}
+
+async function spanSeries(context: CollectorContext, sdkTags: string[]): Promise<MeasuredSeries[] | undefined> {
+  let series: MetricsSeries[];
   try {
     series = await queryMetricsRange(
       context,
-      `{ } | count_over_time() by (${SERVICE_NAME_TAG}, ${SERVICE_NAMESPACE_TAG})`
+      `{ } | count_over_time() by (${[SERVICE_NAME_TAG, SERVICE_NAMESPACE_TAG, ...sdkTags].join(', ')})`
     );
   } catch {
     return undefined;
   }
-  const volumes: Volumes = new Map();
-  for (const entry of series) {
-    const label = (key: string) => entry.labels?.find((candidate) => candidate.key === key)?.value?.stringValue ?? '';
-    const spans = (entry.samples ?? []).reduce((total, sample) => total + (sample.value ?? 0), 0);
-    addVolume(volumes, label(SERVICE_NAME_TAG), label(SERVICE_NAMESPACE_TAG), spans);
+  return series.map((entry) => ({
+    name: labelValue(entry.labels, SERVICE_NAME_TAG),
+    namespace: labelValue(entry.labels, SERVICE_NAMESPACE_TAG),
+    sdk: sdkFromLabels(entry, sdkTags),
+    spans: spanTotal(entry),
+  }));
+}
+
+function sdkFromLabels(entry: MetricsSeries, sdkTags: string[]): SDK {
+  const sdk: SDK = {};
+  for (const field of Object.keys(SDK_TAGS) as Array<keyof SDK>) {
+    const value = sdkTags.includes(SDK_TAGS[field]) ? labelValue(entry.labels, SDK_TAGS[field]) : '';
+    if (value) {
+      sdk[field] = value;
+    }
   }
-  return volumes;
+  return sdk;
+}
+
+function heaviestFor(series: MeasuredSeries[], service: ServiceRef): MeasuredSeries | undefined {
+  return series
+    .filter(
+      (entry) =>
+        entry.name === service.name && (service.namespace === undefined || entry.namespace === service.namespace)
+    )
+    .reduce<MeasuredSeries | undefined>(
+      (heaviest, entry) => (heaviest && heaviest.spans >= entry.spans ? heaviest : entry),
+      undefined
+    );
 }
 
 function withSampled(measured: Volumes, sampled: Volumes): Volumes {
@@ -202,13 +248,14 @@ function describe(service: ServiceRef): string {
 async function collectService(
   context: CollectorContext,
   { ref, namespace }: DiscoveredService,
-  keysMethod: KeysMethod
+  keysMethod: KeysMethod,
+  measured: Measured | undefined
 ): Promise<TraceService> {
   const filter = serviceFilter(ref);
   const step = (what: string) => `${what} for ${describe(ref)}`;
   const [keys, sdk] = await Promise.all([
     collectKeys(context, ref, filter, keysMethod, step),
-    collectSDK(context, filter, step),
+    collectSDK(context, ref, filter, step, measured),
   ]);
   const { resourceKeys, spanKeys, namespaces } = keys;
   const spanGroups = await collectSpanGroups(context, ref, spanKeys ?? [], step);
@@ -255,9 +302,35 @@ async function collectSpanGroups(
   return samples.filter((sample): sample is SpanGroupSample => sample !== undefined && sample.sampled > 0);
 }
 
-async function collectSDK(context: CollectorContext, filter: string, step: (what: string) => string): Promise<SDK> {
+async function collectSDK(
+  context: CollectorContext,
+  service: ServiceRef,
+  filter: string,
+  step: (what: string) => string,
+  measured: Measured | undefined
+): Promise<SDK> {
+  const fromMetrics = measured && heaviestFor(measured.sdks, service);
+  if (!fromMetrics) {
+    return sdkFromTags(context, filter, step, Object.keys(SDK_TAGS) as Array<keyof SDK>);
+  }
+  if (!measured.distros) {
+    return { ...fromMetrics.sdk, ...(await sdkFromTags(context, filter, step, ['distro'])) };
+  }
+  const distro = heaviestFor(
+    measured.distros.filter((entry) => entry.sdk.distro),
+    service
+  )?.sdk.distro;
+  return distro ? { ...fromMetrics.sdk, distro } : fromMetrics.sdk;
+}
+
+async function sdkFromTags(
+  context: CollectorContext,
+  filter: string,
+  step: (what: string) => string,
+  fields: Array<keyof SDK>
+): Promise<SDK> {
   const entries = await Promise.all(
-    (Object.keys(SDK_TAGS) as Array<keyof SDK>).map(async (field) => {
+    fields.map(async (field) => {
       const values = await guarded(context, step(SDK_TAGS[field]), () => tagValues(context, SDK_TAGS[field], filter));
       return [field, values?.[0]] as const;
     })

@@ -126,6 +126,12 @@ export function FeatureLimits({ progress, result }: { progress: DatasourceProgre
     ...progress
       .filter((entry) => entry.volumeMethod === 'sample')
       .map((entry) => `${entry.ref.name}: volume from sample, TraceQL metrics are unavailable`),
+    ...progress
+      .filter((entry) => entry.volumeMethod === 'mixed')
+      .map(
+        (entry) =>
+          `${entry.ref.name}: volume from sample for services missing from TraceQL metrics, so they rank lower than measured services`
+      ),
     ...progress.flatMap((entry) =>
       entry.labelChecks
         ? [

@@ -37,6 +37,8 @@ function fakeTempo(failPaths: string[] = []): { get: ProxyGet; calls: Call[] } {
             labels: [
               { key: 'resource.service.name', value: { stringValue: 'checkout' } },
               { key: 'resource.service.namespace', value: { stringValue: 'shop' } },
+              { key: 'resource.telemetry.sdk.language', value: { stringValue: 'python' } },
+              { key: 'resource.telemetry.distro.name', value: { stringValue: 'nil' } },
             ],
             samples: [
               { timestampMs: '1', value: 30 },
@@ -295,7 +297,7 @@ describe('collectTempoInventory', () => {
     const { datasource, errors } = await collectTempoInventory('tempo', get, createLimiter(2), window);
 
     expect(datasource.services.length).toBe(6);
-    expect(errors.length).toBe(6);
+    expect(errors.length).toBe(4);
     expect(errors[0]).toMatchObject({ datasource: 'tempo', message: 'tempo exploded' });
   });
 
@@ -314,10 +316,38 @@ describe('collectTempoInventory', () => {
     expect(checkout?.span_count).toBe(6);
   });
 
-  it('reports metrics as the volume method when TraceQL metrics answer', async () => {
+  it('reports mixed volumes when TraceQL metrics miss some services', async () => {
     const { get } = fakeTempo();
 
-    expect((await collectTempoInventory('tempo', get, createLimiter(2), window)).volumeMethod).toBe('metrics');
+    expect((await collectTempoInventory('tempo', get, createLimiter(2), window)).volumeMethod).toBe('mixed');
+  });
+
+  it('reports metrics as the volume method when TraceQL metrics cover every service', async () => {
+    const { get } = fakeTempo();
+    const onlyCheckout = (async (uid: string, requestPath: string, params: Record<string, string>) =>
+      requestPath === '/api/v2/search/tag/resource.service.name/values'
+        ? { tagValues: [{ type: 'string', value: 'checkout' }] }
+        : get(uid, requestPath, params)) as ProxyGet;
+
+    expect((await collectTempoInventory('tempo', onlyCheckout, createLimiter(2), window)).volumeMethod).toBe('metrics');
+  });
+
+  it('takes SDK fields for every service from two TraceQL metrics queries instead of per-service tag values', async () => {
+    const { get, calls } = fakeTempo();
+
+    const { datasource } = await collectTempoInventory('tempo', get, createLimiter(2), window);
+
+    const checkout = datasource.services.find((service) => service.service_name === 'checkout');
+    expect(checkout?.sdk).toEqual({ language: 'python' });
+    const checkoutSdkTagCalls = calls.filter(
+      (call) => call.path.includes('telemetry') && call.params.q?.includes('"checkout"')
+    );
+    expect(checkoutSdkTagCalls).toEqual([]);
+    const metricQueries = calls.filter((call) => call.path === '/api/metrics/query_range').map((call) => call.params.q);
+    expect(metricQueries).toEqual([
+      '{ } | count_over_time() by (resource.service.name, resource.service.namespace, resource.telemetry.sdk.name, resource.telemetry.sdk.language, resource.telemetry.sdk.version)',
+      '{ } | count_over_time() by (resource.service.name, resource.service.namespace, resource.telemetry.distro.name)',
+    ]);
   });
 
   it('samples keys from traces when the tag filter is ignored', async () => {

@@ -25,6 +25,17 @@ export interface MetricsSeries {
   samples?: MetricsSample[];
 }
 
+const MISSING_VALUE = 'nil';
+
+export function labelValue(labels: MetricsAttribute[] | undefined, key: string): string {
+  const value = labels?.find((label) => label.key === key)?.value?.stringValue ?? '';
+  return value === MISSING_VALUE ? '' : value;
+}
+
+export function spanTotal(series: MetricsSeries): number {
+  return (series.samples ?? []).reduce((total, sample) => total + (sample.value ?? 0), 0);
+}
+
 export interface MetricsQueryContext {
   uid: string;
   get: ProxyGet;

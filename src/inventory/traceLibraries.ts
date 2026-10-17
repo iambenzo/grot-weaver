@@ -2,7 +2,7 @@ import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, tempoWindowParams } from '../window/window';
 import { attributeSelector, serviceFilterExpression } from './traceql';
-import { MetricsAttribute, queryMetricsRange } from './traceqlMetrics';
+import { MetricsAttribute, labelValue, queryMetricsRange } from './traceqlMetrics';
 
 const INSTRUMENTATION_NAME = 'instrumentation:name';
 const INSTRUMENTATION_VERSION = 'instrumentation:version';
@@ -123,7 +123,7 @@ async function lookupWithSample(context: LookupContext, flagged: FlaggedKey): Pr
 }
 
 function libraryFrom(attributes: Attribute[]): Library {
-  const value = (key: string) => attributes.find((attribute) => attribute.key === key)?.value?.stringValue ?? '';
+  const value = (key: string) => labelValue(attributes, key);
   return { name: value(INSTRUMENTATION_NAME), version: value(INSTRUMENTATION_VERSION) };
 }
 

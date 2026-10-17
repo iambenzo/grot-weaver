@@ -137,6 +137,7 @@ function OverviewHeader({
           const entry = assessment.progress.find((candidate) => candidate.ref.uid === ds.uid);
           const limits = [
             entry?.volumeMethod === 'sample' ? 'volume from sample' : '',
+            entry?.volumeMethod === 'mixed' ? 'some volumes from sample' : '',
             entry?.keysMethod === 'sample' ? 'keys from sample' : '',
           ].filter(Boolean);
           return (

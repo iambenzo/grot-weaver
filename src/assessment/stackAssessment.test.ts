@@ -295,6 +295,16 @@ describe('progress, partial results and retry', () => {
       if (uid === 'tempo' && requestPath.endsWith('resource.service.name/values')) {
         return { tagValues: [{ type: 'string', value: 'checkout' }] };
       }
+      if (uid === 'tempo' && requestPath === '/api/metrics/query_range') {
+        return {
+          series: [
+            {
+              labels: [{ key: 'resource.service.name', value: { stringValue: 'checkout' } }],
+              samples: [{ timestampMs: '1', value: 5 }],
+            },
+          ],
+        };
+      }
       return get(uid, requestPath, params);
     }) as ProxyGet;
 

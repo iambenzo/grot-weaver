@@ -99,6 +99,16 @@ describe('FeatureLimits', () => {
     );
   });
 
+  it('names services whose volume was sampled beside measured ones', () => {
+    const mixed = { ...tempo, state: 'ok' as const, volumeMethod: 'mixed' as const };
+
+    render(<FeatureLimits progress={[mixed]} result={result({})} />);
+
+    expect(screen.getByTestId(testIds.status.limits)).toHaveTextContent(
+      'Tempo: volume from sample for services missing from TraceQL metrics'
+    );
+  });
+
   it('renders nothing without limits', () => {
     const { container } = render(<FeatureLimits progress={[prom]} result={result({})} />);
 
