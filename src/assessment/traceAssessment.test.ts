@@ -75,4 +75,27 @@ describe('lookupFindingLibraries', () => {
     expect(queries.filter((query) => query.includes('{ } | count_over_time()'))).toHaveLength(1);
     expect(queries.some((query) => query.includes('resource.telemetry.auto.version != nil'))).toBe(true);
   });
+
+  it('filters on no namespace only when the owners beside the finding prove a split', async () => {
+    const queries: string[] = [];
+    const get = (async (_uid: string, requestPath: string, params: Record<string, string>) => {
+      queries.push(params.q);
+      return requestPath === '/api/metrics/query_range' ? { series: [] } : { traces: [] };
+    }) as ProxyGet;
+    const lookup = (beside: Array<Finding['owner']>) =>
+      lookupFindingLibraries(
+        [base],
+        () => 'tempo',
+        window,
+        { get, limit: createLimiter(1) },
+        () => beside
+      );
+
+    await lookup([]);
+    await lookup([owner, { ...owner, namespace: 'shop' }]);
+
+    const lookups = queries.filter((query) => query?.includes('span.http.method != nil'));
+    expect(lookups.some((query) => query.includes('resource.service.namespace = nil'))).toBe(true);
+    expect(lookups.some((query) => !query.includes('resource.service.namespace'))).toBe(true);
+  });
 });

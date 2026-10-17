@@ -136,4 +136,20 @@ describe('namespaceScope', () => {
       '{ resource.service.name = "api" && span.http.method != nil }'
     );
   });
+
+  it('scopes a log drill-down to no namespace only for a split within the same Loki datasource', () => {
+    const api = { kind: 'service' as const, name: 'api' };
+    const logs = (sibling: string) =>
+      ({
+        ...result,
+        log_attributions: [
+          { owner: api, datasource: 'loki' },
+          { owner: { ...api, namespace: 'shop' }, datasource: sibling },
+        ],
+      }) as unknown as AssessmentResult;
+    const finding = { ...base, owner: api, signal: 'logs' as const, observed: '' };
+
+    expect(evidenceTarget(finding, logs('loki'), typeOf)?.query).toBe('{service_name="api", service_namespace=""}');
+    expect(evidenceTarget(finding, logs('loki-eu'), typeOf)?.query).toBe('{service_name="api"}');
+  });
 });
