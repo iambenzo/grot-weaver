@@ -1,4 +1,4 @@
-import { CollectionError } from './types';
+import { CollectionError, UnknownPart } from './types';
 
 const PERMISSION_STATUSES = [401, 403];
 
@@ -26,6 +26,10 @@ export function toCollectionError(datasource: string, step: string, error: unkno
     collectionError.status = candidate.status;
   }
   return collectionError;
+}
+
+export function markUnknown(service: { unknown?: UnknownPart[] }, part: UnknownPart) {
+  service.unknown = [...new Set([...(service.unknown ?? []), part])];
 }
 
 export function errorMessage(error: unknown): string {

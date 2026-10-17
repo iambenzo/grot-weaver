@@ -133,6 +133,13 @@ export function FeatureLimits({ progress, result }: { progress: DatasourceProgre
           `${entry.ref.name}: volume from sample for services missing from TraceQL metrics, so they rank lower than measured services`
       ),
     ...progress.flatMap((entry) =>
+      entry.unmeasuredVolumes
+        ? [
+            `${entry.ref.name}: volume not measured for ${entry.unmeasuredVolumes} ${entry.unmeasuredVolumes === 1 ? 'service' : 'services'} because the query failed, so their findings rank last`,
+          ]
+        : []
+    ),
+    ...progress.flatMap((entry) =>
       entry.labelChecks
         ? [
             `${entry.ref.name}: label keys checked for the ${entry.labelChecks.checked} busiest of ${entry.labelChecks.total} metric and owner pairs, the rest are not checked`,

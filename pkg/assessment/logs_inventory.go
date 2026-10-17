@@ -28,6 +28,7 @@ type LogService struct {
 	ScopeNames       []string      `json:"scope_names"`
 	SDK              SDK           `json:"sdk"`
 	Volume           float64       `json:"volume"`
+	Unknown          []UnknownPart `json:"unknown,omitempty"`
 }
 
 func (d LogDatasource) validate() error {
@@ -48,6 +49,9 @@ func (d LogDatasource) validate() error {
 func (s LogService) validate() error {
 	if len(s.ServiceName) > MaxNameLength || len(s.ServiceNamespace) > MaxNameLength {
 		return fmt.Errorf("%w: log service name longer than %d", ErrInvalidInventory, MaxNameLength)
+	}
+	if err := validateUnknown(s.Unknown); err != nil {
+		return err
 	}
 	if s.Volume < 0 || s.SampledLines < 0 {
 		return fmt.Errorf("%w: log service %q has negative counts", ErrInvalidInventory, s.ServiceName)

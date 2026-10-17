@@ -7,7 +7,7 @@ import { applicableRules, sampleSpanGroup } from './spanGroups';
 import { ServiceRef, serviceFilterExpression } from './traceql';
 import { MetricsSeries, labelValue, queryMetricsRange, spanTotal } from './traceqlMetrics';
 import { KeysMethod, isTagFilterIgnored, sampleServiceKeys } from './traceKeys';
-import { guardStep } from './guard';
+import { guardStep, markUnknown } from './guard';
 import { MAX_TRACE_SERVICES, limitError } from './limits';
 import { Volumes, addVolume, volumeOf } from './volumes';
 
@@ -113,7 +113,11 @@ export async function collectTempoInventory(
   const sampled = await sampledVolumes(context, unmeasured);
   const volumes = metricVolumes ? withSampled(metricVolumes, sampled) : sampled;
   services.forEach((service, index) => {
-    service.span_count = volumeOf(volumes, discovered[index].ref) ?? 0;
+    const spans = volumeOf(volumes, discovered[index].ref);
+    service.span_count = spans ?? 0;
+    if (spans === undefined) {
+      markUnknown(service, 'volume');
+    }
   });
   const collection: TempoCollection = { datasource: { uid, services }, errors: context.errors };
   if (services.length > 0) {
@@ -159,6 +163,9 @@ async function discoverNamespaces(
   const tagged = (values ?? []).filter(Boolean);
   if (measured) {
     return [...fromMetrics, ...tagged];
+  }
+  if (values === undefined) {
+    return undefined;
   }
   if (tagged.length === 0) {
     return [];
@@ -246,7 +253,10 @@ async function sampledVolumes(context: CollectorContext, services: DiscoveredSer
       const response = await guarded(context, `span volume sample for ${describe(ref)}`, () =>
         context.limit(() => context.get<SearchResponse>(context.uid, '/api/search', params))
       );
-      const spans = (response?.traces ?? [])
+      if (!response) {
+        return;
+      }
+      const spans = (response.traces ?? [])
         .flatMap((trace) => trace.spanSets ?? [])
         .reduce((total, set) => total + (set.matched ?? 0), 0);
       addVolume(volumes, ref.name, ref.namespace ?? '', spans);
@@ -277,7 +287,7 @@ async function collectService(
   ]);
   const { resourceKeys, spanKeys, namespaces } = keys;
   const spanGroups = await collectSpanGroups(context, ref, spanKeys ?? [], step);
-  return {
+  const service: TraceService = {
     service_name: ref.name,
     service_namespace: namespace ?? soleNamespace(namespaces),
     span_count: 0,
@@ -286,6 +296,13 @@ async function collectService(
     span_groups: spanGroups,
     sdk,
   };
+  if (namespace === undefined && namespaces?.length !== 1) {
+    markUnknown(service, 'service_namespace');
+  }
+  if (resourceKeys === undefined) {
+    markUnknown(service, 'resource_keys');
+  }
+  return service;
 }
 
 async function collectKeys(

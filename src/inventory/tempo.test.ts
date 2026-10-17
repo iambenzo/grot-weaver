@@ -461,3 +461,40 @@ describe('scorer limits', () => {
     );
   });
 });
+
+describe('unknown parts', () => {
+  const unknownOf = (services: Array<{ service_name: string; unknown?: string[] }>, name: string) =>
+    services.find((service) => service.service_name === name)?.unknown ?? [];
+
+  it('marks the namespace unknown when its lookup fails for a service TraceQL metrics did not cover', async () => {
+    const { get } = fakeTempo(['service.namespace']);
+
+    const { datasource } = await collectTempoInventory('tempo', get, createLimiter(2), window);
+
+    expect(unknownOf(datasource.services, 'checkout')).not.toContain('service_namespace');
+    expect(unknownOf(datasource.services, 'inventory')).toContain('service_namespace');
+  });
+
+  it('marks resource keys unknown when the resource tag lookup fails', async () => {
+    const { get } = fakeTempo();
+    const failing = (async (uid: string, requestPath: string, params: Record<string, string>) => {
+      if (requestPath === '/api/v2/search/tags' && params.scope === 'resource' && params.q?.includes('"checkout"')) {
+        throw { status: 500, data: { message: 'tempo exploded' } };
+      }
+      return get(uid, requestPath, params);
+    }) as ProxyGet;
+
+    const { datasource } = await collectTempoInventory('tempo', failing, createLimiter(2), window);
+
+    expect(unknownOf(datasource.services, 'checkout')).toEqual(['resource_keys']);
+  });
+
+  it('marks volume unknown when the sampled volume search fails', async () => {
+    const { get } = fakeTempo(['/api/metrics/query_range', '/api/search']);
+
+    const { datasource } = await collectTempoInventory('tempo', get, createLimiter(2), window);
+
+    expect(datasource.services.every((service) => service.unknown?.includes('volume'))).toBe(true);
+    expect(datasource.services.every((service) => service.span_count === 0)).toBe(true);
+  });
+});

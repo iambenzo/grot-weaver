@@ -4,7 +4,14 @@ import { VolumeMethod, collectTempoInventory } from '../inventory/tempo';
 import { KeysMethod } from '../inventory/traceKeys';
 import { collectPrometheusInventory, LabelChecks, LabelProgress, NamesNeedingLabels } from '../inventory/prometheus';
 import { collectLokiInventory } from '../inventory/loki';
-import { CollectionError, Inventory, LogDatasource, MetricDatasource, TraceDatasource } from '../inventory/types';
+import {
+  CollectionError,
+  Inventory,
+  LogDatasource,
+  MetricDatasource,
+  TraceDatasource,
+  UnknownPart,
+} from '../inventory/types';
 import { isPermissionDenied } from '../inventory/guard';
 import { QueryWindow } from '../window/window';
 import { ScoreInventory } from '../api/score';
@@ -34,6 +41,7 @@ export interface DatasourceProgress {
   volumeMethod?: VolumeMethod;
   keysMethod?: KeysMethod;
   labelChecks?: LabelChecks;
+  unmeasuredVolumes?: number;
 }
 
 export interface Collection {
@@ -46,6 +54,7 @@ export interface Collection {
   volumeMethod?: VolumeMethod;
   keysMethod?: KeysMethod;
   labelChecks?: LabelChecks;
+  unmeasuredVolumes?: number;
 }
 
 export interface StackAssessment {
@@ -179,6 +188,7 @@ async function collect(
       traces: collected.datasource,
       volumeMethod: collected.volumeMethod,
       keysMethod: collected.keysMethod,
+      unmeasuredVolumes: unmeasured(collected.datasource.services),
     };
   }
   if (signal === 'metrics') {
@@ -201,7 +211,18 @@ async function collect(
   }
   const limit = sampleLimit(settings.logSampleLimit, DEFAULT_LOG_SAMPLE_LIMIT);
   const collected = await collectLokiInventory(ref.uid, deps.get, deps.limit, window, limit);
-  return { ref, signal, errors: collected.errors, logs: collected.datasource };
+  return {
+    ref,
+    signal,
+    errors: collected.errors,
+    logs: collected.datasource,
+    unmeasuredVolumes: unmeasured(collected.datasource.services),
+  };
+}
+
+function unmeasured(services: Array<{ unknown?: UnknownPart[] }>): number | undefined {
+  const count = services.filter((service) => service.unknown?.includes('volume')).length;
+  return count > 0 ? count : undefined;
 }
 
 function buildInventory(collections: Collection[], window: QueryWindow, settings: PluginSettings): Inventory {
@@ -252,6 +273,7 @@ function progressOf(datasources: DatasourcesBySignal, collections: Collection[])
       volumeMethod: collection.volumeMethod,
       keysMethod: collection.keysMethod,
       labelChecks: collection.labelChecks,
+      unmeasuredVolumes: collection.unmeasuredVolumes,
     };
   });
 }

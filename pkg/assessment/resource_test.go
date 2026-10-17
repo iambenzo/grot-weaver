@@ -143,6 +143,63 @@ func Test_Assess_requiredResourceAttributesOnLogs(t *testing.T) {
 	})
 }
 
+func Test_Assess_failedCollectionStepsLeaveAttributesUnknown(t *testing.T) {
+	inventory := Inventory{
+		Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{
+			{ServiceName: "checkout", SpanCount: 10, ResourceKeys: []KeyObservation{{Key: "service.name"}, {Key: "service.instance.id"}}, Unknown: []UnknownPart{UnknownNamespace}},
+			{ServiceName: "cart", SpanCount: 5, SpanKeys: []KeyObservation{{Key: "http.route"}}, Unknown: []UnknownPart{UnknownResourceKeys}},
+		}}},
+		Logs: []LogDatasource{{UID: "loki", Services: []LogService{
+			{ServiceName: "checkout", MetadataKeys: []string{"deployment_environment_name"}, KeysMethod: MethodDetectedFields, Volume: 3, Unknown: []UnknownPart{UnknownStreamLabels, UnknownNamespace}},
+		}}},
+	}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	checkout := finding.Owner{Kind: finding.OwnerService, Name: "checkout"}
+	wantStates(t, resourceStates(result, checkout, finding.SignalTraces), map[string]PresenceState{
+		"service.name": PresencePresent, "service.namespace": PresenceUnknown,
+		"service.instance.id": PresencePresent, "deployment.environment.name": PresenceMissing,
+	})
+	wantStates(t, resourceStates(result, finding.Owner{Kind: finding.OwnerService, Name: "cart"}, finding.SignalTraces), map[string]PresenceState{
+		"service.name": PresencePresent, "service.namespace": PresenceMissing,
+		"service.instance.id": PresenceUnknown, "deployment.environment.name": PresenceUnknown,
+	})
+	logs := resourceStates(result, checkout, finding.SignalLogs)
+	wantStates(t, logs, map[string]PresenceState{
+		"service.name": PresencePresent, "service.namespace": PresenceUnknown,
+		"service.instance.id": PresenceUnknown, "deployment.environment.name": PresencePresent,
+	})
+	if !strings.Contains(logs["service.instance.id"].evidence, "stream labels could not be collected") {
+		t.Errorf("evidence = %q, want the failed stream labels named", logs["service.instance.id"].evidence)
+	}
+}
+
+func Test_Assess_aSourceThatKnowsOutranksOneThatCouldNotTell(t *testing.T) {
+	keys := []KeyObservation{{Key: "service.name"}}
+	inventory := Inventory{Traces: []TraceDatasource{
+		{UID: "tempo-a", Services: []TraceService{{ServiceName: "checkout", SpanCount: 1, ResourceKeys: keys, Unknown: []UnknownPart{UnknownNamespace}}}},
+		{UID: "tempo-b", Services: []TraceService{{ServiceName: "checkout", SpanCount: 1, ResourceKeys: keys}}},
+	}}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	states := resourceStates(result, finding.Owner{Kind: finding.OwnerService, Name: "checkout"}, finding.SignalTraces)
+	if states["service.namespace"].state != PresenceMissing {
+		t.Errorf("service.namespace = %+v, want missing", states["service.namespace"])
+	}
+}
+
+func Test_Inventory_Validate_rejectsUnrecognisedUnknownParts(t *testing.T) {
+	inventory := Inventory{Window: Window{Start: 1, End: 2}, Traces: []TraceDatasource{{UID: "tempo", Services: []TraceService{
+		{ServiceName: "checkout", Unknown: []UnknownPart{"everything"}},
+	}}}}
+
+	if err := inventory.Validate(); !errors.Is(err, ErrInvalidInventory) {
+		t.Errorf("err = %v, want ErrInvalidInventory", err)
+	}
+}
+
 func Test_Assess_requiredResourceAttributesAreConfigurableAndScoredSeparately(t *testing.T) {
 	inventory := Inventory{
 		RequiredResourceAttributes: []string{"service.name", "team.name"},

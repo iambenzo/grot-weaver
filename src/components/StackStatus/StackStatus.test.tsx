@@ -109,6 +109,16 @@ describe('FeatureLimits', () => {
     );
   });
 
+  it('names services whose volume could not be measured', () => {
+    const failed = { ...lokiDenied, state: 'errors' as const, errors: [], unmeasuredVolumes: 2 };
+
+    render(<FeatureLimits progress={[failed]} result={result({})} />);
+
+    expect(screen.getByTestId(testIds.status.limits)).toHaveTextContent(
+      'Loki: volume not measured for 2 services because the query failed, so their findings rank last'
+    );
+  });
+
   it('renders nothing without limits', () => {
     const { container } = render(<FeatureLimits progress={[prom]} result={result({})} />);
 

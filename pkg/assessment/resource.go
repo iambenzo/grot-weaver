@@ -46,13 +46,14 @@ type ResourceAttributeCheck struct {
 type observedResource struct {
 	keys          map[string]string
 	authoritative map[string]bool
+	unknown       map[string]string
 	complete      bool
 	where         string
 	unknownReason string
 }
 
 func newObservedResource(where, unknownReason string, complete bool) *observedResource {
-	return &observedResource{keys: map[string]string{}, authoritative: map[string]bool{}, complete: complete, where: where, unknownReason: unknownReason}
+	return &observedResource{keys: map[string]string{}, authoritative: map[string]bool{}, unknown: map[string]string{}, complete: complete, where: where, unknownReason: unknownReason}
 }
 
 func (o *observedResource) see(key, evidence string) {
@@ -68,9 +69,21 @@ func (o *observedResource) settle(attribute, evidence string, present bool) {
 	}
 }
 
+func (o *observedResource) markUnknown(attribute, reason string) {
+	o.unknown[attribute] = reason
+}
+
+func (o *observedResource) markedUnknown(attribute string) (string, bool) {
+	reason, unknown := o.unknown[attribute]
+	return reason, unknown && !o.authoritative[attribute]
+}
+
 func (o *observedResource) merge(other *observedResource) {
 	for key, evidence := range other.keys {
 		o.see(key, evidence)
+	}
+	for attribute, reason := range other.unknown {
+		o.markUnknown(attribute, reason)
 	}
 	for attribute := range other.authoritative {
 		o.authoritative[attribute] = true
@@ -142,6 +155,9 @@ func (o *observedResource) judge(attribute string, deprecatedNames []string) (Pr
 	if evidence, present := o.lookup(attribute); present {
 		return PresencePresent, evidence
 	}
+	if reason, unknown := o.markedUnknown(attribute); unknown {
+		return PresenceUnknown, reason
+	}
 	if !o.complete && !o.authoritative[attribute] {
 		return PresenceUnknown, o.unknownReason
 	}
@@ -156,6 +172,9 @@ func (o *observedResource) judge(attribute string, deprecatedNames []string) (Pr
 func (o *observedResource) judgeAny(names []string) PresenceState {
 	if slices.ContainsFunc(names, o.has) {
 		return PresencePresent
+	}
+	if slices.ContainsFunc(names, func(name string) bool { _, unknown := o.markedUnknown(name); return unknown }) {
+		return PresenceUnknown
 	}
 	if o.complete || !slices.ContainsFunc(names, o.unsettled) {
 		return PresenceMissing
@@ -211,9 +230,10 @@ func validateAttributeList(attributes []string, limit int, what string) error {
 }
 
 func traceResource(service TraceService) *observedResource {
-	observed := newObservedResource("the trace resource attributes", "no trace resource attributes were collected", len(service.ResourceKeys) > 0)
+	complete := len(service.ResourceKeys) > 0 && !slices.Contains(service.Unknown, UnknownResourceKeys)
+	observed := newObservedResource("the trace resource attributes", "no trace resource attributes were collected", complete)
 	observed.settle(attributeServiceName, "service.name resource attribute", service.ServiceName != "")
-	observed.settle(attributeServiceNamespace, "service.namespace resource attribute", service.ServiceNamespace != "")
+	settleNamespace(observed, service.Unknown, "service.namespace resource attribute", service.ServiceNamespace != "")
 	for _, key := range service.ResourceKeys {
 		observed.see(key.Key, key.Key+" resource attribute")
 	}
@@ -242,15 +262,32 @@ func metricResource(owner finding.Owner, labels, target map[string]string, check
 	return observed
 }
 
+func settleNamespace(observed *observedResource, unknown []UnknownPart, evidence string, present bool) {
+	if !slices.Contains(unknown, UnknownNamespace) {
+		observed.settle(attributeServiceNamespace, evidence, present)
+		return
+	}
+	if present {
+		observed.see(attributeServiceNamespace, evidence)
+		return
+	}
+	observed.markUnknown(attributeServiceNamespace, "the service namespace could not be collected")
+}
+
 func promLabelName(attribute string) string {
 	return invalidLabelCharacters.ReplaceAllString(attribute, "_")
 }
 
 func logResource(service LogService) *observedResource {
-	complete := service.KeysMethod == MethodDetectedFields || service.SampledLines > 0
-	observed := newObservedResource("the log stream labels and structured metadata", "no log lines were sampled for this service", complete)
+	sampled := service.KeysMethod == MethodDetectedFields || service.SampledLines > 0
+	complete := sampled && !slices.Contains(service.Unknown, UnknownStreamLabels)
+	reason := "no log lines were sampled for this service"
+	if sampled {
+		reason = "the stream labels could not be collected for this service"
+	}
+	observed := newObservedResource("the log stream labels and structured metadata", reason, complete)
 	observed.settle(attributeServiceName, "service_name stream label", true)
-	observed.settle(attributeServiceNamespace, "service_namespace label", service.ServiceNamespace != "")
+	settleNamespace(observed, service.Unknown, "service_namespace label", service.ServiceNamespace != "")
 	for _, key := range service.StreamLabels {
 		observed.see(key, key+" stream label")
 	}

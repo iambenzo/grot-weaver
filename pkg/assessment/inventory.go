@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"slices"
 )
 
 const (
@@ -52,6 +53,30 @@ type TraceService struct {
 	SpanKeys         []KeyObservation  `json:"span_keys"`
 	SpanGroups       []SpanGroupSample `json:"span_groups"`
 	SDK              SDK               `json:"sdk"`
+	Unknown          []UnknownPart     `json:"unknown,omitempty"`
+}
+
+type UnknownPart string
+
+const (
+	UnknownNamespace    UnknownPart = "service_namespace"
+	UnknownResourceKeys UnknownPart = "resource_keys"
+	UnknownStreamLabels UnknownPart = "stream_labels"
+	UnknownVolume       UnknownPart = "volume"
+)
+
+var unknownParts = []UnknownPart{UnknownNamespace, UnknownResourceKeys, UnknownStreamLabels, UnknownVolume}
+
+func validateUnknown(parts []UnknownPart) error {
+	if len(parts) > len(unknownParts) {
+		return fmt.Errorf("%w: more unknown parts than exist", ErrInvalidInventory)
+	}
+	for _, part := range parts {
+		if !slices.Contains(unknownParts, part) {
+			return fmt.Errorf("%w: unknown part %q", ErrInvalidInventory, part)
+		}
+	}
+	return nil
 }
 
 type SpanGroupSample struct {
@@ -139,6 +164,9 @@ func (d TraceDatasource) validate() error {
 func (s TraceService) validate() error {
 	if len(s.ServiceName) > MaxNameLength || len(s.ServiceNamespace) > MaxNameLength {
 		return fmt.Errorf("%w: service name longer than %d", ErrInvalidInventory, MaxNameLength)
+	}
+	if err := validateUnknown(s.Unknown); err != nil {
+		return err
 	}
 	if len(s.ResourceKeys)+len(s.SpanKeys) > MaxKeysPerService {
 		return fmt.Errorf("%w: service %q has more than %d keys", ErrInvalidInventory, s.ServiceName, MaxKeysPerService)

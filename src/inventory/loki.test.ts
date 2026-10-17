@@ -14,6 +14,8 @@ interface FakeLokiOptions {
   series?: Array<Record<string, string>>;
   volumes?: Array<{ metric: Record<string, string>; bytes: number }>;
   volumeFails?: boolean;
+  statsFails?: boolean;
+  seriesFails?: boolean;
   serviceNames?: string[];
 }
 
@@ -32,6 +34,9 @@ function fakeLoki(options: FakeLokiOptions = {}) {
       case '/loki/api/v1/label/service_name/values':
         return { status: 'success', data: options.serviceNames ?? ['checkout'] };
       case '/loki/api/v1/series':
+        if (options.seriesFails) {
+          throw { status: 500, data: 'loki exploded' };
+        }
         return options.series ? { status: 'success', data: options.series } : fixture('series-checkout.json');
       case '/loki/api/v1/detected_fields':
         if (options.detectedFieldsFail) {
@@ -53,6 +58,9 @@ function fakeLoki(options: FakeLokiOptions = {}) {
           },
         };
       case '/loki/api/v1/index/stats':
+        if (options.statsFails) {
+          throw { status: 500, data: 'loki exploded' };
+        }
         return { streams: 1, chunks: 1, entries: 1, bytes: 7 };
     }
     throw new Error(`unexpected ${requestPath}`);
@@ -197,6 +205,32 @@ describe('collectLokiInventory', () => {
         .map((call) => call.params.limit)
         .sort()
     ).toEqual(['20', '5']);
+  });
+});
+
+describe('unknown parts', () => {
+  it('marks stream labels and namespace unknown when the streams call fails', async () => {
+    const { get } = fakeLoki({ seriesFails: true });
+
+    const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(datasource.services[0].unknown).toEqual(['stream_labels', 'service_namespace']);
+  });
+
+  it('marks volume unknown when neither index volume nor index stats answer', async () => {
+    const { get } = fakeLoki({ volumeFails: true, statsFails: true });
+
+    const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(datasource.services[0]).toMatchObject({ volume: 0, unknown: ['volume'] });
+  });
+
+  it('leaves unknown unset when every step answers', async () => {
+    const { get } = fakeLoki();
+
+    const { datasource } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(datasource.services[0].unknown).toBeUndefined();
   });
 });
 

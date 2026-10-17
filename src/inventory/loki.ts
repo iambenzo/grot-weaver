@@ -2,7 +2,7 @@ import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
 import { QueryWindow, lokiWindowParams } from '../window/window';
 import { CollectionError, LogDatasource, LogKeysMethod, LogService, SDK, ServiceRef } from './types';
-import { guardStep } from './guard';
+import { guardStep, markUnknown } from './guard';
 import { MAX_LOG_SERVICES, limitError } from './limits';
 import { Volumes, addVolume, volumeOf } from './volumes';
 
@@ -103,17 +103,18 @@ export async function collectLokiInventory(
 }
 
 async function collectServices(context: Context, name: string): Promise<LogService[]> {
-  const series =
-    (await guarded(context, `streams for service "${name}"`, () =>
-      lokiGet<Array<Record<string, string>>>(context, '/loki/api/v1/series', {
-        ...lokiWindowParams(context.window),
-        'match[]': streamSelector({ name }),
-      })
-    )) ?? [];
+  const fetched = await guarded(context, `streams for service "${name}"`, () =>
+    lokiGet<Array<Record<string, string>>>(context, '/loki/api/v1/series', {
+      ...lokiWindowParams(context.window),
+      'match[]': streamSelector({ name }),
+    })
+  );
+  const series = fetched ?? [];
+  const streamsKnown = fetched !== undefined;
   const namespaceOf = (labels: Record<string, string>) => labels[SERVICE_NAMESPACE] ?? '';
   const namespaces = [...new Set(series.map(namespaceOf))];
   if (namespaces.length <= 1) {
-    return [await collectService(context, { name }, series, namespaces[0] ?? '')];
+    return [await collectService(context, { name }, series, namespaces[0] ?? '', streamsKnown)];
   }
   return Promise.all(
     namespaces.map((namespace) =>
@@ -121,7 +122,8 @@ async function collectServices(context: Context, name: string): Promise<LogServi
         context,
         { name, namespace },
         series.filter((labels) => namespaceOf(labels) === namespace),
-        namespace
+        namespace,
+        streamsKnown
       )
     )
   );
@@ -131,7 +133,8 @@ async function collectService(
   context: Context,
   service: ServiceRef,
   series: Array<Record<string, string>>,
-  namespace: string
+  namespace: string,
+  streamsKnown: boolean
 ): Promise<LogService> {
   const where =
     service.namespace === undefined ? service.name : `${service.namespace || '(no namespace)'}/${service.name}`;
@@ -155,7 +158,7 @@ async function collectService(
   const metadataKeys = detected ?? keysOf(keySample);
   const streamLabels = [...new Set(series.flatMap((labels) => Object.keys(labels)))].sort();
 
-  return {
+  const collected: LogService = {
     service_name: service.name,
     service_namespace: namespace,
     stream_labels: streamLabels,
@@ -167,6 +170,14 @@ async function collectService(
     sdk: sdkOf(sample ?? []),
     volume: volume ?? 0,
   };
+  if (!streamsKnown) {
+    markUnknown(collected, 'stream_labels');
+    markUnknown(collected, 'service_namespace');
+  }
+  if (volume === undefined) {
+    markUnknown(collected, 'volume');
+  }
+  return collected;
 }
 
 async function detectedFieldKeys(context: Context, selector: string): Promise<string[] | undefined> {

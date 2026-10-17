@@ -26,6 +26,8 @@ export interface SpanGroupSample {
   present: Record<string, number>;
 }
 
+export type UnknownPart = 'service_namespace' | 'resource_keys' | 'stream_labels' | 'volume';
+
 export interface TraceService {
   service_name: string;
   service_namespace: string;
@@ -34,6 +36,7 @@ export interface TraceService {
   span_keys: KeyObservation[];
   span_groups: SpanGroupSample[];
   sdk: SDK;
+  unknown?: UnknownPart[];
 }
 
 export interface TraceDatasource {
@@ -97,6 +100,7 @@ export interface LogService {
   scope_names: string[];
   sdk: SDK;
   volume: number;
+  unknown?: UnknownPart[];
 }
 
 export interface LogDatasource {
