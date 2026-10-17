@@ -1,13 +1,16 @@
 import { ProxyGet } from '../datasources/proxy';
 import { Limiter } from '../datasources/limiter';
-import { QueryWindow, lokiWindowParams, prometheusLookback } from '../window/window';
+import { QueryWindow, lokiWindowParams } from '../window/window';
 import { CollectionError, LogDatasource, LogKeysMethod, LogService, SDK, ServiceRef } from './types';
 import { guardStep } from './guard';
+import { Volumes, addVolume, volumeOf } from './volumes';
 
 const SERVICE_NAME = 'service_name';
 const SERVICE_NAMESPACE = 'service_namespace';
 const VALUES_SAMPLE_LIMIT = '5';
 const DEFAULT_KEYS_SAMPLE_LIMIT = 20;
+const VOLUME_SELECTOR = `{${SERVICE_NAME}=~".+", ${SERVICE_NAMESPACE}=~".*"}`;
+export const VOLUME_SERIES_LIMIT = 5000;
 const CATEGORIZE_LABELS = { 'X-Loki-Response-Encoding-Flags': 'categorize-labels' };
 
 export const OTLP_MARKERS = [
@@ -34,6 +37,10 @@ interface SampleStream {
   values: Array<[string, string, { structuredMetadata?: Record<string, string>; parsed?: Record<string, string> }?]>;
 }
 
+interface IndexStats {
+  bytes?: number;
+}
+
 interface Context {
   uid: string;
   get: ProxyGet;
@@ -41,6 +48,7 @@ interface Context {
   window: QueryWindow;
   errors: CollectionError[];
   sampleLimit?: number;
+  volumes?: Volumes;
 }
 
 export interface LokiCollection {
@@ -68,12 +76,14 @@ export async function collectLokiInventory(
   sampleLimit?: number
 ): Promise<LokiCollection> {
   const context: Context = { uid, get, limit, window, errors: [], sampleLimit };
-  const [labels, serviceNames] = await Promise.all([
+  const [labels, serviceNames, volumes] = await Promise.all([
     guarded(context, 'labels', () => lokiGet<string[]>(context, '/loki/api/v1/labels', lokiWindowParams(window))),
     guarded(context, 'service names', () =>
       lokiGet<string[]>(context, `/loki/api/v1/label/${SERVICE_NAME}/values`, lokiWindowParams(window))
     ),
+    indexVolumes(context).catch(() => undefined),
   ]);
+  context.volumes = volumes;
   const services = (await Promise.all((serviceNames ?? []).map((name) => collectServices(context, name)))).flat();
   return { datasource: { uid, labels: [...(labels ?? [])].sort(), services }, errors: context.errors };
 }
@@ -116,7 +126,7 @@ async function collectService(
   const [detected, sample, volume] = await Promise.all([
     detectedFieldKeys(context, selector),
     guarded(context, step('sample'), () => sampleStreams(context, selector, VALUES_SAMPLE_LIMIT)),
-    guarded(context, step('volume'), () => logVolume(context, selector)),
+    serviceVolume(context, service, selector, step),
   ]);
 
   let method: LogKeysMethod = 'detected_fields';
@@ -175,15 +185,38 @@ async function sampleStreams(context: Context, selector: string, lineLimit: stri
   return response.data.result;
 }
 
-async function logVolume(context: Context, selector: string): Promise<number> {
-  const query = `sum(count_over_time(${selector}[${prometheusLookback(context.window)}]))`;
-  const response = await context.limit(() =>
-    context.get<LokiResponse<{ result: Array<{ value: [number, string] }> }>>(context.uid, '/loki/api/v1/query', {
-      query,
-      time: String(context.window.endSeconds),
-    })
+async function indexVolumes(context: Context): Promise<Volumes> {
+  const result = await lokiGet<{ result: Array<{ metric: Record<string, string>; value: [number, string] }> }>(
+    context,
+    '/loki/api/v1/index/volume',
+    { ...lokiWindowParams(context.window), query: VOLUME_SELECTOR, limit: String(VOLUME_SERIES_LIMIT) }
   );
-  return Number(response.data.result[0]?.value[1] ?? 0);
+  const volumes: Volumes = new Map();
+  for (const { metric, value } of result.result) {
+    addVolume(volumes, metric[SERVICE_NAME] ?? '', metric[SERVICE_NAMESPACE] ?? '', Number(value[1]));
+  }
+  return volumes;
+}
+
+async function serviceVolume(
+  context: Context,
+  service: ServiceRef,
+  selector: string,
+  step: (what: string) => string
+): Promise<number | undefined> {
+  const indexed = context.volumes && volumeOf(context.volumes, service);
+  if (indexed !== undefined) {
+    return indexed;
+  }
+  const stats = await guarded(context, step('volume'), () =>
+    context.limit(() =>
+      context.get<IndexStats>(context.uid, '/loki/api/v1/index/stats', {
+        ...lokiWindowParams(context.window),
+        query: selector,
+      })
+    )
+  );
+  return stats?.bytes;
 }
 
 async function lokiGet<T>(context: Context, path: string, params: Record<string, string>): Promise<T> {

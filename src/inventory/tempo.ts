@@ -8,6 +8,7 @@ import { ServiceRef, serviceFilterExpression } from './traceql';
 import { queryMetricsRange } from './traceqlMetrics';
 import { KeysMethod, isTagFilterIgnored, sampleServiceKeys } from './traceKeys';
 import { guardStep } from './guard';
+import { Volumes, addVolume, volumeOf } from './volumes';
 
 const SERVICE_NAME_TAG = 'resource.service.name';
 const SERVICE_NAMESPACE_TAG = 'resource.service.namespace';
@@ -56,8 +57,6 @@ interface DiscoveredService {
   namespace: string;
 }
 
-type Volumes = Map<string, Map<string, number>>;
-
 export function serviceFilter(service: ServiceRef): string {
   return `{ ${serviceFilterExpression(service)} }`;
 }
@@ -83,7 +82,7 @@ export async function collectTempoInventory(
   ]);
   const volumes = metricVolumes ?? (await sampledVolumes(context, discovered));
   services.forEach((service, index) => {
-    service.span_count = volumeOf(volumes, discovered[index].ref);
+    service.span_count = volumeOf(volumes, discovered[index].ref) ?? 0;
   });
   const collection: TempoCollection = { datasource: { uid, services }, errors: context.errors };
   if (services.length > 0) {
@@ -102,23 +101,6 @@ async function discoverNamespaces(context: CollectorContext, name: string): Prom
     return distinct.map((namespace) => ({ ref: { name, namespace }, namespace }));
   }
   return [{ ref: { name }, namespace: distinct[0] ?? '' }];
-}
-
-function addVolume(volumes: Volumes, name: string, namespace: string, spans: number) {
-  const byNamespace = volumes.get(name) ?? new Map<string, number>();
-  byNamespace.set(namespace, (byNamespace.get(namespace) ?? 0) + spans);
-  volumes.set(name, byNamespace);
-}
-
-function volumeOf(volumes: Volumes, service: ServiceRef): number {
-  const byNamespace = volumes.get(service.name);
-  if (!byNamespace) {
-    return 0;
-  }
-  if (service.namespace) {
-    return byNamespace.get(service.namespace) ?? 0;
-  }
-  return [...byNamespace.values()].reduce((total, spans) => total + spans, 0);
 }
 
 async function spanVolumes(context: CollectorContext): Promise<Volumes | undefined> {
