@@ -136,4 +136,60 @@ describe('assessment store', () => {
     expect(run.state.assessment).toBe(retried);
     expect(listener).toHaveBeenCalledTimes(2);
   });
+
+  it('runs a retry clicked during the main run only after it, starting from its final result', async () => {
+    const runs = controlledRuns(assessStack as jest.Mock);
+    const retries = controlledRuns(retryDatasource as jest.Mock);
+    const { store } = storeAt({ nowMs: 0 });
+    const run = store.acquire('a', window, settings);
+    const partial = { progress: [], partial: true } as unknown as StackAssessment;
+    runs[0].deps.onPartial?.(partial);
+
+    store.retry(run, 'loki');
+    await settle();
+    expect(retryDatasource).not.toHaveBeenCalled();
+
+    const complete = { progress: [], partial: false } as unknown as StackAssessment;
+    runs[0].resolve(complete);
+    await settle();
+    expect(retryDatasource).toHaveBeenCalledWith(complete, 'loki', window, settings, expect.anything());
+
+    const retried = { progress: [], partial: false } as unknown as StackAssessment;
+    retries[0].resolve(retried);
+    await settle();
+    expect(run.state.assessment).toBe(retried);
+  });
+
+  it('chains concurrent retries so the second starts from the first one result', async () => {
+    const runs = controlledRuns(assessStack as jest.Mock);
+    const retries = controlledRuns(retryDatasource as jest.Mock);
+    const { store } = storeAt({ nowMs: 0 });
+    const run = store.acquire('a', window, settings);
+    runs[0].resolve(assessment);
+    await settle();
+
+    store.retry(run, 'loki');
+    store.retry(run, 'tempo');
+    await settle();
+    expect(retryDatasource).toHaveBeenCalledTimes(1);
+
+    const afterLoki = { progress: [] } as unknown as StackAssessment;
+    retries[0].resolve(afterLoki);
+    await settle();
+    expect((retryDatasource as jest.Mock).mock.calls[1].slice(0, 2)).toEqual([afterLoki, 'tempo']);
+  });
+
+  it('ignores a second click on a retry that is still queued', async () => {
+    const runs = controlledRuns(assessStack as jest.Mock);
+    controlledRuns(retryDatasource as jest.Mock);
+    const { store } = storeAt({ nowMs: 0 });
+    const run = store.acquire('a', window, settings);
+
+    store.retry(run, 'loki');
+    store.retry(run, 'loki');
+    runs[0].resolve(assessment);
+    await settle();
+
+    expect(retryDatasource).toHaveBeenCalledTimes(1);
+  });
 });

@@ -41,6 +41,8 @@ interface ActiveRun extends Run {
   running: number;
   controller: AbortController;
   listeners: Set<Listener>;
+  queue: Promise<void>;
+  queuedRetries: Set<string>;
   abandonTimer?: ReturnType<typeof setTimeout>;
 }
 
@@ -81,8 +83,7 @@ export function createAssessmentStore(
     notify(run);
   };
 
-  const start = (run: ActiveRun, begin: Start) => {
-    run.running++;
+  const execute = (run: ActiveRun, begin: Start) =>
     begin({
       ...dependencies(run.settings, run.controller.signal),
       onLabelProgress: (labels) => patch(run, { labels }),
@@ -90,8 +91,16 @@ export function createAssessmentStore(
       onPartial: (assessment) => patch(run, { assessment }),
     })
       .then((assessment) => patch(run, { assessment, progress: assessment.progress, message: undefined }))
-      .catch((error: unknown) => patch(run, { message: messageOf(error) }))
-      .finally(() => run.running--);
+      .catch((error: unknown) => patch(run, { message: messageOf(error) }));
+
+  const enqueue = (run: ActiveRun, next: () => Start | undefined) => {
+    const idle = run.running === 0;
+    run.running++;
+    const step = () => {
+      const begin = next();
+      return begin && !run.controller.signal.aborted ? execute(run, begin) : undefined;
+    };
+    run.queue = (idle ? Promise.resolve(step()) : run.queue.then(step)).finally(() => run.running--);
   };
 
   const abandon = (run: ActiveRun) => {
@@ -123,9 +132,11 @@ export function createAssessmentStore(
         running: 0,
         controller: new AbortController(),
         listeners: new Set(),
+        queue: Promise.resolve(),
+        queuedRetries: new Set(),
       };
       current = run;
-      start(run, (deps) => assessStack(discoverStack(settings), window, settings, deps));
+      enqueue(run, () => (deps) => assessStack(discoverStack(settings), window, settings, deps));
       return run;
     },
 
@@ -143,11 +154,15 @@ export function createAssessmentStore(
 
     retry(run: Run, uid: string) {
       const active = run as ActiveRun;
-      const base = active.state.assessment;
-      if (!base || active.controller.signal.aborted) {
+      if (active.controller.signal.aborted || active.queuedRetries.has(uid)) {
         return;
       }
-      start(active, (deps) => retryDatasource(base, uid, active.window, active.settings, deps));
+      active.queuedRetries.add(uid);
+      enqueue(active, () => {
+        active.queuedRetries.delete(uid);
+        const base = active.state.assessment;
+        return base && ((deps) => retryDatasource(base, uid, active.window, active.settings, deps));
+      });
     },
   };
 }
