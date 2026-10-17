@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { ProxyGet } from '../datasources/proxy';
 import { createLimiter } from '../datasources/limiter';
-import { MAX_OWNER_ATTEMPTS_PER_BATCH } from './queryBudget';
+import { MAX_OWNER_ATTEMPTS_PER_BATCH, SERIES_HOURS_PER_QUERY } from './queryBudget';
 import {
   MAX_LABEL_KEY_CALLS,
   anonymousOwnersQuery,
@@ -333,7 +333,38 @@ describe('bounded owner queries', () => {
     const { errors } = await collectPrometheusInventory('prom', get, createLimiter(4), window);
 
     expect(ownerCalls(calls).length).toBe(MAX_OWNER_ATTEMPTS_PER_BATCH + 1);
-    expect(errors.filter((error) => error.message.startsWith('stopped splitting'))).toHaveLength(1);
+    const stopped = errors.filter((error) => error.message.startsWith('stopped splitting'));
+    expect(stopped).toHaveLength(1);
+    expect(stopped[0].message).toMatch(
+      new RegExp(
+        `^stopped splitting after ${MAX_OWNER_ATTEMPTS_PER_BATCH + 1} owner query attempts against Mimir limits; owners not collected for heavy_\\d+, heavy_\\d+, heavy_\\d+ and \\d+ more$`
+      )
+    );
+    const skippedCount = 3 + Number(/and (\d+) more$/.exec(stopped[0].message)?.[1]);
+    const failedNames = errors
+      .filter((error) => !error.message.startsWith('stopped splitting'))
+      .flatMap((error) => /\(for (.*)\)$/.exec(error.message)?.[1].split(', ') ?? []);
+    expect(skippedCount + new Set(failedNames).size).toBe(names.length);
+  });
+
+  it('adds one attempt to the budget for each planned window slice', async () => {
+    const { get, calls } = fakePrometheus('local', undefined, (requestPath, params) => {
+      if (requestPath === '/api/v1/label/__name__/values') {
+        return { status: 'success', data: ['huge_total'] };
+      }
+      if (requestPath === '/api/v1/cardinality/label_values') {
+        return { labels: [{ cardinality: [{ label_value: 'huge_total', series_count: 2_000_000 }] }] };
+      }
+      if (params.query?.startsWith('count by (__name__, job')) {
+        throw chunkLimit;
+      }
+      return undefined;
+    });
+
+    await collectPrometheusInventory('prom', get, createLimiter(4), window);
+
+    const plannedSlices = Math.ceil((2_000_000 * 24) / SERIES_HOURS_PER_QUERY);
+    expect(ownerCalls(calls).length).toBe(MAX_OWNER_ATTEMPTS_PER_BATCH + plannedSlices);
   });
 
   it('keeps the owners of a half that succeeded when the other half fails', async () => {

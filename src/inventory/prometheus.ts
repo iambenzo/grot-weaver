@@ -271,6 +271,7 @@ async function activeSeriesByName(context: Context): Promise<SeriesOf> {
 
 interface SplitBudget {
   attempts: number;
+  used: number;
   failures: Array<{ names: string[]; window: QueryWindow; error: unknown }>;
   skipped: Set<string>;
 }
@@ -278,6 +279,7 @@ interface SplitBudget {
 async function ownersAcross(context: Context, batch: Batch, step: string): Promise<MetricOwner[]> {
   const budget: SplitBudget = {
     attempts: MAX_OWNER_ATTEMPTS_PER_BATCH + batch.windows.length,
+    used: 0,
     failures: [],
     skipped: new Set(),
   };
@@ -291,7 +293,7 @@ async function ownersAcross(context: Context, batch: Batch, step: string): Promi
     context.errors.push({
       datasource: context.uid,
       step,
-      message: `stopped splitting after ${MAX_OWNER_ATTEMPTS_PER_BATCH} owner queries that hit Mimir limits; owners not collected for ${describeNames([...budget.skipped])}`,
+      message: `stopped splitting after ${budget.used} owner query attempts against Mimir limits; owners not collected for ${describeNames([...budget.skipped])}`,
     });
   }
   return mergeOwnerSlices(slices.flat());
@@ -309,6 +311,7 @@ async function boundedOwners(
     return [];
   }
   budget.attempts--;
+  budget.used++;
   try {
     return await ownersForBatch(context, names, window);
   } catch (error) {
