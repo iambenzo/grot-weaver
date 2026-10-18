@@ -2,7 +2,13 @@ import React from 'react';
 import { useStyles2, Badge, BadgeColor, Stack, Text } from '@grafana/ui';
 import { ShareStatus, formatShare, shareStatus } from '../../components/ShareStatus/shareStatus';
 import { Owner, ServiceReadinessRow, Signal } from '../../api/types';
-import { SignalReadiness, serviceReadiness } from '../../assessment/readiness';
+import {
+  ReadinessCounts,
+  SignalReadiness,
+  countsOf,
+  readinessBasis,
+  serviceReadiness,
+} from '../../assessment/readiness';
 import { testIds } from '../../components/testIds';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { PRODUCT_READINESS_HELP } from '../../components/SectionHeading/guides';
@@ -44,7 +50,10 @@ export function ProductReadiness({ rows, owner, signals }: ProductReadinessProps
               <tr key={product.product}>
                 <th scope="row">{product.name}</th>
                 <td>
-                  <ShareBadge share={product.overall} />
+                  <Stack direction="column" gap={0.5} alignItems="flex-start">
+                    <ShareBadge share={product.overall} />
+                    <Basis counts={product.overallCounts} />
+                  </Stack>
                 </td>
                 {signals.map((signal) => (
                   <td key={signal}>
@@ -67,6 +76,7 @@ function SignalCell({ readiness }: { readiness?: SignalReadiness }) {
   return (
     <Stack direction="column" gap={0.5} alignItems="flex-start">
       <ShareBadge share={readiness.share} />
+      <Basis counts={countsOf(readiness)} />
       {readiness.missing.length > 0 && <AttributeList label="Missing" attributes={readiness.missing} />}
       {readiness.unknown.length > 0 && <AttributeList label="Not checkable" attributes={readiness.unknown} />}
       {readiness.missingRecommended.length > 0 && (
@@ -87,6 +97,15 @@ const STATUS_COLORS: Record<ShareStatus, BadgeColor> = { complete: 'green', part
 
 function shareColor(share: number): BadgeColor {
   return STATUS_COLORS[shareStatus(share)];
+}
+
+function Basis({ counts }: { counts: ReadinessCounts }) {
+  const basis = readinessBasis(counts);
+  return basis ? (
+    <Text color="secondary" variant="bodySmall">
+      {basis}
+    </Text>
+  ) : null;
 }
 
 function AttributeList({ label, attributes }: { label: string; attributes: string[] }) {

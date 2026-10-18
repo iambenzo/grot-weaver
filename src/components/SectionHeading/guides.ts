@@ -65,6 +65,12 @@ export const PRODUCT_READINESS_HELP: GuideItem[] = [
       'Share of the attributes each Grafana Cloud product needs that this service sends, per signal. Kept out of every score.',
   },
   {
+    term: 'Counts',
+    meaning:
+      'The line under each share says how many needed attributes are present out of those checked. Attributes that could not be checked are left out of the share and counted separately.',
+  },
+  { term: 'Overall', meaning: 'All needed attributes across every signal the product uses, added together.' },
+  {
     term: 'Also unlocks',
     meaning: 'Recommended attributes that turn on extra features, such as linking to Kubernetes.',
   },

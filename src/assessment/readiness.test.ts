@@ -1,5 +1,5 @@
 import { ServiceReadinessRow } from '../api/types';
-import { serviceReadiness } from './readiness';
+import { readinessBasis, serviceReadiness } from './readiness';
 
 const ratio = (value: number | null) => ({ value, numerator: 0, denominator: 0 });
 
@@ -33,6 +33,7 @@ describe('serviceReadiness', () => {
       product: 'knowledge-graph',
       name: 'Knowledge Graph',
       overall: 0.5,
+      overallCounts: { present: 1, missing: 1, unknown: 0 },
       signals: {
         traces: {
           present: ['service.name'],
@@ -54,5 +55,14 @@ describe('serviceReadiness', () => {
 
   it('returns nothing for another kind with the same name', () => {
     expect(serviceReadiness([row('checkout', 1)], { kind: 'unattributed', name: 'checkout' })).toEqual([]);
+  });
+});
+
+describe('readinessBasis', () => {
+  it('counts present of checked attributes and names the ones that could not be checked', () => {
+    expect(readinessBasis({ present: 1, missing: 2, unknown: 0 })).toBe('1 of 3 present');
+    expect(readinessBasis({ present: 1, missing: 0, unknown: 3 })).toBe('1 of 1 present, 3 not checkable');
+    expect(readinessBasis({ present: 0, missing: 0, unknown: 2 })).toBe('2 not checkable');
+    expect(readinessBasis({ present: 0, missing: 0, unknown: 0 })).toBe('');
   });
 });

@@ -49,6 +49,9 @@ describe('ProductReadiness', () => {
         signals={['metrics', 'traces', 'logs']}
       />
     );
+    expect(screen.getAllByText('2 of 3 present').length).toBeGreaterThan(0);
+    expect(screen.getByText('2 of 3 present, 1 not checkable')).toBeInTheDocument();
+    expect(screen.getByText('1 not checkable')).toBeInTheDocument();
 
     const kg = screen.getByRole('row', { name: /Knowledge Graph/ });
     expect(within(kg).getAllByText('67%')).toHaveLength(2);
