@@ -22,6 +22,7 @@ import { ScoreTiles } from './ScoreTiles';
 import { TopViolations } from './TopViolations';
 import { ServicesTable } from './ServicesTable';
 import { OwnerSections } from './OwnerSections';
+import { OverviewIntro } from './OverviewIntro';
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
@@ -136,6 +137,7 @@ function OverviewHeader({
   );
   return (
     <Stack direction="column" gap={1} data-testid={testIds.overview.header}>
+      <OverviewIntro semconvVersion={assessment.result.semconv_version} />
       <Text>
         Scored against semantic conventions <strong>{assessment.result.semconv_version}</strong> for {windowLabel}.
       </Text>

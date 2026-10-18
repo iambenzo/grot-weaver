@@ -11,6 +11,7 @@ export const testIds = {
   },
   overview: {
     header: 'data-testid overview-header',
+    intro: 'data-testid overview-intro',
     tiles: 'data-testid overview-score-tiles',
     violations: 'data-testid overview-top-violations',
     services: 'data-testid overview-services',

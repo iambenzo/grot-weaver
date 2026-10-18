@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { browserStorage, useStoredValue } from '../storage/useStoredValue';
 
 export const LATEST_RELEASE_URL = 'https://api.github.com/repos/open-telemetry/semantic-conventions/releases/latest';
 const CACHE_KEY = 'iambenzo-semconvcompliance-app.upstream-release';
@@ -64,22 +65,7 @@ export function useUpstreamRelease(enabled: boolean): UpstreamRelease | undefine
 }
 
 export function useDismissedRelease(): [string | undefined, (tag: string) => void] {
-  const [dismissed, setDismissed] = useState<string | undefined>(() => {
-    try {
-      return safeLocalStorage()?.getItem(DISMISSED_KEY) ?? undefined;
-    } catch {
-      return undefined;
-    }
-  });
-  const dismiss = (tag: string) => {
-    setDismissed(tag);
-    try {
-      safeLocalStorage()?.setItem(DISMISSED_KEY, tag);
-    } catch {
-      return;
-    }
-  };
-  return [dismissed, dismiss];
+  return useStoredValue(DISMISSED_KEY);
 }
 
 function browserDependencies(): UpstreamCheckDependencies {
@@ -91,17 +77,9 @@ function browserDependencies(): UpstreamCheckDependencies {
       }
       return response.json();
     },
-    storage: safeLocalStorage(),
+    storage: browserStorage(),
     nowMs: () => Date.now(),
   };
-}
-
-function safeLocalStorage(): Storage | undefined {
-  try {
-    return window.localStorage;
-  } catch {
-    return undefined;
-  }
 }
 
 function releaseFrom(body: unknown): UpstreamRelease | undefined {
