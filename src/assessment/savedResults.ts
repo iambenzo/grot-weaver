@@ -82,13 +82,27 @@ export function browserSavedResults(
   };
 }
 
-async function prune(database: IDBFactory, nowMs: number) {
-  const entries = await withStore<Entry[]>(database, 'readonly', (store) => store.getAll());
-  const newestFirst = [...entries].sort((a, b) => b.savedAtMs - a.savedAtMs);
-  const stale = newestFirst.filter(
-    (entry, index) => index >= MAX_SAVED_RESULTS || nowMs - entry.savedAtMs > MAX_SAVED_AGE_MS
-  );
-  await Promise.all(stale.map((entry) => withStore(database, 'readwrite', (store) => store.delete(entry.key))));
+async function prune(database: IDBFactory, nowMs: number): Promise<void> {
+  const opened = await openDatabase(database);
+  return new Promise((resolve, reject) => {
+    const transaction = opened.transaction(STORE, 'readwrite');
+    const store = transaction.objectStore(STORE);
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const newestFirst = [...(request.result as Entry[])].sort((a, b) => b.savedAtMs - a.savedAtMs);
+      newestFirst
+        .filter((entry, index) => index >= MAX_SAVED_RESULTS || nowMs - entry.savedAtMs > MAX_SAVED_AGE_MS)
+        .forEach((entry) => store.delete(entry.key));
+    };
+    transaction.oncomplete = () => {
+      opened.close();
+      resolve();
+    };
+    transaction.onerror = () => {
+      opened.close();
+      reject(transaction.error);
+    };
+  });
 }
 
 function withStore<T>(

@@ -97,6 +97,7 @@ export function useServiceAssessment(
   settings: PluginSettings,
   timeRange: TimeRange,
   service: string | undefined,
+  namespace: string | undefined,
   store: AssessmentStore = sharedStore,
   quickLane: AssessmentStore = quickStore
 ): ServiceLoad {
@@ -106,7 +107,9 @@ export function useServiceAssessment(
     full.status === 'ready' &&
     full.savedAtMs !== undefined &&
     service !== undefined &&
-    !mergeOwners(full.assessment.result).some((identity) => identity.owner.name === service);
+    !mergeOwners(full.assessment.result).some(
+      (identity) => identity.owner.name === service && (identity.owner.namespace ?? '') === (namespace ?? '')
+    );
   const quick = useStackAssessment(settings, timeRange, {
     store: quickLane,
     service,

@@ -98,7 +98,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   const { service, namespace, signal, settings } = model.useState();
   const timeRangeObject = sceneGraph.getTimeRange(model) as SceneTimeRange;
   const { value: timeRange } = timeRangeObject.useState();
-  const { load, quick } = useServiceAssessment(settings, timeRange, service);
+  const { load, quick } = useServiceAssessment(settings, timeRange, service, namespace);
 
   if (load.status === 'loading') {
     return <LoadingProgress progress={load.progress} labels={load.labels} />;
