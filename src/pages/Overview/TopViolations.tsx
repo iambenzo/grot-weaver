@@ -2,7 +2,7 @@ import React from 'react';
 import { Column, InteractiveTable, LinkButton, Stack, Text } from '@grafana/ui';
 import { ViolationGroup } from '../../assessment/overview';
 import { testIds } from '../../components/testIds';
-import { ownerName, serviceLink } from './ServicesTable';
+import { ownerName, serviceLink } from '../../utils/serviceLink';
 import { ownerKey } from '../../assessment/stackAssessment';
 
 const MAX_ROWS = 25;

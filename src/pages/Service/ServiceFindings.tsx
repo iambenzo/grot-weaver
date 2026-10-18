@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import {
+  SceneAppPage,
   SceneComponentProps,
+  SceneObject,
   SceneObjectBase,
   SceneObjectState,
   SceneObjectUrlSyncConfig,
@@ -29,7 +31,10 @@ import { prefixRoute } from '../../utils/utils.routing';
 import { ROUTES } from '../../constants';
 import { proxyGet } from '../../datasources/proxy';
 import { createLimiter } from '../../datasources/limiter';
-import { Finding, Owner, Signal } from '../../api/types';
+import { AssessmentResult, Finding, Owner, Signal } from '../../api/types';
+import { serviceRows } from '../../assessment/overview';
+import { ownerName, serviceLink } from '../../utils/serviceLink';
+import { formatShare } from '../../components/ShareStatus/shareStatus';
 import { lookupFindingLibraries, sameOwner } from '../../assessment/traceAssessment';
 import { ServiceIdentity, StackAssessment, mergeOwners, ownerKey } from '../../assessment/stackAssessment';
 import { evidenceTarget, exploreUrl, ownersIn } from '../../assessment/explore';
@@ -69,8 +74,44 @@ interface ServiceFindingsState extends SceneObjectState {
   settings: PluginSettings;
 }
 
+export const SERVICE_PAGE_TITLE = 'Service';
+
+export function servicePageTitle(service?: string, namespace?: string): string {
+  if (service === undefined) {
+    return SERVICE_PAGE_TITLE;
+  }
+  const name = namespace ? `${namespace}/${service}` : service || 'Unattributed (no service.name)';
+  return `${SERVICE_PAGE_TITLE}: ${name}`;
+}
+
+function owningPage(object: SceneObject): SceneAppPage | undefined {
+  for (let candidate = object.parent; candidate; candidate = candidate.parent) {
+    if (candidate instanceof SceneAppPage) {
+      return candidate;
+    }
+  }
+  return undefined;
+}
+
 export class ServiceFindings extends SceneObjectBase<ServiceFindingsState> {
   static Component = ServiceFindingsRenderer;
+
+  constructor(state: ServiceFindingsState) {
+    super(state);
+    this.addActivationHandler(() => {
+      this.syncPageTitle();
+      const subscription = this.subscribeToState(() => this.syncPageTitle());
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  private syncPageTitle() {
+    const page = owningPage(this);
+    const title = servicePageTitle(this.state.service, this.state.namespace);
+    if (page && page.state.title !== title) {
+      page.setState({ title });
+    }
+  }
 
   protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['service', 'namespace', 'signal'] });
 
@@ -171,7 +212,13 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
           range={{ from: String(timeRange.raw.from), to: String(timeRange.raw.to) }}
         />
       ) : (
-        empty === undefined && identities.length > 0 && <NoServiceSelected />
+        empty === undefined &&
+        identities.length > 0 && (
+          <NoServiceSelected
+            result={assessment.result}
+            range={{ from: String(timeRange.raw.from), to: String(timeRange.raw.to) }}
+          />
+        )
       )}
     </Stack>
   );
@@ -359,7 +406,10 @@ function ServicePicker({
   );
 }
 
-function NoServiceSelected() {
+const WORST_SERVICES_SHOWN = 5;
+
+function NoServiceSelected({ result, range }: { result: AssessmentResult; range: { from: string; to: string } }) {
+  const worst = serviceRows(result).slice(0, WORST_SERVICES_SHOWN);
   return (
     <EmptyState
       variant="call-to-action"
@@ -367,11 +417,20 @@ function NoServiceSelected() {
       hideImage
       button={
         <LinkButton href={prefixRoute(ROUTES.Overview)} variant="secondary" icon="arrow-left">
-          Services on the Overview
+          All services on the Overview
         </LinkButton>
       }
     >
-      Pick one in the list above, or open one from the services table on the Overview, worst first.
+      <Stack direction="column" gap={1} alignItems="center">
+        <Text>Pick one in the list above, or start with the lowest naming scores:</Text>
+        <Stack gap={1} wrap="wrap" justifyContent="center" data-testid={testIds.service.worstServices}>
+          {worst.map((row) => (
+            <LinkButton key={ownerKey(row.owner)} href={serviceLink(row.owner, range)} size="sm" fill="outline">
+              {ownerName(row.owner)} ({row.worst === null ? 'N/A' : formatShare(row.worst)})
+            </LinkButton>
+          ))}
+        </Stack>
+      </Stack>
     </EmptyState>
   );
 }

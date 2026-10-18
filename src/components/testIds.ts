@@ -8,6 +8,7 @@ export const testIds = {
     resourceAttributes: 'data-testid service-resource-attributes',
     productReadiness: 'data-testid service-product-readiness',
     quickView: 'data-testid service-quick-view',
+    worstServices: 'data-testid service-worst-services',
   },
   overview: {
     header: 'data-testid overview-header',

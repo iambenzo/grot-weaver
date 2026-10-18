@@ -10,11 +10,11 @@ import { ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/utils.routing';
 import { PluginSettings } from '../../settings/settings';
 import { createTimePicker, createTimeRange } from '../../window/window';
-import { ServiceFindings } from './ServiceFindings';
+import { SERVICE_PAGE_TITLE, ServiceFindings } from './ServiceFindings';
 
 export function servicePage(settings: PluginSettings): SceneAppPage {
   return new SceneAppPage({
-    title: 'Service',
+    title: SERVICE_PAGE_TITLE,
     subTitle: 'Semantic convention findings for one service, and where to fix them.',
     url: prefixRoute(ROUTES.Service),
     routePath: ROUTES.Service,
