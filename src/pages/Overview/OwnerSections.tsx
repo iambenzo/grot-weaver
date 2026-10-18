@@ -9,7 +9,7 @@ const SECTIONS: Array<{ kind: Owner['kind']; label: string; description: string;
     kind: 'pipeline',
     label: 'Pipelines',
     description:
-      'Findings a collector or Alloy pipeline introduced, such as labels it adds to every service. Fix them in that pipeline’s config.',
+      'Findings added on the way rather than by a service, such as labels a collector, Alloy or Grafana Asserts puts on every series. Fix them where they are added, usually the collector or Alloy config.',
     empty: 'No pipeline-introduced findings in this window.',
   },
   {
@@ -22,7 +22,8 @@ const SECTIONS: Array<{ kind: Owner['kind']; label: string; description: string;
   {
     kind: 'unattributed',
     label: 'Unattributed (no service.name)',
-    description: 'Telemetry from an SDK that sets no service.name. Set OTEL_SERVICE_NAME on the service that sends it.',
+    description:
+      'Telemetry with no service identity: no service.name, job or service_name to tie it to a service. Set one where it is produced, for example OTEL_SERVICE_NAME in an SDK or the job or service_name label in the scrape or log pipeline.',
     empty: 'All telemetry in this window has a service identity.',
   },
 ];
@@ -51,9 +52,10 @@ interface OwnerSectionProps {
 }
 
 function OwnerSection({ label, description, empty, owners }: OwnerSectionProps) {
-  const [open, setOpen] = useState(owners.length > 0);
+  const [chosenOpen, setChosenOpen] = useState<boolean>();
+  const open = chosenOpen ?? owners.length > 0;
   return (
-    <CollapsableSection label={`${label} (${owners.length})`} isOpen={open} onToggle={setOpen}>
+    <CollapsableSection label={`${label} (${owners.length})`} isOpen={open} onToggle={setChosenOpen}>
       <Text element="p" color="secondary" variant="bodySmall">
         {description}
       </Text>

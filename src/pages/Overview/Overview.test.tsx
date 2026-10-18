@@ -202,7 +202,31 @@ describe('OwnerSections', () => {
 
     expect(screen.getByText('node')).toBeVisible();
     expect(screen.getByText(/no OpenTelemetry SDK service identity/)).toBeVisible();
-    expect(screen.queryByText(/Set OTEL_SERVICE_NAME/)).toBeNull();
+    expect(screen.queryByText(/OTEL_SERVICE_NAME/)).toBeNull();
+  });
+
+  it('opens a section when its first owners arrive in a later result', () => {
+    const empty = { findings: [], metric_attributions: [] } as unknown as AssessmentResult;
+    const later = {
+      findings: [
+        {
+          type: 'not_in_registry',
+          level: 'violation',
+          signal: 'metrics',
+          owner: { kind: 'source', name: 'node' },
+          observed: 'node_cpu_seconds_total',
+          scope: 'metric',
+          volume: 1,
+          impact_share: 0,
+        },
+      ],
+      metric_attributions: [],
+    } as unknown as AssessmentResult;
+    const { rerender } = render(<OwnerSections result={empty} />);
+
+    rerender(<OwnerSections result={later} />);
+
+    expect(screen.getByText('node')).toBeVisible();
   });
 });
 
