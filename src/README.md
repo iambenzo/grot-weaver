@@ -34,9 +34,9 @@ When a check had to be limited, for example volume sampled because TraceQL metri
 
 1. On the **Overview**, start with **Services, worst first**, or with **Top violations**, which lists the names seen across the most services.
 2. Open a service to see each finding with its level (violation, improvement or information) and its share of the signal's volume.
-3. Expand a finding for evidence in Explore and three ways to fix it:
+3. Expand a finding for its evidence in Explore, where it can be found, and the ways to fix it:
    - **Instrumentation**: which library or SDK emits the name, and how to upgrade or configure it.
-   - **Pipeline rule**: an OpenTelemetry Collector or Grafana Alloy processor that renames it, as a stopgap.
+   - **Pipeline rule**: for names that can be renamed safely, an OpenTelemetry Collector or Grafana Alloy processor that renames them, as a stopgap.
    - **Raise with owner**: a summary to paste into a ticket.
 
 ## Requirements

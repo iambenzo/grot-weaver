@@ -23,10 +23,12 @@ A Grafana app plugin that scores how well a stack's telemetry follows the OpenTe
 
 ```sh
 npm install
-npm run dev                      # frontend in watch mode
+npm run build                    # frontend, once
 go run github.com/magefile/mage@v1.17.2 build:linuxARM64   # backend for the dev container
 docker compose up -d --build     # Grafana on http://localhost:13000 plus the dev stack
 ```
+
+Then run `npm run dev` in a separate terminal to rebuild the frontend on every change; it keeps running.
 
 Grafana loads the plugin from `dist/`. Restart Grafana after changing `src/plugin.json`.
 
