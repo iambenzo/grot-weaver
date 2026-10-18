@@ -21,7 +21,11 @@ export const SIGNAL_TILES_HELP: GuideItem[] = [
     meaning:
       'Names inside a semantic convention namespace that match nothing in the registry, counted once per service.',
   },
-  { term: 'Coverage', meaning: 'Share of volume that came from an OTel SDK and is tied to a service.' },
+  {
+    term: 'Coverage',
+    meaning:
+      'Share of volume that came from an OTel SDK and is tied to a service. Services whose volume could not be measured are left out and counted as unmeasured.',
+  },
   { meaning: 'The line under each score shows what it was counted from, or why there is nothing to score.' },
   {
     term: 'Status',

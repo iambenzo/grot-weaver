@@ -305,6 +305,7 @@ function RuleEditor({
       {rules.map((rule, index) => (
         <Stack key={index} gap={1} alignItems="center">
           <Input
+            id={`ac-rule-${index}-pattern`}
             aria-label={`Rule ${index + 1} metric name pattern`}
             width={40}
             value={rule.pattern}
@@ -312,6 +313,7 @@ function RuleEditor({
             onChange={(event) => replace(index, { ...rule, pattern: event.currentTarget.value })}
           />
           <Combobox
+            id={`ac-rule-${index}-action`}
             aria-label={`Rule ${index + 1} action`}
             width={20}
             options={[
@@ -358,6 +360,7 @@ function MappingEditor({
       {mappings.map((mapping, index) => (
         <Stack key={index} gap={1} alignItems="center">
           <Input
+            id={`ac-mapping-${index}-match`}
             aria-label={`Mapping ${index + 1} service pattern`}
             width={30}
             value={mapping.match}
@@ -365,6 +368,7 @@ function MappingEditor({
             onChange={(event) => replace(index, { ...mapping, match: event.currentTarget.value })}
           />
           <Input
+            id={`ac-mapping-${index}-pipeline`}
             aria-label={`Mapping ${index + 1} pipeline`}
             width={30}
             value={mapping.pipeline}

@@ -64,6 +64,8 @@ describe('AppConfig', () => {
       expect(screen.getByLabelText(new RegExp(`^${label}`))).toBeInTheDocument();
     }
     expect(screen.getByRole('button', { name: 'Remove rule 1' })).toBeInTheDocument();
+    const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('shows why a save failed and keeps the edited settings for a retry', async () => {
