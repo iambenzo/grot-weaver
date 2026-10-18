@@ -155,3 +155,9 @@ export function coverageFor(result: AssessmentResult, signal: Signal): Ratio | u
 export function unmeasuredFor(result: AssessmentResult, signal: Signal): number {
   return result.coverage?.find((row) => row.signal === signal)?.unmeasured ?? 0;
 }
+
+export function uncheckableResourceFor(result: AssessmentResult, signal: Signal): number {
+  return (result.resource_attributes ?? []).filter(
+    (check) => check.signal === signal && check.owner.kind === 'service' && check.state === 'unknown'
+  ).length;
+}

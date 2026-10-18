@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStyles2, Badge, BadgeColor, Stack, Text } from '@grafana/ui';
-import { ShareStatus, shareStatus } from '../../components/ShareStatus/shareStatus';
+import { ShareStatus, formatShare, shareStatus } from '../../components/ShareStatus/shareStatus';
 import { Owner, ServiceReadinessRow, Signal } from '../../api/types';
 import { SignalReadiness, serviceReadiness } from '../../assessment/readiness';
 import { testIds } from '../../components/testIds';
@@ -80,7 +80,7 @@ function ShareBadge({ share }: { share: number | null }) {
   if (share === null) {
     return <Badge text="Not checkable" color="darkgrey" />;
   }
-  return <Badge text={`${Math.round(share * 100)}%`} color={shareColor(share)} />;
+  return <Badge text={formatShare(share)} color={shareColor(share)} />;
 }
 
 const STATUS_COLORS: Record<ShareStatus, BadgeColor> = { complete: 'green', partial: 'orange', none: 'red' };

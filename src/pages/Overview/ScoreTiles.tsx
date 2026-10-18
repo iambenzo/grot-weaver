@@ -6,7 +6,7 @@ import { Ratio, ScoreRow, Signal } from '../../api/types';
 import { testIds } from '../../components/testIds';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { SIGNAL_TILES_HELP } from '../../components/SectionHeading/guides';
-import { ShareStatus, shareStatus } from '../../components/ShareStatus/shareStatus';
+import { ShareStatus, formatShare, shareStatus } from '../../components/ShareStatus/shareStatus';
 
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 const VOLUME_UNITS: Record<Signal, string> = { metrics: 'series', traces: 'spans', logs: 'log lines' };
@@ -16,6 +16,7 @@ interface ScoreTilesProps {
   row?: ScoreRow;
   coverage?: Ratio;
   unmeasured?: number;
+  uncheckable?: number;
   volumeWeighted?: boolean;
 }
 
@@ -37,7 +38,7 @@ export function formatRatio(ratio?: Ratio): string {
   if (!ratio || ratio.value === null) {
     return 'N/A';
   }
-  return `${Math.round(ratio.value * 100)}%`;
+  return formatShare(ratio.value);
 }
 
 export function ratioBasis(ratio: Ratio | undefined, unit: string, emptyReason: string): string {
@@ -83,6 +84,13 @@ function ratioTile(
   };
 }
 
+function withUncheckable(tile: Tile, uncheckable: number): Tile {
+  if (uncheckable === 0) {
+    return tile;
+  }
+  return { ...tile, basis: `${tile.basis}, ${uncheckable} not checkable` };
+}
+
 function coverageBasis(coverage: Ratio | undefined, unit: string, unmeasured: number): string {
   const basis = ratioBasis(coverage, unit, 'No volume measured');
   if (unmeasured === 0) {
@@ -91,7 +99,14 @@ function coverageBasis(coverage: Ratio | undefined, unit: string, unmeasured: nu
   return `${basis}, ${unmeasured} ${unmeasured === 1 ? 'service' : 'services'} unmeasured`;
 }
 
-export function scoreTiles({ signal, row, coverage, unmeasured = 0, volumeWeighted = false }: ScoreTilesProps): Tile[] {
+export function scoreTiles({
+  signal,
+  row,
+  coverage,
+  unmeasured = 0,
+  uncheckable = 0,
+  volumeWeighted = false,
+}: ScoreTilesProps): Tile[] {
   const scores = row?.scores;
   const names = countingFor(volumeWeighted, signal, 'names');
   const requirementChecks = countingFor(volumeWeighted, signal, 'checks');
@@ -132,12 +147,15 @@ export function scoreTiles({ signal, row, coverage, unmeasured = 0, volumeWeight
       'No service identity to check',
       'service.name present and not the SDK default'
     ),
-    ratioTile(
-      'Required resource attributes',
-      scores?.required_resource,
-      checks,
-      'None configured or checkable',
-      'Your required resource attributes present per service; separate from semconv conformance'
+    withUncheckable(
+      ratioTile(
+        'Required resource attributes',
+        scores?.required_resource,
+        checks,
+        'None configured or checkable',
+        'Your required resource attributes present per service, out of those that could be checked; separate from semconv conformance'
+      ),
+      uncheckable
     ),
     {
       label: 'Deprecated',

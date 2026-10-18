@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { FindingsTable, formatImpact } from './FindingsTable';
+import { FindingsTable } from './FindingsTable';
 import { Finding } from '../../api/types';
 import { LibraryInfo } from '../../assessment/libraries';
 
@@ -83,12 +83,6 @@ describe('FindingsTable', () => {
 
     expect(screen.getByText('Stable · semconv · medium confidence')).toBeInTheDocument();
     expect(screen.getByText('Deprecated').tagName).toBe('SPAN');
-  });
-
-  it('formats impact shares for people', () => {
-    expect(formatImpact(0)).toBe('0%');
-    expect(formatImpact(0.004)).toBe('<1%');
-    expect(formatImpact(0.256)).toBe('26%');
   });
 
   it('shows found and expected names, badges, library and first/last seen', () => {

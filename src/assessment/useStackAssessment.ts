@@ -7,7 +7,6 @@ import { DatasourceProgress, StackAssessment, mergeOwners } from './stackAssessm
 import { AssessmentStore, Run, RunState, browserDependencies, createAssessmentStore, runKey } from './assessmentStore';
 import { browserSavedResults, currentViewer, viewerId } from './savedResults';
 
-
 export interface Keyed<K, V> {
   key: K;
   value: V;

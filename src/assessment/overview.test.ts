@@ -1,5 +1,5 @@
 import { AssessmentResult, Finding, Ratio, Scores } from '../api/types';
-import { groupViolations, ownersOfKind, serviceRows } from './overview';
+import { groupViolations, ownersOfKind, serviceRows, uncheckableResourceFor } from './overview';
 
 const ratio = (value: number | null): Ratio => ({ value, numerator: 0, denominator: value === null ? 0 : 1 });
 const scores = (stable: number | null, rc: number | null = null, experimental: number | null = null): Scores => ({
@@ -90,5 +90,28 @@ describe('ownersOfKind', () => {
 
     expect(summary).toMatchObject({ violations: 1, findings: 1 });
     expect(summary.detail).toEqual(expect.arrayContaining(['telemetry_sdk_name=envoy']));
+  });
+});
+
+describe('uncheckableResourceFor', () => {
+  it('counts not-checkable required attributes on services for one signal', () => {
+    const check = (signal: 'metrics' | 'traces', state: 'present' | 'unknown', kind: 'service' | 'source') => ({
+      owner: { kind, name: 'x' },
+      signal,
+      attribute: 'deployment.environment.name',
+      state,
+      evidence: '',
+    });
+    const result = {
+      resource_attributes: [
+        check('metrics', 'unknown', 'service'),
+        check('metrics', 'unknown', 'service'),
+        check('metrics', 'present', 'service'),
+        check('metrics', 'unknown', 'source'),
+        check('traces', 'unknown', 'service'),
+      ],
+    } as unknown as AssessmentResult;
+
+    expect(uncheckableResourceFor(result, 'metrics')).toBe(2);
   });
 });

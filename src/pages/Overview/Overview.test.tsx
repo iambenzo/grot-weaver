@@ -98,6 +98,34 @@ describe('ScoreTiles', () => {
   });
 });
 
+describe('ScoreTiles required resource attributes', () => {
+  it('says how many attributes could not be checked', () => {
+    const basis = Object.fromEntries(
+      scoreTiles({
+        signal: 'metrics',
+        row: {
+          owner: { kind: 'service', name: '' },
+          signal: 'metrics',
+          scores: {
+            naming_stable: { value: null, numerator: 0, denominator: 0 },
+            naming_release_candidate: { value: null, numerator: 0, denominator: 0 },
+            naming_experimental: { value: null, numerator: 0, denominator: 0 },
+            requirements: { value: null, numerator: 0, denominator: 0 },
+            resource: { value: null, numerator: 0, denominator: 0 },
+            required_resource: { value: 1, numerator: 1, denominator: 1 },
+            deprecated: 0,
+            unclassified: 0,
+            custom: 0,
+          },
+        },
+        uncheckable: 3,
+      }).map((tile) => [tile.label, tile.basis])
+    );
+
+    expect(basis['Required resource attributes']).toBe('1 of 1 checks, 3 not checkable');
+  });
+});
+
 describe('weightingText', () => {
   it('says how names are counted', () => {
     expect(weightingText(false)).toBe('Each name counts once per service, whatever its volume.');

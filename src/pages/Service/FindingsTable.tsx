@@ -19,6 +19,7 @@ import { testIds } from '../../components/testIds';
 import { Evidence } from '../../fix/summary';
 import { FetchFixOptions } from '../../fix/fixOptions';
 import { FixTabs } from './FixTabs';
+import { formatShare } from '../../components/ShareStatus/shareStatus';
 
 interface Row {
   id: string;
@@ -80,7 +81,7 @@ export function FindingsTable({ findings, libraryFor, evidenceFor, semconvVersio
     { id: 'level', header: 'Level', cell: ({ row }) => <LevelBadge finding={row.original.finding} /> },
     { id: 'name', header: 'Found → expected', cell: ({ row }) => <NameCell finding={row.original.finding} /> },
     { id: 'type', header: 'Finding', cell: ({ row }) => <FindingBadges finding={row.original.finding} /> },
-    { id: 'impact', header: 'Impact', cell: ({ row }) => formatImpact(row.original.finding.impact_share) },
+    { id: 'impact', header: 'Impact', cell: ({ row }) => formatShare(row.original.finding.impact_share) },
     { id: 'library', header: 'Library or SDK', cell: ({ row }) => <LibraryCell library={row.original.library} /> },
     { id: 'seen', header: 'First / last seen', cell: ({ row }) => <SeenCell library={row.original.library} /> },
   ];
@@ -109,13 +110,6 @@ const LEVEL_ORDER: Record<string, number> = { violation: 0, improvement: 1, info
 
 function byPriority(a: Finding, b: Finding): number {
   return (LEVEL_ORDER[a.level ?? ''] ?? 3) - (LEVEL_ORDER[b.level ?? ''] ?? 3) || b.impact_share - a.impact_share;
-}
-
-export function formatImpact(share: number): string {
-  if (share > 0 && share < 0.01) {
-    return '<1%';
-  }
-  return `${Math.round(share * 100)}%`;
 }
 
 function LevelBadge({ finding }: { finding: Finding }) {
