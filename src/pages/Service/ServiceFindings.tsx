@@ -76,12 +76,24 @@ interface ServiceFindingsState extends SceneObjectState {
 
 export const SERVICE_PAGE_TITLE = 'Service';
 
-export function servicePageTitle(service?: string, namespace?: string): string {
-  if (service === undefined) {
-    return SERVICE_PAGE_TITLE;
-  }
-  const name = namespace ? `${namespace}/${service}` : service || 'Unattributed (no service.name)';
-  return `${SERVICE_PAGE_TITLE}: ${name}`;
+export function servicePageTitle(owner?: Owner): string {
+  return owner ? `${SERVICE_PAGE_TITLE}: ${ownerLabel(owner)}` : SERVICE_PAGE_TITLE;
+}
+
+function pickableIdentities(assessment: StackAssessment): ServiceIdentity[] {
+  return mergeOwners(assessment.result).filter(
+    (identity) => identity.owner.kind === 'service' || identity.owner.kind === 'unattributed'
+  );
+}
+
+function selectedIdentity(
+  identities: ServiceIdentity[],
+  service?: string,
+  namespace?: string
+): ServiceIdentity | undefined {
+  return identities.find(
+    (identity) => identity.owner.name === service && (identity.owner.namespace ?? '') === (namespace ?? '')
+  );
 }
 
 function owningPage(object: SceneObject): SceneAppPage | undefined {
@@ -98,22 +110,17 @@ export class ServiceFindings extends SceneObjectBase<ServiceFindingsState> {
 
   constructor(state: ServiceFindingsState) {
     super(state);
-    this.addActivationHandler(() => {
-      this.syncPageTitle();
-      const subscription = this.subscribeToState(() => this.syncPageTitle());
-      return () => subscription.unsubscribe();
-    });
+    this.addActivationHandler(() => () => this.showTitle(SERVICE_PAGE_TITLE));
   }
 
-  private syncPageTitle() {
+  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['service', 'namespace', 'signal'] });
+
+  showTitle(title: string) {
     const page = owningPage(this);
-    const title = servicePageTitle(this.state.service, this.state.namespace);
     if (page && page.state.title !== title) {
       page.setState({ title });
     }
   }
-
-  protected _urlSync = new SceneObjectUrlSyncConfig(this, { keys: ['service', 'namespace', 'signal'] });
 
   getUrlState() {
     return { service: this.state.service, namespace: this.state.namespace, signal: this.state.signal };
@@ -145,6 +152,10 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   const timeRangeObject = sceneGraph.getTimeRange(model) as SceneTimeRange;
   const { value: timeRange } = timeRangeObject.useState();
   const { load, quick } = useServiceAssessment(settings, timeRange, service, namespace);
+  const resolved =
+    load.status === 'ready' ? selectedIdentity(pickableIdentities(load.assessment), service, namespace) : undefined;
+  const title = servicePageTitle(resolved?.owner);
+  useEffect(() => model.showTitle(title), [model, title]);
 
   if (load.status === 'loading') {
     return <LoadingProgress progress={load.progress} labels={load.labels} />;
@@ -159,12 +170,8 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
 
   const { assessment } = load;
   const empty = emptyKind(assessment);
-  const identities = mergeOwners(assessment.result).filter(
-    (identity) => identity.owner.kind === 'service' || identity.owner.kind === 'unattributed'
-  );
-  const selected = identities.find(
-    (identity) => identity.owner.name === service && (identity.owner.namespace ?? '') === (namespace ?? '')
-  );
+  const identities = pickableIdentities(assessment);
+  const selected = selectedIdentity(identities, service, namespace);
   const activeSignal = SIGNALS.find((candidate) => candidate === signal) ?? selected?.signals[0] ?? 'metrics';
 
   return (

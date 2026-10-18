@@ -1,10 +1,10 @@
 import { servicePageTitle } from './ServiceFindings';
 
 describe('servicePageTitle', () => {
-  it('names the selected service, with its namespace when it has one', () => {
+  it('names the resolved owner the way the picker does', () => {
     expect(servicePageTitle()).toBe('Service');
-    expect(servicePageTitle('checkout', 'shop')).toBe('Service: shop/checkout');
-    expect(servicePageTitle('payments')).toBe('Service: payments');
-    expect(servicePageTitle('')).toBe('Service: Unattributed (no service.name)');
+    expect(servicePageTitle({ kind: 'service', namespace: 'shop', name: 'checkout' })).toBe('Service: shop/checkout');
+    expect(servicePageTitle({ kind: 'service', name: 'payments' })).toBe('Service: payments');
+    expect(servicePageTitle({ kind: 'unattributed', name: 'host-7' })).toBe('Service: Unattributed (no service.name)');
   });
 });
