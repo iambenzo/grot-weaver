@@ -3,6 +3,7 @@ import { Column, InteractiveTable, LinkButton, Stack, Text } from '@grafana/ui';
 import { ViolationGroup } from '../../assessment/overview';
 import { testIds } from '../../components/testIds';
 import { ownerName, serviceLink } from './ServicesTable';
+import { ownerKey } from '../../assessment/stackAssessment';
 
 const MAX_ROWS = 25;
 
@@ -74,7 +75,7 @@ function AffectedServices({ group, range }: { group: ViolationGroup; range: { fr
       <Stack gap={1} wrap="wrap">
         {group.owners.map((owner) => (
           <LinkButton
-            key={ownerName(owner)}
+            key={ownerKey(owner)}
             href={serviceLink(owner, range, group.signal)}
             fill="outline"
             variant="secondary"
