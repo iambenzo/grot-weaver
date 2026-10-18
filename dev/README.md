@@ -24,25 +24,23 @@ Emitters (compose profile `emitters`, image built from `./emitter`, Python OTel 
 
 ## Start
 
-From the repo root (builds the plugin first, starts Grafana plus these backends):
+Run everything from the repo root, so Grafana, the backends and the emitters share one compose project and network:
 
 ```sh
 npm run build
 go run github.com/magefile/mage@v1.17.2 build:linuxARM64
 docker compose up -d --build
-```
-
-From `dev/` (backends and emitters only, no Grafana):
-
-```sh
-docker compose up -d
 docker compose --profile emitters build
 for s in emit-checkout-via-collector emit-payments-direct emit-noname-via-collector emit-noname-direct emit-inventory-enriched; do
   docker compose run --rm -d "$s"
 done
-./scripts/push-raw.sh
-./scripts/translation-matrix.sh
+./dev/scripts/push-raw.sh
+./dev/scripts/translation-matrix.sh
 ```
+
+Each emitter sends telemetry for 60 seconds (`RUN_SECONDS`) and exits. Rerun the loop for fresh data, for example when the overview shows nothing for a recent time range.
+
+Do not run `docker compose` from `dev/` while the root stack is up: it starts a separate project (`semconv-lab`) on its own network, where emitters cannot reach the root stack's collector and the backend ports clash.
 
 `push-raw.sh` sends hand-built OTLP/JSON with no `service.name`, Loki push-API streams with various label sets, and Zipkin spans.
 `translation-matrix.sh` hot-reloads prometheus-alt through `NoTranslation`, `UnderscoreEscapingWithoutSuffixes` and `NoUTF8EscapingWithSuffixes`, pushing a probe metric under each (job `probe-<strategy>`), then restores the config.
@@ -50,8 +48,8 @@ done
 ## Stop
 
 ```sh
-docker compose down          # run in the directory you started from
-docker compose down --rmi local   # also remove the built emitter image
+docker compose down          # from the repo root
+docker image rm semconv-emitter:local   # also remove the built emitter image
 ```
 
 ## Other contents
