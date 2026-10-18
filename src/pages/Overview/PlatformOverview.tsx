@@ -141,7 +141,8 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
       <Stack direction="column" gap={1}>
         <SectionHeading title="Services, worst first" help={SERVICES_HELP} />
         <IncompleteNote
-          reasons={limitedSignals.map((candidate) => `${SIGNAL_LABELS[candidate].toLowerCase()} scores`)}
+          lead="Some of these scores rest on limited data for"
+          reasons={limitedSignals.map((candidate) => SIGNAL_LABELS[candidate].toLowerCase())}
         />
         <ServicesTable rows={serviceRows(result)} range={range} />
       </Stack>

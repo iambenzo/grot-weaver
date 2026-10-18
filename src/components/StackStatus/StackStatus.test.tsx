@@ -156,6 +156,7 @@ describe('incompleteReasons', () => {
       'failed queries on Tempo',
       'keys from a sample',
     ]);
+    expect(incompleteReasons([tempo], [], 'traces')).toEqual(['Tempo still collecting']);
     expect(incompleteReasons(progress, scanLimits(progress, result({})), 'logs')).toEqual(['Loki not visible to you']);
     expect(incompleteReasons(progress, scanLimits(progress, result({})), 'metrics')).toEqual([]);
   });
@@ -202,7 +203,7 @@ describe('scanLimits', () => {
       {
         signal: 'logs',
         summary: 'some volumes not measured',
-        detail: 'Loki: volume not measured for 2 services because the query failed, so their findings rank last',
+        detail: 'Loki: volume not measured for 2 services because the query failed, so their findings show 0% impact',
       },
     ]);
   });

@@ -243,6 +243,7 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
         ))}
       </TabsBar>
       <IncompleteNote
+        lead={`Limits on this stack's ${SIGNAL_LABELS[signal].toLowerCase()} datasources`}
         reasons={incompleteReasons(assessment.progress, scanLimits(assessment.progress, assessment.result), signal)}
       />
       {!identity.signals.includes(signal) ? (

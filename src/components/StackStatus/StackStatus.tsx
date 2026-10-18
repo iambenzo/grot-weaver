@@ -233,7 +233,7 @@ export function scanLimits(progress: DatasourceProgress[], result: AssessmentRes
         limit(
           entry,
           'some volumes from a sample',
-          `${entry.ref.name}: volume from sample for services missing from TraceQL metrics, so they rank lower than measured services`
+          `${entry.ref.name}: volume from sample for services missing from TraceQL metrics, so their impact shares are estimates`
         )
       ),
     ...progress.flatMap((entry) =>
@@ -242,7 +242,7 @@ export function scanLimits(progress: DatasourceProgress[], result: AssessmentRes
             limit(
               entry,
               'some volumes not measured',
-              `${entry.ref.name}: volume not measured for ${entry.unmeasuredVolumes} ${entry.unmeasuredVolumes === 1 ? 'service' : 'services'} because the query failed, so their findings rank last`
+              `${entry.ref.name}: volume not measured for ${entry.unmeasuredVolumes} ${entry.unmeasuredVolumes === 1 ? 'service' : 'services'} because the query failed, so their findings show 0% impact`
             ),
           ]
         : []
@@ -282,6 +282,9 @@ export function scanLimits(progress: DatasourceProgress[], result: AssessmentRes
 export function incompleteReasons(progress: DatasourceProgress[], limits: ScanLimit[], signal: Signal): string[] {
   const reasons = [
     ...progress
+      .filter((entry) => entry.signal === signal && entry.state === 'pending')
+      .map((entry) => `${entry.ref.name} still collecting`),
+    ...progress
       .filter((entry) => entry.signal === signal && entry.state === 'errors')
       .map((entry) => `failed queries on ${entry.ref.name}`),
     ...progress
@@ -292,7 +295,7 @@ export function incompleteReasons(progress: DatasourceProgress[], limits: ScanLi
   return [...new Set(reasons)];
 }
 
-export function IncompleteNote({ reasons }: { reasons: string[] }) {
+export function IncompleteNote({ reasons, lead = 'Based on limited data' }: { reasons: string[]; lead?: string }) {
   if (reasons.length === 0) {
     return null;
   }
@@ -300,7 +303,7 @@ export function IncompleteNote({ reasons }: { reasons: string[] }) {
     <Stack gap={0.5} alignItems="center" data-testid={testIds.status.incomplete}>
       <Icon name="exclamation-triangle" size="sm" aria-hidden />
       <Text color="secondary" variant="bodySmall">
-        Based on limited data: {reasons.join(', ')}.
+        {lead}: {reasons.join(', ')}.
       </Text>
     </Stack>
   );
