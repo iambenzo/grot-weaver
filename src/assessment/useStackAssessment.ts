@@ -3,9 +3,9 @@ import { TimeRange } from '@grafana/data';
 import { LabelProgress } from '../inventory/prometheus';
 import { PluginSettings } from '../settings/settings';
 import { QueryWindow, toQueryWindow } from '../window/window';
-import { DatasourceProgress, StackAssessment } from './stackAssessment';
+import { DatasourceProgress, StackAssessment, mergeOwners } from './stackAssessment';
 import { AssessmentStore, Run, RunState, browserDependencies, createAssessmentStore, runKey } from './assessmentStore';
-import { browserSavedResults } from './savedResults';
+import { browserSavedResults, currentViewer, viewerId } from './savedResults';
 
 export { messageOf } from './assessmentStore';
 
@@ -42,7 +42,7 @@ export function useStackAssessment(
   timeRange: TimeRange,
   { store = sharedStore, service, enabled = true }: AssessmentOptions = {}
 ): Load {
-  const key = runKey(settings, timeRange.raw, service);
+  const key = `${viewerId(currentViewer()) ?? 'anonymous'}|${runKey(settings, timeRange.raw, service)}`;
   const [snapshot, setSnapshot] = useState<Keyed<string, { run: Run; state: RunState }>>();
 
   useEffect(() => {
@@ -82,8 +82,11 @@ export interface ServiceLoad {
   quick: boolean;
 }
 
-export function chooseServiceLoad(full: Load, quick: Load): ServiceLoad {
+export function chooseServiceLoad(full: Load, quick: Load, preferQuick = false): ServiceLoad {
   const complete = (load: Load) => load.status === 'ready' && !load.assessment.partial;
+  if (preferQuick && complete(quick)) {
+    return { load: quick, quick: true };
+  }
   if (complete(full) || full.status === 'failed' || !complete(quick)) {
     return { load: full, quick: false };
   }
@@ -99,12 +102,17 @@ export function useServiceAssessment(
 ): ServiceLoad {
   const full = useStackAssessment(settings, timeRange, { store });
   const fullComplete = full.status === 'ready' && !full.assessment.partial;
+  const savedLacksService =
+    full.status === 'ready' &&
+    full.savedAtMs !== undefined &&
+    service !== undefined &&
+    !mergeOwners(full.assessment.result).some((identity) => identity.owner.name === service);
   const quick = useStackAssessment(settings, timeRange, {
     store: quickLane,
     service,
-    enabled: service !== undefined && !fullComplete,
+    enabled: service !== undefined && (!fullComplete || savedLacksService),
   });
-  return chooseServiceLoad(full, quick);
+  return chooseServiceLoad(full, quick, savedLacksService);
 }
 
 export function loadingText(load: { labels?: LabelProgress }): string {

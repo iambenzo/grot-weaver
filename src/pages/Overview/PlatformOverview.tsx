@@ -59,7 +59,13 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const status = (
     <>
       <SavedScanNotice savedAtMs={load.savedAtMs} refreshError={load.refreshError} />
-      <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
+      <StackStatus
+        progress={load.progress}
+        partial={assessment.partial}
+        labels={load.labels}
+        onRetry={load.retry}
+        refreshing={load.savedAtMs !== undefined}
+      />
     </>
   );
 

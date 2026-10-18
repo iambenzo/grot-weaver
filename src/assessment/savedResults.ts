@@ -37,20 +37,27 @@ export function viewerId(viewer: Viewer | undefined): string | undefined {
   return viewer?.isSignedIn && viewer.uid ? `${viewer.orgId}:${viewer.uid}` : undefined;
 }
 
+export function currentViewer(): Viewer | undefined {
+  return config.bootData?.user;
+}
+
 export function browserSavedResults(
-  viewer: Viewer | undefined = config.bootData?.user,
+  viewer: () => Viewer | undefined = currentViewer,
   nowMs: () => number = Date.now,
   database: IDBFactory | undefined = globalThis.indexedDB
 ): SavedResults {
-  const id = viewerId(viewer);
-  if (!id || !database) {
+  if (!database) {
     return noSavedResults;
   }
-  const entryKey = (key: string) => `${id}|${key}`;
   return {
     async load(key) {
+      const id = viewerId(viewer());
+      if (!id) {
+        return undefined;
+      }
       try {
-        const entry = await withStore<Entry | undefined>(database, 'readonly', (store) => store.get(entryKey(key)));
+        const entry = await withStore<Entry | undefined>(database, 'readonly', (store) => store.get(`${id}|${key}`));
+        void prune(database, nowMs()).catch(() => undefined);
         if (!entry || entry.viewer !== id || nowMs() - entry.savedAtMs > MAX_SAVED_AGE_MS) {
           return undefined;
         }
@@ -60,8 +67,12 @@ export function browserSavedResults(
       }
     },
     async save(key, assessment) {
+      const id = viewerId(viewer());
+      if (!id) {
+        return;
+      }
       try {
-        const entry: Entry = { key: entryKey(key), viewer: id, assessment, savedAtMs: nowMs() };
+        const entry: Entry = { key: `${id}|${key}`, viewer: id, assessment, savedAtMs: nowMs() };
         await withStore(database, 'readwrite', (store) => store.put(entry));
         await prune(database, nowMs());
       } catch {

@@ -87,7 +87,7 @@ export function createAssessmentStore(
     notify(run);
   };
 
-  const execute = (run: ActiveRun, begin: Start) =>
+  const execute = (run: ActiveRun, begin: Start, fromSaved = false) =>
     begin({
       ...dependencies(run.settings, run.controller.signal),
       service: run.service,
@@ -96,6 +96,10 @@ export function createAssessmentStore(
       onPartial: (assessment) => run.state.savedAtMs === undefined && patch(run, { assessment }),
     })
       .then((assessment) => {
+        if (fromSaved) {
+          patch(run, { assessment, progress: assessment.progress, message: undefined });
+          return;
+        }
         patch(run, { assessment, progress: assessment.progress, message: undefined, savedAtMs: undefined });
         if (run.service === undefined && !assessment.partial && !run.controller.signal.aborted) {
           void saved.save(run.key, assessment);
@@ -103,12 +107,16 @@ export function createAssessmentStore(
       })
       .catch((error: unknown) => patch(run, { message: messageOf(error) }));
 
-  const enqueue = (run: ActiveRun, next: () => Start | undefined, settled: () => void = () => undefined) => {
+  const enqueue = (
+    run: ActiveRun,
+    next: () => { begin: Start; fromSaved: boolean } | undefined,
+    settled: () => void = () => undefined
+  ) => {
     const idle = run.running === 0;
     run.running++;
     const step = () => {
-      const begin = next();
-      return begin && !run.controller.signal.aborted ? execute(run, begin) : undefined;
+      const planned = next();
+      return planned && !run.controller.signal.aborted ? execute(run, planned.begin, planned.fromSaved) : undefined;
     };
     run.queue = (idle ? Promise.resolve(step()) : run.queue.then(step)).finally(() => {
       run.running--;
@@ -150,10 +158,13 @@ export function createAssessmentStore(
         queuedRetries: new Set(),
       };
       current = run;
-      enqueue(run, () => (deps) => assessStack(discoverStack(settings), window, settings, deps));
+      enqueue(run, () => ({
+        begin: (deps) => assessStack(discoverStack(settings), window, settings, deps),
+        fromSaved: false,
+      }));
       if (service === undefined) {
         void saved.load(key).then((found) => {
-          if (found && run.state.assessment === undefined) {
+          if (found && (run.state.assessment === undefined || run.state.assessment.partial)) {
             patch(run, {
               assessment: found.assessment,
               progress: found.assessment.progress,
@@ -187,7 +198,12 @@ export function createAssessmentStore(
         active,
         () => {
           const base = active.state.assessment;
-          return base && ((deps) => retryDatasource(base, uid, active.window, active.settings, deps));
+          return (
+            base && {
+              begin: (deps) => retryDatasource(base, uid, active.window, active.settings, deps),
+              fromSaved: active.state.savedAtMs !== undefined,
+            }
+          );
         },
         () => active.queuedRetries.delete(uid)
       );

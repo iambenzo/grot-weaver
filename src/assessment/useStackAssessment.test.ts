@@ -29,3 +29,12 @@ describe('chooseServiceLoad', () => {
     expect(chooseServiceLoad(failed, ready(false))).toEqual({ load: failed, quick: false });
   });
 });
+
+describe('chooseServiceLoad with a saved scan that lacks the service', () => {
+  it('prefers a complete quick view over the saved full scan', () => {
+    const quick = ready(false);
+
+    expect(chooseServiceLoad(ready(false), quick, true)).toEqual({ load: quick, quick: true });
+    expect(chooseServiceLoad(ready(false), loading, true).quick).toBe(false);
+  });
+});

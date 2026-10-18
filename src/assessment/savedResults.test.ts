@@ -13,11 +13,23 @@ describe('viewerId', () => {
 });
 
 describe('browserSavedResults', () => {
-  it('saves nothing without a signed-in viewer or without IndexedDB', () => {
-    expect(browserSavedResults({ isSignedIn: false, orgId: 1, uid: 'u1' }, Date.now, {} as IDBFactory)).toBe(
+  const untouched = { open: jest.fn() } as unknown as IDBFactory;
+
+  it('saves nothing without IndexedDB', () => {
+    expect(browserSavedResults(() => ({ isSignedIn: true, orgId: 1, uid: 'u1' }), Date.now, undefined)).toBe(
       noSavedResults
     );
-    expect(browserSavedResults({ isSignedIn: true, orgId: 1, uid: 'u1' }, Date.now, undefined)).toBe(noSavedResults);
+  });
+
+  it('never touches the database for a viewer who is not signed in, checked on every call', async () => {
+    let viewer = { isSignedIn: true, orgId: 1, uid: 'u1' };
+    const saved = browserSavedResults(() => viewer, Date.now, untouched);
+    viewer = { isSignedIn: false, orgId: 1, uid: 'u1' };
+
+    await expect(saved.load('a')).resolves.toBeUndefined();
+    await saved.save('a', {} as never);
+
+    expect(untouched.open).not.toHaveBeenCalled();
   });
 
   it('reads nothing back when the database cannot be opened', async () => {
@@ -28,7 +40,7 @@ describe('browserSavedResults', () => {
         return request;
       },
     } as unknown as IDBFactory;
-    const saved = browserSavedResults({ isSignedIn: true, orgId: 1, uid: 'u1' }, Date.now, failing);
+    const saved = browserSavedResults(() => ({ isSignedIn: true, orgId: 1, uid: 'u1' }), Date.now, failing);
 
     await expect(saved.load('a')).resolves.toBeUndefined();
     await expect(saved.save('a', {} as never)).resolves.toBeUndefined();

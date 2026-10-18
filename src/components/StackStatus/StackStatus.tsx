@@ -50,9 +50,10 @@ interface StackStatusProps {
   partial: boolean;
   labels?: LabelProgress;
   onRetry: (uid: string) => void;
+  refreshing?: boolean;
 }
 
-export function StackStatus({ progress, partial, labels, onRetry }: StackStatusProps) {
+export function StackStatus({ progress, partial, labels, onRetry, refreshing = false }: StackStatusProps) {
   if (progress.length === 0) {
     return (
       <Alert severity="info" title="No metrics, trace or log datasources found">
@@ -66,12 +67,18 @@ export function StackStatus({ progress, partial, labels, onRetry }: StackStatusP
   return (
     <Stack direction="column" gap={1}>
       {(partial || pending.length > 0) && (
-        <Alert severity="info" title="Partial results" data-testid={testIds.status.partial}>
+        <Alert
+          severity="info"
+          title={refreshing ? 'Refreshing' : 'Partial results'}
+          data-testid={testIds.status.partial}
+        >
           <Stack direction="column" gap={1}>
             <div aria-live="polite">
               <Text>
-                Scores cover {progress.length - pending.length} of {progress.length} datasources so far and update as
-                the rest arrive. {loadingText({ labels })}
+                {refreshing
+                  ? `The fresh scan has covered ${progress.length - pending.length} of ${progress.length} datasources. The scores shown are from the saved scan until it finishes.`
+                  : `Scores cover ${progress.length - pending.length} of ${progress.length} datasources so far and update as the rest arrive.`}{' '}
+                {loadingText({ labels })}
               </Text>
             </div>
             <DatasourceProgressList progress={progress} />

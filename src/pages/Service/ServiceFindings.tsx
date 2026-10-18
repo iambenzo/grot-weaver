@@ -129,7 +129,13 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
         </Alert>
       )}
       <SavedScanNotice savedAtMs={load.savedAtMs} refreshError={load.refreshError} />
-      <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
+      <StackStatus
+        progress={load.progress}
+        partial={assessment.partial}
+        labels={load.labels}
+        onRetry={load.retry}
+        refreshing={load.savedAtMs !== undefined}
+      />
       <FeatureLimits progress={load.progress} result={assessment.result} />
       {!assessment.partial && !hasOTelServices(assessment.result) && <EmptyTelemetry result={assessment.result} />}
       <WidenWindowPrompt

@@ -133,6 +133,17 @@ describe('FeatureLimits', () => {
   });
 });
 
+describe('StackStatus while refreshing', () => {
+  it('describes the progress as the fresh scan, not the scores shown', () => {
+    render(<StackStatus progress={[prom, tempo]} partial={false} onRetry={() => undefined} refreshing />);
+
+    expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent('Refreshing');
+    expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent(
+      'The fresh scan has covered 1 of 2 datasources. The scores shown are from the saved scan until it finishes.'
+    );
+  });
+});
+
 describe('SavedScanNotice', () => {
   it('says the saved scan is showing while a fresh one runs', () => {
     render(<SavedScanNotice savedAtMs={Date.now() - 2 * 60 * 60 * 1000} />);

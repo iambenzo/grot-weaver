@@ -254,6 +254,50 @@ describe('assessment store', () => {
       expect(saved.save).toHaveBeenCalledWith('a', fresh);
     });
 
+    it('takes the saved result over a partial one that arrived first', async () => {
+      const runs = controlledRuns(assessStack as jest.Mock);
+      let release: () => void = () => undefined;
+      const late = {
+        load: jest.fn(
+          () =>
+            new Promise<{ assessment: StackAssessment; savedAtMs: number }>((resolve) => {
+              release = () => resolve({ assessment: savedAssessment, savedAtMs: 123 });
+            })
+        ),
+        save: jest.fn(async () => undefined),
+      };
+      const store = createAssessmentStore(
+        () => ({}) as ReturnType<DependencyFactory>,
+        () => 0,
+        late
+      );
+      const run = store.acquire('a', window, settings);
+      runs[0].deps.onPartial?.({ progress: [], partial: true } as unknown as StackAssessment);
+
+      release();
+      await settle();
+
+      expect(run.state).toMatchObject({ assessment: savedAssessment, savedAtMs: 123 });
+    });
+
+    it('does not save or relabel a retry built on the saved result', async () => {
+      (assessStack as jest.Mock).mockImplementation(() => Promise.reject(new Error('boom')));
+      const retries = controlledRuns(retryDatasource as jest.Mock);
+      const saved = fakeSaved(savedAssessment);
+      const store = storeWith(saved);
+      const run = store.acquire('a', window, settings);
+      await settle();
+
+      store.retry(run, 'loki');
+      await settle();
+      retries[0].resolve({ progress: [], partial: false } as unknown as StackAssessment);
+      await settle();
+
+      expect(retryDatasource).toHaveBeenCalledWith(savedAssessment, 'loki', window, settings, expect.anything());
+      expect(run.state.savedAtMs).toBe(123);
+      expect(saved.save).not.toHaveBeenCalled();
+    });
+
     it('keeps the saved result and the error when the fresh scan fails', async () => {
       (assessStack as jest.Mock).mockImplementation(() => Promise.reject(new Error('boom')));
       const store = storeWith(fakeSaved(savedAssessment));
