@@ -8,6 +8,7 @@ import { LabelProgress } from '../inventory/prometheus';
 import { PluginSettings, concurrencyFrom } from '../settings/settings';
 import { QueryWindow } from '../window/window';
 import { SavedResults, noSavedResults } from './savedResults';
+import { messageOf } from '../api/errors';
 import {
   DatasourceProgress,
   StackAssessment,
@@ -212,11 +213,3 @@ export function createAssessmentStore(
 }
 
 export type AssessmentStore = ReturnType<typeof createAssessmentStore>;
-
-export function messageOf(error: unknown): string {
-  if (error && typeof error === 'object') {
-    const candidate = error as { data?: { error?: string; message?: string }; message?: string };
-    return candidate.data?.error ?? candidate.data?.message ?? candidate.message ?? 'unknown error';
-  }
-  return String(error);
-}

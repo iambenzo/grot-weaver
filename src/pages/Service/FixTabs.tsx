@@ -17,7 +17,7 @@ import { Finding } from '../../api/types';
 import { LibraryInfo } from '../../assessment/libraries';
 import { FetchFixOptions, FixLibrary, FixOptions, fetchFixOptions, identifiedLibrary } from '../../fix/fixOptions';
 import { Evidence, ownerSummary } from '../../fix/summary';
-import { messageOf } from '../../assessment/useStackAssessment';
+import { messageOf } from '../../api/errors';
 import { testIds } from '../../components/testIds';
 
 type FixTab = 'instrumentation' | 'pipeline' | 'raise';

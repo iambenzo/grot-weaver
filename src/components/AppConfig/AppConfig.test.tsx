@@ -1,5 +1,5 @@
 import React from 'react';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { AppPluginMeta, PluginType } from '@grafana/data';
 import AppConfig, { AppConfigProps } from './AppConfig';
@@ -43,6 +43,22 @@ describe('AppConfig', () => {
       expect(screen.getByText(group)).toBeInTheDocument();
     }
     expect(screen.getByText('Translation strategy for Prometheus')).toBeInTheDocument();
+  });
+
+  it('shows why a save failed and keeps the edited settings for a retry', async () => {
+    fetch.mockReturnValue(throwError(() => ({ status: 403, data: { message: 'Permission denied' } })));
+    render(<AppConfig {...props({})} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /add rule/i }));
+    fireEvent.change(screen.getByPlaceholderText('traces_spanmetrics_*'), { target: { value: 'acme_*' } });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId(testIds.appConfig.submit));
+    });
+
+    expect(screen.getByTestId(testIds.appConfig.saveError)).toHaveTextContent('Permission denied');
+    expect(reload).not.toHaveBeenCalled();
+    expect(screen.getByPlaceholderText('traces_spanmetrics_*')).toHaveValue('acme_*');
+    expect(screen.getByTestId(testIds.appConfig.submit)).toBeEnabled();
   });
 
   it('saves edited settings into jsonData, keeping existing values', async () => {

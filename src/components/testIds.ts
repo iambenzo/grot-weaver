@@ -44,5 +44,6 @@ export const testIds = {
     defaultWindow: 'data-testid ac-default-window',
     requiredAttributes: 'data-testid ac-required-attributes',
     submit: 'data-testid ac-submit-form',
+    saveError: 'data-testid ac-save-error',
   },
 };

@@ -4,6 +4,7 @@ import { css } from '@emotion/css';
 import { AppPluginMeta, GrafanaTheme2, PluginConfigPageProps, PluginMeta } from '@grafana/data';
 import { getBackendSrv, getDataSourceSrv, locationService } from '@grafana/runtime';
 import {
+  Alert,
   Button,
   Combobox,
   ComboboxOption,
@@ -15,6 +16,7 @@ import {
   Stack,
   Switch,
   TagsInput,
+  Text,
   useStyles2,
 } from '@grafana/ui';
 import { testIds } from '../testIds';
@@ -32,6 +34,7 @@ import {
 } from '../../settings/settings';
 import { DEFAULT_WINDOW, WINDOW_PRESETS } from '../../window/presets';
 import { ReclassificationRule, TRANSLATION_STRATEGIES, TranslationStrategy } from '../../inventory/types';
+import { messageOf } from '../../api/errors';
 
 export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<PluginSettings>> {}
 
@@ -49,10 +52,19 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
   const typesFor = (signal: keyof DatasourceTypes) =>
     settings.datasourceTypes?.[signal] ?? DEFAULT_DATASOURCE_TYPES[signal];
 
+  const [saveError, setSaveError] = useState<string>();
+
   const save = async () => {
     setSaving(true);
-    await updatePluginAndReload(plugin.meta.id, { enabled, pinned, jsonData: settings });
-    setSaving(false);
+    setSaveError(undefined);
+    try {
+      await updatePlugin(plugin.meta.id, { enabled, pinned, jsonData: settings });
+      locationService.reload();
+    } catch (error) {
+      setSaveError(messageOf(error));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const metricsDatasources = datasources.filter((ds) => typesFor('metrics').includes(ds.type));
@@ -217,6 +229,12 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
         </Field>
       </FieldSet>
 
+      {saveError && (
+        <Alert severity="error" title="Settings were not saved" data-testid={testIds.appConfig.saveError}>
+          <Text element="p">{saveError}</Text>
+          <Text element="p">Your changes are still in the form, so you can try again.</Text>
+        </Alert>
+      )}
       <Button onClick={save} disabled={saving} data-testid={testIds.appConfig.submit}>
         Save settings
       </Button>
@@ -363,15 +381,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
     maxWidth: theme.spacing(120),
   }),
 });
-
-const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta<PluginSettings>>) => {
-  try {
-    await updatePlugin(pluginId, data);
-    locationService.reload();
-  } catch (error) {
-    console.error('Error while updating the plugin', error);
-  }
-};
 
 const updatePlugin = async (pluginId: string, data: Partial<PluginMeta>) => {
   const response = getBackendSrv().fetch({
