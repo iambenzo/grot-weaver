@@ -1,9 +1,11 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ScoreTiles, scoreTiles } from './ScoreTiles';
 import { weightingText } from './PlatformOverview';
 import { ServicesTable, serviceLink } from './ServicesTable';
 import { OwnerSections } from './OwnerSections';
+import { TopViolations } from './TopViolations';
+import { ViolationGroup } from '../../assessment/overview';
 import { AssessmentResult } from '../../api/types';
 
 describe('ScoreTiles', () => {
@@ -121,7 +123,7 @@ describe('ServicesTable', () => {
       requiredResource: { value: 0.8, numerator: 4, denominator: 5 },
     };
 
-    expect(serviceLink(row, { from: 'now-24h', to: 'now' })).toBe(
+    expect(serviceLink(row.owner, { from: 'now-24h', to: 'now' })).toBe(
       '/a/iambenzo-semconvcompliance-app/service?service=checkout&from=now-24h&to=now&namespace=shop'
     );
     render(<ServicesTable rows={[row]} range={{ from: 'now-24h', to: 'now' }} />);
@@ -143,5 +145,37 @@ describe('OwnerSections', () => {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
     expect(screen.queryByText('No pipeline-introduced findings in this window.')).toBeNull();
+  });
+});
+
+describe('TopViolations', () => {
+  const range = { from: 'now-24h', to: 'now' };
+  const group = (index: number): ViolationGroup => ({
+    key: `traces|deprecated|name.${index}`,
+    signal: 'traces',
+    type: 'deprecated',
+    name: `name.${index}`,
+    services: 1,
+    owners: [{ kind: 'service', namespace: 'shop', name: 'checkout' }],
+    libraries: [],
+    volume: 1,
+    impactShare: 0,
+  });
+
+  it('links an expanded violation to each affected service on its signal', () => {
+    render(<TopViolations groups={[group(1)]} range={range} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /toggle row expanded/i }));
+
+    expect(screen.getByRole('link', { name: 'shop/checkout' })).toHaveAttribute(
+      'href',
+      '/a/iambenzo-semconvcompliance-app/service?service=checkout&from=now-24h&to=now&namespace=shop&signal=traces'
+    );
+  });
+
+  it('says when the list is capped', () => {
+    render(<TopViolations groups={Array.from({ length: 30 }, (_, index) => group(index))} range={range} />);
+
+    expect(screen.getByText(/Showing the top 25 of 30 violations/)).toBeInTheDocument();
   });
 });

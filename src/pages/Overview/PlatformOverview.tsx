@@ -112,7 +112,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
             />
           ))}
         </TabsBar>
-        <TopViolations groups={groups.filter((group) => group.signal === signal)} />
+        <TopViolations groups={groups.filter((group) => group.signal === signal)} range={range} />
       </Stack>
       <Stack direction="column" gap={1}>
         <SectionHeading title="Services, worst first" help={SERVICES_HELP} />

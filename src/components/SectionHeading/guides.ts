@@ -21,6 +21,7 @@ export const SIGNAL_TILES_HELP: GuideItem[] = [
 
 export const TOP_VIOLATIONS_HELP: GuideItem[] = [
   { meaning: 'Violations seen across the most services come first, so one fix in a shared library helps most.' },
+  { meaning: 'Expand a row to open each affected service on this signal.' },
 ];
 
 export const SERVICES_HELP: GuideItem[] = [

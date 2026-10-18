@@ -1,7 +1,10 @@
 import React from 'react';
-import { Column, InteractiveTable, Text } from '@grafana/ui';
+import { Column, InteractiveTable, LinkButton, Stack, Text } from '@grafana/ui';
 import { ViolationGroup } from '../../assessment/overview';
 import { testIds } from '../../components/testIds';
+import { ownerName, serviceLink } from './ServicesTable';
+
+const MAX_ROWS = 25;
 
 const TYPE_LABELS: Record<string, string> = {
   deprecated: 'Deprecated',
@@ -12,7 +15,12 @@ const TYPE_LABELS: Record<string, string> = {
   missing_service_name: 'No service name',
 };
 
-export function TopViolations({ groups }: { groups: ViolationGroup[] }) {
+interface TopViolationsProps {
+  groups: ViolationGroup[];
+  range: { from: string; to: string };
+}
+
+export function TopViolations({ groups, range }: TopViolationsProps) {
   if (groups.length === 0) {
     return <Text color="secondary">No violations for this signal in this window.</Text>;
   }
@@ -41,8 +49,41 @@ export function TopViolations({ groups }: { groups: ViolationGroup[] }) {
     },
   ];
   return (
-    <div data-testid={testIds.overview.violations}>
-      <InteractiveTable columns={columns} data={groups.slice(0, 25)} getRowId={(group) => group.key} />
-    </div>
+    <Stack direction="column" gap={1} data-testid={testIds.overview.violations}>
+      <InteractiveTable
+        columns={columns}
+        data={groups.slice(0, MAX_ROWS)}
+        getRowId={(group) => group.key}
+        renderExpandedRow={(group) => <AffectedServices group={group} range={range} />}
+      />
+      {groups.length > MAX_ROWS && (
+        <Text color="secondary" variant="bodySmall">
+          Showing the top {MAX_ROWS} of {groups.length} violations. Open a service below to see all of its findings.
+        </Text>
+      )}
+    </Stack>
+  );
+}
+
+function AffectedServices({ group, range }: { group: ViolationGroup; range: { from: string; to: string } }) {
+  return (
+    <Stack direction="column" gap={0.5} alignItems="flex-start">
+      <Text color="secondary" variant="bodySmall">
+        Open a service to see the evidence and fix options for this violation.
+      </Text>
+      <Stack gap={1} wrap="wrap">
+        {group.owners.map((owner) => (
+          <LinkButton
+            key={ownerName(owner)}
+            href={serviceLink(owner, range, group.signal)}
+            fill="outline"
+            variant="secondary"
+            size="sm"
+          >
+            {ownerName(owner)}
+          </LinkButton>
+        ))}
+      </Stack>
+    </Stack>
   );
 }

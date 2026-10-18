@@ -9,6 +9,7 @@ export interface ViolationGroup {
   expected?: string;
   note?: string;
   services: number;
+  owners: Owner[];
   libraries: string[];
   volume: number;
   impactShare: number;
@@ -27,7 +28,7 @@ export function ratioValue(ratio: Ratio | undefined): number | null {
 }
 
 export function groupViolations(findings: Finding[]): ViolationGroup[] {
-  const groups = new Map<string, ViolationGroup & { owners: Set<string> }>();
+  const groups = new Map<string, Omit<ViolationGroup, 'services'> & { ownerKeys: Set<string> }>();
   for (const finding of findings) {
     if (finding.level !== 'violation' || finding.owner.kind !== 'service') {
       continue;
@@ -41,13 +42,16 @@ export function groupViolations(findings: Finding[]): ViolationGroup[] {
       name,
       expected: finding.expected,
       note: finding.note,
-      services: 0,
+      owners: [],
       libraries: [],
       volume: 0,
       impactShare: 0,
-      owners: new Set<string>(),
+      ownerKeys: new Set<string>(),
     };
-    group.owners.add(ownerKey(finding.owner));
+    if (!group.ownerKeys.has(ownerKey(finding.owner))) {
+      group.ownerKeys.add(ownerKey(finding.owner));
+      group.owners.push(finding.owner);
+    }
     group.volume += finding.volume;
     group.impactShare += finding.impact_share;
     if (finding.library && !group.libraries.includes(finding.library.name)) {
@@ -56,7 +60,7 @@ export function groupViolations(findings: Finding[]): ViolationGroup[] {
     groups.set(key, group);
   }
   return [...groups.values()]
-    .map(({ owners, ...group }) => ({ ...group, services: owners.size }))
+    .map(({ ownerKeys, ...group }) => ({ ...group, services: ownerKeys.size }))
     .sort((a, b) => b.services - a.services || b.impactShare - a.impactShare || a.name.localeCompare(b.name));
 }
 

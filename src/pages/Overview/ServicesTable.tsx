@@ -1,7 +1,7 @@
 import React from 'react';
 import { css } from '@emotion/css';
 import { Column, InteractiveTable, LinkButton, useStyles2 } from '@grafana/ui';
-import { Signal } from '../../api/types';
+import { Owner, Signal } from '../../api/types';
 import { ServiceRow } from '../../assessment/overview';
 import { prefixRoute } from '../../utils/utils.routing';
 import { ROUTES } from '../../constants';
@@ -10,12 +10,19 @@ import { formatRatio } from './ScoreTiles';
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
 
-export function serviceLink(row: ServiceRow, range: { from: string; to: string }): string {
-  const params = new URLSearchParams({ service: row.owner.name, from: range.from, to: range.to });
-  if (row.owner.namespace) {
-    params.set('namespace', row.owner.namespace);
+export function serviceLink(owner: Owner, range: { from: string; to: string }, signal?: Signal): string {
+  const params = new URLSearchParams({ service: owner.name, from: range.from, to: range.to });
+  if (owner.namespace) {
+    params.set('namespace', owner.namespace);
+  }
+  if (signal) {
+    params.set('signal', signal);
   }
   return `${prefixRoute(ROUTES.Service)}?${params.toString()}`;
+}
+
+export function ownerName(owner: Owner): string {
+  return owner.namespace ? `${owner.namespace}/${owner.name}` : owner.name;
 }
 
 export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { from: string; to: string } }) {
@@ -25,10 +32,8 @@ export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { fr
       id: 'service',
       header: 'Service',
       cell: ({ row }) => (
-        <LinkButton href={serviceLink(row.original, range)} fill="text" size="sm">
-          {row.original.owner.namespace
-            ? `${row.original.owner.namespace}/${row.original.owner.name}`
-            : row.original.owner.name}
+        <LinkButton href={serviceLink(row.original.owner, range)} fill="text" size="sm">
+          {ownerName(row.original.owner)}
         </LinkButton>
       ),
     },

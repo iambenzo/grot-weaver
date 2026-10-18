@@ -44,6 +44,7 @@ describe('groupViolations', () => {
       ['net.peer.name', 1],
     ]);
     expect(groups[0].libraries).toEqual(['otel-http', 'other-lib']);
+    expect(groups[0].owners).toEqual([checkout, payments]);
   });
 });
 
