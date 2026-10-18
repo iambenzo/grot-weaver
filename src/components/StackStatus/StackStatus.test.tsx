@@ -12,6 +12,7 @@ import {
   hasOTelServices,
   incompleteReasons,
   scanLimits,
+  scanSummary,
 } from './StackStatus';
 import { testIds } from '../testIds';
 
@@ -74,7 +75,16 @@ describe('ScanStatus', () => {
     );
 
     expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent(
-      'Showing your saved scan from 2 hours ago. A fresh scan has covered 1 of 2 datasources and replaces it when it finishes.'
+      'Showing your saved scan from 2 hours ago. A fresh scan is running, 1 of 2 datasources so far, and replaces it when it finishes.'
+    );
+  });
+
+  it('keeps saying the fresh scan is running after the last datasource answers', () => {
+    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now() })).toContain(
+      'A fresh scan is running, 1 of 1 datasources so far'
+    );
+    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now(), refreshError: 'boom' })).toBe(
+      'Showing your saved scan from a few seconds ago.'
     );
   });
 

@@ -69,6 +69,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const limits = scanLimits(assessment.progress, result);
   const incompleteFor = (candidate: Signal) => incompleteReasons(assessment.progress, limits, candidate);
   const limitedSignals = SIGNALS.filter((candidate) => incompleteFor(candidate).length > 0);
+  const empty = emptyKind(assessment);
   const status = (observedItems: number) => (
     <>
       <ScanStatus
@@ -77,11 +78,14 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
         limits={limits}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
+        refreshError={load.refreshError}
       >
-        <WidenWindowPrompt window={load.window} observedItems={observedItems} timeRange={timeRangeObject} />
+        {empty !== 'unreadable' && (
+          <WidenWindowPrompt window={load.window} observedItems={observedItems} timeRange={timeRangeObject} />
+        )}
       </ScanStatus>
       <ScanWarnings
-        progress={load.progress}
+        progress={assessment.progress}
         onRetry={load.retry}
         savedAtMs={load.savedAtMs}
         refreshError={load.refreshError}
@@ -89,7 +93,6 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
     </>
   );
 
-  const empty = emptyKind(assessment);
   if (empty) {
     return (
       <Stack direction="column" gap={3}>

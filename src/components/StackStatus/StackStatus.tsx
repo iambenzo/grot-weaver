@@ -69,6 +69,7 @@ interface ScanStatusProps {
   limits: ScanLimit[];
   labels?: LabelProgress;
   savedAtMs?: number;
+  refreshError?: string;
   children?: React.ReactNode;
 }
 
@@ -77,16 +78,17 @@ export function scanSummary({
   partial,
   labels,
   savedAtMs,
-}: Pick<ScanStatusProps, 'progress' | 'partial' | 'labels' | 'savedAtMs'>): string {
+  refreshError,
+}: Pick<ScanStatusProps, 'progress' | 'partial' | 'labels' | 'savedAtMs' | 'refreshError'>): string {
   const pending = progress.filter((entry) => entry.state === 'pending').length;
   const done = progress.length - pending;
   const labelText = labels && labels.total > 0 ? ` Checking metric labels ${labels.done} of ${labels.total}.` : '';
   if (savedAtMs !== undefined) {
     const age = dateTimeFormatTimeAgo(savedAtMs);
-    if (pending === 0 && !partial) {
+    if (refreshError) {
       return `Showing your saved scan from ${age}.`;
     }
-    return `Showing your saved scan from ${age}. A fresh scan has covered ${done} of ${progress.length} datasources and replaces it when it finishes.${labelText}`;
+    return `Showing your saved scan from ${age}. A fresh scan is running, ${done} of ${progress.length} datasources so far, and replaces it when it finishes.${labelText}`;
   }
   if (partial || pending > 0) {
     return `Scores cover ${done} of ${progress.length} datasources so far and update as the rest arrive.${labelText}`;
@@ -94,19 +96,20 @@ export function scanSummary({
   return `Scan finished across ${progress.length} ${progress.length === 1 ? 'datasource' : 'datasources'}.`;
 }
 
-export function ScanStatus({ progress, partial, limits, labels, savedAtMs, children }: ScanStatusProps) {
+export function ScanStatus({ progress, partial, limits, labels, savedAtMs, refreshError, children }: ScanStatusProps) {
   const styles = useStyles2(getStyles);
   if (progress.length === 0) {
     return null;
   }
-  const scanning = partial || progress.some((entry) => entry.state === 'pending');
+  const refreshing = savedAtMs !== undefined && !refreshError;
+  const scanning = refreshing || partial || progress.some((entry) => entry.state === 'pending');
   return (
     <div className={styles.panel} data-testid={testIds.status.panel}>
       <Stack direction="column" gap={1}>
         <Stack gap={1} alignItems="center">
           {scanning ? <Spinner inline /> : <Icon name={savedAtMs === undefined ? 'check-circle' : 'history'} />}
           <div aria-live="polite" data-testid={savedAtMs === undefined ? testIds.status.partial : testIds.status.saved}>
-            <Text>{scanSummary({ progress, partial, labels, savedAtMs })}</Text>
+            <Text>{scanSummary({ progress, partial, labels, savedAtMs, refreshError })}</Text>
           </div>
         </Stack>
         {scanning && <DatasourceProgressList progress={progress} />}

@@ -134,6 +134,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
         limits={scanLimits(assessment.progress, assessment.result)}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
+        refreshError={load.refreshError}
       >
         {quick && (
           <Text color="secondary" data-testid={testIds.service.quickView}>
@@ -141,14 +142,16 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
             impact ranking, can change when the full scan of the stack finishes, and this page then updates.
           </Text>
         )}
-        <WidenWindowPrompt
-          window={load.window}
-          observedItems={assessment.result.findings.length}
-          timeRange={timeRangeObject}
-        />
+        {empty !== 'unreadable' && (
+          <WidenWindowPrompt
+            window={load.window}
+            observedItems={assessment.result.findings.length}
+            timeRange={timeRangeObject}
+          />
+        )}
       </ScanStatus>
       <ScanWarnings
-        progress={load.progress}
+        progress={assessment.progress}
         onRetry={load.retry}
         savedAtMs={load.savedAtMs}
         refreshError={load.refreshError}
@@ -168,7 +171,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
           range={{ from: String(timeRange.raw.from), to: String(timeRange.raw.to) }}
         />
       ) : (
-        empty === undefined && <NoServiceSelected />
+        empty === undefined && identities.length > 0 && <NoServiceSelected />
       )}
     </Stack>
   );
