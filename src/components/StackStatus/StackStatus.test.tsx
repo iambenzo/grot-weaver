@@ -71,7 +71,13 @@ describe('ScanStatus', () => {
 
   it('describes the progress as the fresh scan when a saved scan is showing', () => {
     render(
-      <ScanStatus progress={[prom, tempo]} partial={false} limits={[]} savedAtMs={Date.now() - 2 * 60 * 60 * 1000} />
+      <ScanStatus
+        progress={[prom, tempo]}
+        partial={false}
+        limits={[]}
+        savedAtMs={Date.now() - 2 * 60 * 60 * 1000}
+        refreshing
+      />
     );
 
     expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent(
@@ -79,11 +85,11 @@ describe('ScanStatus', () => {
     );
   });
 
-  it('keeps saying the fresh scan is running after the last datasource answers', () => {
-    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now() })).toContain(
+  it('says a fresh scan is running exactly while the store is still refreshing', () => {
+    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now(), refreshing: true })).toContain(
       'A fresh scan is running, 1 of 1 datasources so far'
     );
-    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now(), refreshError: 'boom' })).toBe(
+    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now(), refreshing: false })).toBe(
       'Showing your saved scan from a few seconds ago.'
     );
   });

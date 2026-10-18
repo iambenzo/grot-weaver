@@ -78,7 +78,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
         limits={limits}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
-        refreshError={load.refreshError}
+        refreshing={load.refreshing}
       >
         {empty !== 'unreadable' && (
           <WidenWindowPrompt window={load.window} observedItems={observedItems} timeRange={timeRangeObject} />

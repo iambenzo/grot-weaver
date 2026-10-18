@@ -27,6 +27,7 @@ export interface RunState {
   assessment?: StackAssessment;
   message?: string;
   savedAtMs?: number;
+  scanning?: boolean;
 }
 
 export interface Run {
@@ -101,12 +102,20 @@ export function createAssessmentStore(
           patch(run, { assessment, progress: assessment.progress, message: undefined });
           return;
         }
-        patch(run, { assessment, progress: assessment.progress, message: undefined, savedAtMs: undefined });
+        patch(run, {
+          assessment,
+          progress: assessment.progress,
+          message: undefined,
+          savedAtMs: undefined,
+          scanning: false,
+        });
         if (run.service === undefined && !assessment.partial && !run.controller.signal.aborted) {
           void saved.save(run.key, assessment);
         }
       })
-      .catch((error: unknown) => patch(run, { message: messageOf(error) }));
+      .catch((error: unknown) =>
+        patch(run, fromSaved ? { message: messageOf(error) } : { message: messageOf(error), scanning: false })
+      );
 
   const enqueue = (
     run: ActiveRun,
@@ -150,7 +159,7 @@ export function createAssessmentStore(
         window,
         settings,
         service,
-        state: { progress: [] },
+        state: { progress: [], scanning: true },
         startedAtMs: nowMs(),
         running: 0,
         controller: new AbortController(),

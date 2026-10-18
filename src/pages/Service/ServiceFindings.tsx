@@ -134,7 +134,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
         limits={scanLimits(assessment.progress, assessment.result)}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
-        refreshError={load.refreshError}
+        refreshing={load.refreshing}
       >
         {quick && (
           <Text color="secondary" data-testid={testIds.service.quickView}>

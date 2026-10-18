@@ -23,6 +23,7 @@ export type Load =
       labels?: LabelProgress;
       retry: (uid: string) => void;
       savedAtMs?: number;
+      refreshing: boolean;
       refreshError?: string;
     };
 
@@ -66,6 +67,7 @@ export function useStackAssessment(
       labels: state.labels,
       retry: (uid) => store.retry(run, uid),
       savedAtMs: state.savedAtMs,
+      refreshing: state.savedAtMs !== undefined && state.scanning === true,
       refreshError: state.savedAtMs !== undefined ? state.message : undefined,
     };
   }

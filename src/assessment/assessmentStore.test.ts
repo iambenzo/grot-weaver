@@ -86,7 +86,7 @@ describe('assessment store', () => {
 
     expect(signals[0].aborted).toBe(true);
     expect(signals[1].aborted).toBe(false);
-    expect(first.state).toEqual({ progress: [] });
+    expect(first.state).toEqual({ progress: [], scanning: true });
   });
 
   it('abandons an unfinished run nobody watches after the grace period', () => {
@@ -241,7 +241,7 @@ describe('assessment store', () => {
       const run = store.acquire('a', window, settings);
       await settle();
 
-      expect(run.state).toMatchObject({ assessment: savedAssessment, savedAtMs: 123 });
+      expect(run.state).toMatchObject({ assessment: savedAssessment, savedAtMs: 123, scanning: true });
       runs[0].deps.onPartial?.({ progress: [], partial: true } as unknown as StackAssessment);
       expect(run.state.assessment).toBe(savedAssessment);
 
@@ -295,6 +295,8 @@ describe('assessment store', () => {
 
       expect(retryDatasource).toHaveBeenCalledWith(savedAssessment, 'loki', window, settings, expect.anything());
       expect(run.state.savedAtMs).toBe(123);
+      expect(run.state.message).toBeUndefined();
+      expect(run.state.scanning).toBe(false);
       expect(saved.save).not.toHaveBeenCalled();
     });
 
@@ -304,7 +306,12 @@ describe('assessment store', () => {
       const run = store.acquire('a', window, settings);
       await settle();
 
-      expect(run.state).toMatchObject({ assessment: savedAssessment, savedAtMs: 123, message: 'boom' });
+      expect(run.state).toMatchObject({
+        assessment: savedAssessment,
+        savedAtMs: 123,
+        message: 'boom',
+        scanning: false,
+      });
     });
 
     it('does not save partial results, and never loads or saves for a single-service quick scan', async () => {
