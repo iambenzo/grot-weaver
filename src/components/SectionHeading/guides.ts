@@ -72,7 +72,12 @@ export const FINDINGS_HELP: GuideItem[] = [
   { meaning: 'One row per name that differs from semconv on the selected signal.' },
   {
     term: 'Levels',
-    meaning: 'Violations need fixing, improvements are recommended, information is context.',
+    meaning: 'Violations need fixing, improvements are recommended, information is context. Rows sort by level, then impact.',
+  },
+  {
+    term: 'Impact',
+    meaning:
+      "Share of all of this signal's volume in the scan that carries the name: series, spans or log lines. A dash means no volume was measured for it.",
   },
   {
     term: 'Fixing',

@@ -1,8 +1,8 @@
 import React from 'react';
 import { css } from '@emotion/css';
 import { dateTimeFormat, GrafanaTheme2 } from '@grafana/data';
-import { Badge, BadgeColor, Column, InteractiveTable, LinkButton, Stack, Text, useStyles2 } from '@grafana/ui';
-import { Bucket, Finding, FindingType, RegistrySource } from '../../api/types';
+import { Badge, BadgeColor, Column, IconName, InteractiveTable, LinkButton, Stack, Text, useStyles2 } from '@grafana/ui';
+import { Bucket, Finding, FindingType, Level, RegistrySource } from '../../api/types';
 import { findingKey } from '../../assessment/traceAssessment';
 import { LibraryInfo } from '../../assessment/libraries';
 import { testIds } from '../../components/testIds';
@@ -38,6 +38,12 @@ const TYPE_LABELS: Record<FindingType, { text: string; color: BadgeColor }> = {
   missing_service_name: { text: 'No service name', color: 'red' },
 };
 
+const LEVEL_BADGES: Record<Exclude<Level, ''>, { text: string; color: BadgeColor; icon: IconName }> = {
+  violation: { text: 'Violation', color: 'red', icon: 'exclamation-circle' },
+  improvement: { text: 'Improvement', color: 'blue', icon: 'arrow-up' },
+  information: { text: 'Information', color: 'darkgrey', icon: 'info-circle' },
+};
+
 const BUCKET_LABELS: Record<Bucket, string> = {
   stable: 'Stable',
   release_candidate: 'Release candidate',
@@ -61,8 +67,10 @@ export function FindingsTable({ findings, libraryFor, evidenceFor, semconvVersio
   }));
 
   const columns: Array<Column<Row>> = [
+    { id: 'level', header: 'Level', cell: ({ row }) => <LevelBadge finding={row.original.finding} /> },
     { id: 'name', header: 'Found → expected', cell: ({ row }) => <NameCell finding={row.original.finding} /> },
     { id: 'type', header: 'Finding', cell: ({ row }) => <FindingBadges finding={row.original.finding} /> },
+    { id: 'impact', header: 'Impact', cell: ({ row }) => formatImpact(row.original.finding.impact_share) },
     { id: 'library', header: 'Library or SDK', cell: ({ row }) => <LibraryCell library={row.original.library} /> },
     { id: 'seen', header: 'First / last seen', cell: ({ row }) => <SeenCell library={row.original.library} /> },
   ];
@@ -91,6 +99,24 @@ const LEVEL_ORDER: Record<string, number> = { violation: 0, improvement: 1, info
 
 function byPriority(a: Finding, b: Finding): number {
   return (LEVEL_ORDER[a.level ?? ''] ?? 3) - (LEVEL_ORDER[b.level ?? ''] ?? 3) || b.impact_share - a.impact_share;
+}
+
+export function formatImpact(share: number): string {
+  if (share <= 0) {
+    return '—';
+  }
+  if (share < 0.01) {
+    return '<1%';
+  }
+  return `${Math.round(share * 100)}%`;
+}
+
+function LevelBadge({ finding }: { finding: Finding }) {
+  if (!finding.level) {
+    return null;
+  }
+  const badge = LEVEL_BADGES[finding.level];
+  return <Badge text={badge.text} color={badge.color} icon={badge.icon} />;
 }
 
 const REQUIREMENT_TYPES: FindingType[] = ['required_attribute_not_present', 'recommended_attribute_not_present'];

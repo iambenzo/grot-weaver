@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { FindingsTable } from './FindingsTable';
+import { FindingsTable, formatImpact } from './FindingsTable';
 import { Finding } from '../../api/types';
 import { LibraryInfo } from '../../assessment/libraries';
 
@@ -46,6 +46,37 @@ const fetchFix = jest.fn(async () => ({
 const shared = { semconvVersion: 'v1.44.0', fetchFix };
 
 describe('FindingsTable', () => {
+  it('shows each finding level and its share of the signal volume', () => {
+    const improvement: Finding = {
+      ...renamed,
+      type: 'recommended_attribute_not_present',
+      level: 'improvement',
+      observed: 'GET',
+      expected: 'url.scheme',
+      impact_share: 0.42,
+    };
+    render(
+      <FindingsTable
+        findings={[improvement, { ...renamed, impact_share: 0.004 }]}
+        libraryFor={none}
+        evidenceFor={none}
+        {...shared}
+      />
+    );
+
+    const rows = screen.getAllByRole('row').slice(1);
+    expect(within(rows[0]).getByText('Violation')).toBeInTheDocument();
+    expect(within(rows[0]).getByText('<1%')).toBeInTheDocument();
+    expect(within(rows[1]).getByText('Improvement')).toBeInTheDocument();
+    expect(within(rows[1]).getByText('42%')).toBeInTheDocument();
+  });
+
+  it('formats impact shares for people', () => {
+    expect(formatImpact(0)).toBe('—');
+    expect(formatImpact(0.004)).toBe('<1%');
+    expect(formatImpact(0.256)).toBe('26%');
+  });
+
   it('shows found and expected names, badges, library and first/last seen', () => {
     render(<FindingsTable findings={[renamed]} libraryFor={() => library} evidenceFor={() => evidence} {...shared} />);
 
