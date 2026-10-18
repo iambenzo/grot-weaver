@@ -1,5 +1,6 @@
 import React from 'react';
-import { useStyles2, Badge, Stack, Text } from '@grafana/ui';
+import { useStyles2, Badge, BadgeColor, Stack, Text } from '@grafana/ui';
+import { ShareStatus, shareStatus } from '../../components/ShareStatus/shareStatus';
 import { Owner, ServiceReadinessRow, Signal } from '../../api/types';
 import { SignalReadiness, serviceReadiness } from '../../assessment/readiness';
 import { testIds } from '../../components/testIds';
@@ -82,11 +83,10 @@ function ShareBadge({ share }: { share: number | null }) {
   return <Badge text={`${Math.round(share * 100)}%`} color={shareColor(share)} />;
 }
 
-function shareColor(share: number) {
-  if (share === 1) {
-    return 'green';
-  }
-  return share === 0 ? 'red' : 'orange';
+const STATUS_COLORS: Record<ShareStatus, BadgeColor> = { complete: 'green', partial: 'orange', none: 'red' };
+
+function shareColor(share: number): BadgeColor {
+  return STATUS_COLORS[shareStatus(share)];
 }
 
 function AttributeList({ label, attributes }: { label: string; attributes: string[] }) {

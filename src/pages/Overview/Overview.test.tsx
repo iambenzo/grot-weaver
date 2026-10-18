@@ -38,6 +38,9 @@ describe('ScoreTiles', () => {
     expect(screen.getByText('No release-candidate names seen')).toBeInTheDocument();
     expect(screen.getByText('No required attributes to check')).toBeInTheDocument();
     expect(screen.getByText('9 of 10 spans')).toBeInTheDocument();
+    expect(screen.getByText('All pass')).toBeInTheDocument();
+    expect(screen.getAllByText('Some fail')).toHaveLength(3);
+    expect(screen.queryByText('None pass')).not.toBeInTheDocument();
   });
 
   it('counts naming and requirements in volume when scores are volume weighted', () => {

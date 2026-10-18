@@ -1,11 +1,12 @@
 import React from 'react';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { Stack, Text, useStyles2 } from '@grafana/ui';
 import { Ratio, ScoreRow, Signal } from '../../api/types';
 import { testIds } from '../../components/testIds';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { SIGNAL_TILES_HELP } from '../../components/SectionHeading/guides';
+import { ShareStatus, shareStatus } from '../../components/ShareStatus/shareStatus';
 
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 const VOLUME_UNITS: Record<Signal, string> = { metrics: 'series', traces: 'spans', logs: 'log lines' };
@@ -23,7 +24,14 @@ interface Tile {
   value: string;
   basis: string;
   help: string;
+  status?: ShareStatus;
 }
+
+const STATUS_TEXT: Record<ShareStatus, { text: string; color: 'success' | 'warning' | 'error' }> = {
+  complete: { text: 'All pass', color: 'success' },
+  partial: { text: 'Some fail', color: 'warning' },
+  none: { text: 'None pass', color: 'error' },
+};
 
 export function formatRatio(ratio?: Ratio): string {
   if (!ratio || ratio.value === null) {
@@ -71,6 +79,7 @@ function ratioTile(
       counting.weighted ? `${emptyReason}, or none with measured volume` : emptyReason
     ),
     help,
+    status: ratio && ratio.value !== null ? shareStatus(ratio.value) : undefined,
   };
 }
 
@@ -165,13 +174,18 @@ export function ScoreTiles(props: ScoreTilesProps) {
       />
       <div className={styles.grid}>
         {scoreTiles(props).map((tile) => (
-          <div key={tile.label} className={styles.tile} title={tile.help}>
+          <div key={tile.label} className={cx(styles.tile, tile.status && styles[tile.status])} title={tile.help}>
             <Text color="secondary" variant="bodySmall">
               {tile.label}
             </Text>
             <Text element="span" variant="h2">
               {tile.value}
             </Text>
+            {tile.status && (
+              <Text color={STATUS_TEXT[tile.status].color} variant="bodySmall" weight="medium">
+                {STATUS_TEXT[tile.status].text}
+              </Text>
+            )}
             <Text color="secondary" variant="bodySmall">
               {tile.basis}
             </Text>
@@ -197,4 +211,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
     borderRadius: theme.shape.radius.default,
     background: theme.colors.background.secondary,
   }),
+  complete: css({ borderLeft: `${theme.spacing(0.5)} solid ${theme.colors.success.border}` }),
+  partial: css({ borderLeft: `${theme.spacing(0.5)} solid ${theme.colors.warning.border}` }),
+  none: css({ borderLeft: `${theme.spacing(0.5)} solid ${theme.colors.error.border}` }),
 });

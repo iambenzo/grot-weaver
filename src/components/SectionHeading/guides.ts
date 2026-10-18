@@ -17,6 +17,11 @@ export const SIGNAL_TILES_HELP: GuideItem[] = [
   },
   { term: 'Coverage', meaning: 'Share of volume that came from an OTel SDK and is tied to a service.' },
   { meaning: 'The line under each score shows what it was counted from, or why there is nothing to score.' },
+  {
+    term: 'Status',
+    meaning:
+      'All pass (green) is 100%, Some fail (orange) is between 0% and 100%, None pass (red) is 0%. Coverage and the counts are context, so they have no status.',
+  },
 ];
 
 export const TOP_VIOLATIONS_HELP: GuideItem[] = [
@@ -73,7 +78,8 @@ export const FINDINGS_HELP: GuideItem[] = [
   { meaning: 'One row per name that differs from semconv on the selected signal.' },
   {
     term: 'Levels',
-    meaning: 'Violations need fixing, improvements are recommended, information is context. Rows sort by level, then impact.',
+    meaning:
+      'Violations need fixing, improvements are recommended, information is context. Rows sort by level, then impact.',
   },
   {
     term: 'Impact',
