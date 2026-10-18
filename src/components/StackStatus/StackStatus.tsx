@@ -1,6 +1,21 @@
-import React from 'react';
-import { dateTimeFormatTimeAgo } from '@grafana/data';
-import { Alert, Badge, BadgeColor, Button, EmptyState, LinkButton, LoadingPlaceholder, Stack, Text } from '@grafana/ui';
+import React, { useState } from 'react';
+import { css } from '@emotion/css';
+import { GrafanaTheme2, dateTimeFormatTimeAgo } from '@grafana/data';
+import {
+  Alert,
+  Badge,
+  BadgeColor,
+  Button,
+  CollapsableSection,
+  EmptyState,
+  Icon,
+  LinkButton,
+  LoadingPlaceholder,
+  Spinner,
+  Stack,
+  Text,
+  useStyles2,
+} from '@grafana/ui';
 import pluginJson from '../../plugin.json';
 import { AssessmentResult, Signal } from '../../api/types';
 import { DatasourceProgress, DatasourceState, mergeOwners } from '../../assessment/stackAssessment';
@@ -48,40 +63,97 @@ export function LoadingProgress({ progress, labels }: { progress: DatasourceProg
   );
 }
 
-interface StackStatusProps {
+interface ScanStatusProps {
   progress: DatasourceProgress[];
   partial: boolean;
+  result: AssessmentResult;
   labels?: LabelProgress;
-  onRetry: (uid: string) => void;
-  refreshing?: boolean;
+  savedAtMs?: number;
+  children?: React.ReactNode;
 }
 
-export function StackStatus({ progress, partial, labels, onRetry, refreshing = false }: StackStatusProps) {
+export function scanSummary({
+  progress,
+  partial,
+  labels,
+  savedAtMs,
+}: Pick<ScanStatusProps, 'progress' | 'partial' | 'labels' | 'savedAtMs'>): string {
+  const pending = progress.filter((entry) => entry.state === 'pending').length;
+  const done = progress.length - pending;
+  const labelText = labels && labels.total > 0 ? ` Checking metric labels ${labels.done} of ${labels.total}.` : '';
+  if (savedAtMs !== undefined) {
+    const age = dateTimeFormatTimeAgo(savedAtMs);
+    if (pending === 0 && !partial) {
+      return `Showing your saved scan from ${age}.`;
+    }
+    return `Showing your saved scan from ${age}. A fresh scan has covered ${done} of ${progress.length} datasources and replaces it when it finishes.${labelText}`;
+  }
+  if (partial || pending > 0) {
+    return `Scores cover ${done} of ${progress.length} datasources so far and update as the rest arrive.${labelText}`;
+  }
+  return `Scan finished across ${progress.length} ${progress.length === 1 ? 'datasource' : 'datasources'}.`;
+}
+
+export function ScanStatus({ progress, partial, result, labels, savedAtMs, children }: ScanStatusProps) {
+  const styles = useStyles2(getStyles);
   if (progress.length === 0) {
     return null;
   }
+  const scanning = partial || progress.some((entry) => entry.state === 'pending');
+  const limits = scanLimits(progress, result);
+  return (
+    <div className={styles.panel} data-testid={testIds.status.panel}>
+      <Stack direction="column" gap={1}>
+        <Stack gap={1} alignItems="center">
+          {scanning ? <Spinner inline /> : <Icon name={savedAtMs === undefined ? 'check-circle' : 'history'} />}
+          <div aria-live="polite" data-testid={savedAtMs === undefined ? testIds.status.partial : testIds.status.saved}>
+            <Text>{scanSummary({ progress, partial, labels, savedAtMs })}</Text>
+          </div>
+        </Stack>
+        {scanning && <DatasourceProgressList progress={progress} />}
+        {children}
+        {limits.length > 0 && <LimitedChecks limits={limits} />}
+      </Stack>
+    </div>
+  );
+}
+
+function LimitedChecks({ limits }: { limits: string[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div data-testid={testIds.status.limits}>
+      <CollapsableSection
+        label={<Text weight="medium">{`Limited checks (${limits.length})`}</Text>}
+        isOpen={open}
+        onToggle={setOpen}
+      >
+        <ul>
+          {limits.map((limit) => (
+            <li key={limit}>
+              <Text variant="bodySmall">{limit}</Text>
+            </li>
+          ))}
+        </ul>
+      </CollapsableSection>
+    </div>
+  );
+}
+
+interface ScanWarningsProps {
+  progress: DatasourceProgress[];
+  onRetry: (uid: string) => void;
+  savedAtMs?: number;
+  refreshError?: string;
+}
+
+export function ScanWarnings({ progress, onRetry, savedAtMs, refreshError }: ScanWarningsProps) {
   const notVisible = progress.filter((entry) => entry.state === 'not_visible');
   const failed = progress.filter((entry) => entry.state === 'errors');
-  const pending = progress.filter((entry) => entry.state === 'pending');
   return (
-    <Stack direction="column" gap={1}>
-      {(partial || pending.length > 0) && (
-        <Alert
-          severity="info"
-          title={refreshing ? 'Refreshing' : 'Partial results'}
-          data-testid={testIds.status.partial}
-        >
-          <Stack direction="column" gap={1}>
-            <div aria-live="polite">
-              <Text>
-                {refreshing
-                  ? `The fresh scan has covered ${progress.length - pending.length} of ${progress.length} datasources. The scores shown are from the saved scan until it finishes.`
-                  : `Scores cover ${progress.length - pending.length} of ${progress.length} datasources so far and update as the rest arrive.`}{' '}
-                {loadingText({ labels })}
-              </Text>
-            </div>
-            <DatasourceProgressList progress={progress} />
-          </Stack>
+    <>
+      {savedAtMs !== undefined && refreshError && (
+        <Alert severity="warning" title="The fresh scan failed" data-testid={testIds.status.refreshFailed}>
+          The scores shown are from your saved scan from {dateTimeFormatTimeAgo(savedAtMs)}. {refreshError}
         </Alert>
       )}
       {notVisible.length > 0 && (
@@ -97,7 +169,7 @@ export function StackStatus({ progress, partial, labels, onRetry, refreshing = f
       {failed.map((entry) => (
         <DatasourceErrors key={`${entry.signal}|${entry.ref.uid}`} entry={entry} onRetry={onRetry} />
       ))}
-    </Stack>
+    </>
   );
 }
 
@@ -106,7 +178,7 @@ function DatasourceErrors({ entry, onRetry }: { entry: DatasourceProgress; onRet
   return (
     <Alert
       severity="warning"
-      title={`${entry.ref.name}: ${entry.errors.length} queries failed, results for this datasource are partial`}
+      title={`${entry.ref.name}: ${entry.errors.length} ${entry.errors.length === 1 ? 'query' : 'queries'} failed, results for this datasource are partial`}
       data-testid={testIds.status.datasourceErrors}
     >
       <Stack direction="column" gap={1}>
@@ -128,27 +200,8 @@ function DatasourceErrors({ entry, onRetry }: { entry: DatasourceProgress; onRet
   );
 }
 
-export function SavedScanNotice({ savedAtMs, refreshError }: { savedAtMs?: number; refreshError?: string }) {
-  if (savedAtMs === undefined) {
-    return null;
-  }
-  const age = dateTimeFormatTimeAgo(savedAtMs);
-  if (refreshError) {
-    return (
-      <Alert severity="warning" title={`Showing your saved scan from ${age}`} data-testid={testIds.status.saved}>
-        The fresh scan failed: {refreshError}
-      </Alert>
-    );
-  }
-  return (
-    <Alert severity="info" title={`Showing your saved scan from ${age}`} data-testid={testIds.status.saved}>
-      A fresh scan is running and will replace it when it finishes.
-    </Alert>
-  );
-}
-
-export function FeatureLimits({ progress, result }: { progress: DatasourceProgress[]; result: AssessmentResult }) {
-  const limits = [
+export function scanLimits(progress: DatasourceProgress[], result: AssessmentResult): string[] {
+  return [
     ...progress
       .filter((entry) => entry.volumeMethod === 'sample')
       .map((entry) => `${entry.ref.name}: volume from sample, TraceQL metrics are unavailable`),
@@ -182,18 +235,6 @@ export function FeatureLimits({ progress, result }: { progress: DatasourceProgre
       .filter((summary) => !summary.unit_checkable)
       .map((summary) => `${nameOf(progress, summary.uid)}: unit not checkable, metric names carry no unit suffix`),
   ];
-  if (limits.length === 0) {
-    return null;
-  }
-  return (
-    <Alert severity="info" title="Limited checks" data-testid={testIds.status.limits}>
-      <ul>
-        {limits.map((limit) => (
-          <li key={limit}>{limit}</li>
-        ))}
-      </ul>
-    </Alert>
-  );
 }
 
 export function hasOTelServices(result: AssessmentResult): boolean {
@@ -285,3 +326,12 @@ function NoOTelServices({ result }: { result: AssessmentResult }) {
 function nameOf(progress: DatasourceProgress[], uid: string): string {
   return progress.find((entry) => entry.ref.uid === uid)?.ref.name ?? uid;
 }
+
+const getStyles = (theme: GrafanaTheme2) => ({
+  panel: css({
+    padding: theme.spacing(1.5),
+    border: `1px solid ${theme.colors.border.weak}`,
+    borderRadius: theme.shape.radius.default,
+    background: theme.colors.background.secondary,
+  }),
+});

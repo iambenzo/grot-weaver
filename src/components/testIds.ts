@@ -25,6 +25,8 @@ export const testIds = {
     limits: 'data-testid status-limits',
     empty: 'data-testid status-empty',
     saved: 'data-testid status-saved',
+    panel: 'data-testid status-panel',
+    refreshFailed: 'data-testid status-refresh-failed',
   },
   fix: {
     tabs: 'data-testid fix-tabs',

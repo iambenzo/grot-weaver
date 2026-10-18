@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Button } from '@grafana/ui';
+import { Button, Stack, Text } from '@grafana/ui';
 import { SceneTimeRange } from '@grafana/scenes';
 import { QueryWindow, shouldOfferWiden } from './window';
 import { WIDENED_WINDOW } from './presets';
@@ -17,11 +17,13 @@ export function WidenWindowPrompt({ window, observedItems, timeRange }: WidenWin
   }
   const widen = () => timeRange.setState({ from: WIDENED_WINDOW, to: 'now' });
   return (
-    <Alert severity="info" title="Little telemetry in this window" data-testid={testIds.window.widenPrompt}>
-      Services that emit less than daily may be missing.{' '}
+    <Stack gap={1} alignItems="center" wrap="wrap" data-testid={testIds.window.widenPrompt}>
+      <Text color="secondary">
+        Little telemetry in this window, so services that emit less than daily may be missing.
+      </Text>
       <Button size="sm" variant="secondary" onClick={widen} data-testid={testIds.window.widenButton}>
         Widen to 7 days
       </Button>
-    </Alert>
+    </Stack>
   );
 }

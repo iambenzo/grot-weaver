@@ -14,8 +14,8 @@ import { useStackAssessment } from '../../assessment/useStackAssessment';
 import {
   EmptyTelemetry,
   LoadingProgress,
-  SavedScanNotice,
-  StackStatus,
+  ScanStatus,
+  ScanWarnings,
   emptyKind,
 } from '../../components/StackStatus/StackStatus';
 import { PluginSettings, isUpstreamCheckEnabled, isVolumeWeighted } from '../../settings/settings';
@@ -63,15 +63,22 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const { result } = assessment;
   const range = { from: String(timeRange.raw.from), to: String(timeRange.raw.to) };
   const groups = groupViolations(result.findings);
-  const status = (
+  const status = (observedItems: number) => (
     <>
-      <SavedScanNotice savedAtMs={load.savedAtMs} refreshError={load.refreshError} />
-      <StackStatus
+      <ScanStatus
         progress={load.progress}
         partial={assessment.partial}
+        result={result}
         labels={load.labels}
+        savedAtMs={load.savedAtMs}
+      >
+        <WidenWindowPrompt window={load.window} observedItems={observedItems} timeRange={timeRangeObject} />
+      </ScanStatus>
+      <ScanWarnings
+        progress={load.progress}
         onRetry={load.retry}
-        refreshing={load.savedAtMs !== undefined}
+        savedAtMs={load.savedAtMs}
+        refreshError={load.refreshError}
       />
     </>
   );
@@ -81,11 +88,8 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
     return (
       <Stack direction="column" gap={3}>
         <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
-        {status}
+        {status(0)}
         <EmptyTelemetry kind={empty} result={result} />
-        {empty !== 'no-datasources' && (
-          <WidenWindowPrompt window={load.window} observedItems={0} timeRange={timeRangeObject} />
-        )}
         {empty === 'no-otel-services' && <OwnerSections result={result} />}
       </Stack>
     );
@@ -94,8 +98,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   return (
     <Stack direction="column" gap={3}>
       <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
-      {status}
-      <WidenWindowPrompt window={load.window} observedItems={result.findings.length} timeRange={timeRangeObject} />
+      {status(result.findings.length)}
       <Stack direction="column" gap={2}>
         {SIGNALS.map((candidate) => (
           <ScoreTiles

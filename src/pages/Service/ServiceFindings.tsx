@@ -45,10 +45,9 @@ import { ownerSummary } from '../../fix/summary';
 import { identifiedLibrary } from '../../fix/fixOptions';
 import {
   EmptyTelemetry,
-  FeatureLimits,
   LoadingProgress,
-  SavedScanNotice,
-  StackStatus,
+  ScanStatus,
+  ScanWarnings,
   emptyKind,
 } from '../../components/StackStatus/StackStatus';
 import { HopCandidates } from './HopCandidates';
@@ -126,29 +125,32 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
 
   return (
     <Stack direction="column" gap={2}>
-      {quick && (
-        <Alert severity="info" title={`Quick view of ${service}`} data-testid={testIds.service.quickView}>
-          Only this service has been scanned so far. Labels that a pipeline adds to every service, and the impact
-          ranking, can change when the full scan of the stack finishes, and this page then updates.
-        </Alert>
-      )}
-      <SavedScanNotice savedAtMs={load.savedAtMs} refreshError={load.refreshError} />
-      <StackStatus
+      <ScanStatus
         progress={load.progress}
         partial={assessment.partial}
+        result={assessment.result}
         labels={load.labels}
-        onRetry={load.retry}
-        refreshing={load.savedAtMs !== undefined}
-      />
-      <FeatureLimits progress={load.progress} result={assessment.result} />
-      {empty && <EmptyTelemetry kind={empty} result={assessment.result} />}
-      {empty !== 'no-datasources' && (
+        savedAtMs={load.savedAtMs}
+      >
+        {quick && (
+          <Text color="secondary" data-testid={testIds.service.quickView}>
+            Quick view: only {service} has been scanned so far. Labels that a pipeline adds to every service, and the
+            impact ranking, can change when the full scan of the stack finishes, and this page then updates.
+          </Text>
+        )}
         <WidenWindowPrompt
           window={load.window}
           observedItems={assessment.result.findings.length}
           timeRange={timeRangeObject}
         />
-      )}
+      </ScanStatus>
+      <ScanWarnings
+        progress={load.progress}
+        onRetry={load.retry}
+        savedAtMs={load.savedAtMs}
+        refreshError={load.refreshError}
+      />
+      {empty && <EmptyTelemetry kind={empty} result={assessment.result} />}
       {(empty === undefined || empty === 'no-otel-services') && (
         <ServicePicker model={model} identities={identities} selected={selected} />
       )}

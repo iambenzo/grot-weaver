@@ -5,11 +5,11 @@ import { DatasourceProgress } from '../../assessment/stackAssessment';
 import {
   EmptyTelemetry,
   emptyKind,
-  FeatureLimits,
   LoadingProgress,
-  SavedScanNotice,
-  StackStatus,
+  ScanStatus,
+  ScanWarnings,
   hasOTelServices,
+  scanLimits,
 } from './StackStatus';
 import { testIds } from '../testIds';
 
@@ -50,69 +50,108 @@ describe('LoadingProgress', () => {
   });
 });
 
-describe('StackStatus', () => {
-  it('marks partial results with how many datasources are in', () => {
-    render(<StackStatus progress={[prom, tempo]} partial onRetry={jest.fn()} />);
+describe('ScanStatus', () => {
+  it('marks partial results with how many datasources are in, without an alert', () => {
+    render(<ScanStatus progress={[prom, tempo]} partial result={result({})} />);
 
     expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent('Scores cover 1 of 2 datasources so far');
+    expect(screen.getByText('Tempo (traces): collecting')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('lists datasources the viewer cannot query and says scores cover only visible ones', () => {
-    render(<StackStatus progress={[prom, lokiDenied]} partial={false} onRetry={jest.fn()} />);
+  it('says the scan finished and hides per-datasource progress', () => {
+    render(<ScanStatus progress={[prom]} partial={false} result={result({})} />);
 
-    const notice = screen.getByTestId(testIds.status.notVisible);
-    expect(notice).toHaveTextContent('Scores cover only the datasources you can query');
-    expect(notice).toHaveTextContent('Not visible to you: Loki.');
-    expect(screen.queryByTestId(testIds.status.partial)).not.toBeInTheDocument();
+    expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent('Scan finished across 1 datasource.');
+    expect(screen.queryByTestId(testIds.status.progress)).not.toBeInTheDocument();
   });
 
-  it('shows errors per datasource with a retry for that datasource', () => {
-    const onRetry = jest.fn();
-    render(<StackStatus progress={[prom, tempoFailed]} partial={false} onRetry={onRetry} />);
+  it('describes the progress as the fresh scan when a saved scan is showing', () => {
+    render(
+      <ScanStatus
+        progress={[prom, tempo]}
+        partial={false}
+        result={result({})}
+        savedAtMs={Date.now() - 2 * 60 * 60 * 1000}
+      />
+    );
 
-    expect(screen.getByTestId(testIds.status.datasourceErrors)).toHaveTextContent('tempo exploded');
-    fireEvent.click(screen.getByRole('button', { name: /retry tempo/i }));
-    expect(onRetry).toHaveBeenCalledWith('tempo');
+    expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent(
+      'Showing your saved scan from 2 hours ago. A fresh scan has covered 1 of 2 datasources and replaces it when it finishes.'
+    );
   });
 
-  it('leaves the no-datasources message to the empty state', () => {
-    const { container } = render(<StackStatus progress={[]} partial={false} onRetry={jest.fn()} />);
+  it('keeps limited checks collapsed until asked', () => {
+    const capped = { ...prom, labelChecks: { checked: 1000, total: 1500 } };
+    render(<ScanStatus progress={[capped]} partial={false} result={result({})} />);
 
-    expect(container).toBeEmptyDOMElement();
-  });
-});
+    expect(screen.getByText('Limited checks (1)')).toBeInTheDocument();
+    expect(screen.queryByText(/label keys checked/)).not.toBeInTheDocument();
 
-describe('FeatureLimits', () => {
-  it('names sampled span volume and uncheckable units', () => {
-    const sampled = { ...tempo, state: 'ok' as const, volumeMethod: 'sample' as const, keysMethod: 'sample' as const };
-    const summaries = result({
-      datasources: [{ uid: 'prom', strategy: 'UnderscoreEscapingWithoutSuffixes', unit_checkable: false }],
-    } as unknown as Partial<AssessmentResult>);
-
-    render(<FeatureLimits progress={[prom, sampled]} result={summaries} />);
-
-    const limits = screen.getByTestId(testIds.status.limits);
-    expect(limits).toHaveTextContent('Tempo: volume from sample');
-    expect(limits).toHaveTextContent('Tempo: keys from sample');
-    expect(limits).toHaveTextContent('Prometheus: unit not checkable');
-  });
-
-  it('names capped label key checks as a limit, not a failure', () => {
-    const capped = { ...prom, state: 'ok' as const, labelChecks: { checked: 1000, total: 1500 } };
-
-    render(<FeatureLimits progress={[capped]} result={result({})} />);
+    fireEvent.click(screen.getByText('Limited checks (1)'));
 
     expect(screen.getByTestId(testIds.status.limits)).toHaveTextContent(
       'Prometheus: label keys checked for the 1000 busiest of 1500 metric and owner pairs'
     );
   });
 
+  it('renders nothing without datasources', () => {
+    const { container } = render(<ScanStatus progress={[]} partial={false} result={result({})} />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe('ScanWarnings', () => {
+  it('lists datasources the viewer cannot query and says scores cover only visible ones', () => {
+    render(<ScanWarnings progress={[prom, lokiDenied]} onRetry={jest.fn()} />);
+
+    const notice = screen.getByTestId(testIds.status.notVisible);
+    expect(notice).toHaveTextContent('Scores cover only the datasources you can query');
+    expect(notice).toHaveTextContent('Not visible to you: Loki.');
+  });
+
+  it('shows errors per datasource with a retry for that datasource', () => {
+    const onRetry = jest.fn();
+    render(<ScanWarnings progress={[prom, tempoFailed]} onRetry={onRetry} />);
+
+    expect(screen.getByTestId(testIds.status.datasourceErrors)).toHaveTextContent('tempo exploded');
+    fireEvent.click(screen.getByRole('button', { name: /retry tempo/i }));
+    expect(onRetry).toHaveBeenCalledWith('tempo');
+  });
+
+  it('warns when the fresh scan failed and the saved scan is still showing', () => {
+    render(<ScanWarnings progress={[prom]} onRetry={jest.fn()} savedAtMs={Date.now()} refreshError="boom" />);
+
+    expect(screen.getByTestId(testIds.status.refreshFailed)).toHaveTextContent('The fresh scan failed');
+    expect(screen.getByTestId(testIds.status.refreshFailed)).toHaveTextContent('boom');
+  });
+
+  it('renders nothing when all is well', () => {
+    const { container } = render(<ScanWarnings progress={[prom]} onRetry={jest.fn()} savedAtMs={Date.now()} />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe('scanLimits', () => {
+  it('names sampled span volume and uncheckable units', () => {
+    const sampled = { ...tempo, state: 'ok' as const, volumeMethod: 'sample' as const, keysMethod: 'sample' as const };
+    const summaries = result({
+      datasources: [{ uid: 'prom', strategy: 'UnderscoreEscapingWithoutSuffixes', unit_checkable: false }],
+    } as unknown as Partial<AssessmentResult>);
+
+    const limits = scanLimits([prom, sampled], summaries).join('\n');
+
+    expect(limits).toContain('Tempo: volume from sample');
+    expect(limits).toContain('Tempo: keys from sample');
+    expect(limits).toContain('Prometheus: unit not checkable');
+  });
+
   it('names services whose volume was sampled beside measured ones', () => {
     const mixed = { ...tempo, state: 'ok' as const, volumeMethod: 'mixed' as const };
 
-    render(<FeatureLimits progress={[mixed]} result={result({})} />);
-
-    expect(screen.getByTestId(testIds.status.limits)).toHaveTextContent(
+    expect(scanLimits([mixed], result({}))[0]).toContain(
       'Tempo: volume from sample for services missing from TraceQL metrics'
     );
   });
@@ -120,49 +159,13 @@ describe('FeatureLimits', () => {
   it('names services whose volume could not be measured', () => {
     const failed = { ...lokiDenied, state: 'errors' as const, errors: [], unmeasuredVolumes: 2 };
 
-    render(<FeatureLimits progress={[failed]} result={result({})} />);
-
-    expect(screen.getByTestId(testIds.status.limits)).toHaveTextContent(
-      'Loki: volume not measured for 2 services because the query failed, so their findings rank last'
-    );
+    expect(scanLimits([failed], result({}))).toEqual([
+      'Loki: volume not measured for 2 services because the query failed, so their findings rank last',
+    ]);
   });
 
-  it('renders nothing without limits', () => {
-    const { container } = render(<FeatureLimits progress={[prom]} result={result({})} />);
-
-    expect(container).toBeEmptyDOMElement();
-  });
-});
-
-describe('StackStatus while refreshing', () => {
-  it('describes the progress as the fresh scan, not the scores shown', () => {
-    render(<StackStatus progress={[prom, tempo]} partial={false} onRetry={() => undefined} refreshing />);
-
-    expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent('Refreshing');
-    expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent(
-      'The fresh scan has covered 1 of 2 datasources. The scores shown are from the saved scan until it finishes.'
-    );
-  });
-});
-
-describe('SavedScanNotice', () => {
-  it('says the saved scan is showing while a fresh one runs', () => {
-    render(<SavedScanNotice savedAtMs={Date.now() - 2 * 60 * 60 * 1000} />);
-
-    expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent('Showing your saved scan from 2 hours ago');
-    expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent('A fresh scan is running');
-  });
-
-  it('names a failed fresh scan', () => {
-    render(<SavedScanNotice savedAtMs={Date.now()} refreshError="boom" />);
-
-    expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent('The fresh scan failed: boom');
-  });
-
-  it('renders nothing without a saved scan', () => {
-    const { container } = render(<SavedScanNotice />);
-
-    expect(container).toBeEmptyDOMElement();
+  it('is empty without limits', () => {
+    expect(scanLimits([prom], result({}))).toEqual([]);
   });
 });
 
