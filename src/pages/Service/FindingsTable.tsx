@@ -17,7 +17,9 @@ import { findingKey } from '../../assessment/traceAssessment';
 import { LibraryInfo } from '../../assessment/libraries';
 import { testIds } from '../../components/testIds';
 import { Evidence } from '../../fix/summary';
-import { FetchFixOptions } from '../../fix/fixOptions';
+import { FetchFixOptions, identifiedLibrary } from '../../fix/fixOptions';
+import { AskAssistant, useAskAssistantShown } from '../../assistant/AskAssistant';
+import { findingPrompt } from '../../assistant/prompts';
 import { FixTabs } from './FixTabs';
 import { formatShare } from '../../components/ShareStatus/shareStatus';
 
@@ -213,6 +215,7 @@ interface FindingDetailsProps {
 }
 
 function FindingDetails({ finding, library, evidence, semconvVersion, fetchFix }: FindingDetailsProps) {
+  const assistantShown = useAskAssistantShown();
   return (
     <Stack direction="column" gap={2}>
       {finding.note && <Text>{finding.note}</Text>}
@@ -234,19 +237,25 @@ function FindingDetails({ finding, library, evidence, semconvVersion, fetchFix }
             .join(', ')}
         </Text>
       )}
-      {evidence && (
-        <div>
-          <LinkButton
-            href={evidence.url}
-            icon="compass"
-            variant="secondary"
-            size="sm"
-            target="_blank"
-            data-testid={testIds.service.explore}
-          >
-            Open in Explore
-          </LinkButton>
-        </div>
+      {(evidence || assistantShown) && (
+        <Stack gap={1} wrap="wrap">
+          {evidence && (
+            <LinkButton
+              href={evidence.url}
+              icon="compass"
+              variant="secondary"
+              size="sm"
+              target="_blank"
+              data-testid={testIds.service.explore}
+            >
+              Open in Explore
+            </LinkButton>
+          )}
+          <AskAssistant
+            origin="finding"
+            prompt={findingPrompt({ finding, library: identifiedLibrary(finding, library), evidence }, semconvVersion)}
+          />
+        </Stack>
       )}
       <FixTabs
         finding={finding}

@@ -22,6 +22,7 @@ export interface PluginSettings {
   traceSampleLimit?: number;
   logSampleLimit?: number;
   upstreamCheck?: boolean;
+  assistantButtons?: boolean;
   pipelineMappings?: PipelineMapping[];
   customNamespaces?: string[];
   requiredResourceAttributes?: string[];
@@ -94,6 +95,9 @@ export function readSettings(jsonData: unknown): PluginSettings {
   if (typeof raw.upstreamCheck === 'boolean') {
     settings.upstreamCheck = raw.upstreamCheck;
   }
+  if (typeof raw.assistantButtons === 'boolean') {
+    settings.assistantButtons = raw.assistantButtons;
+  }
   if (Array.isArray(raw.pipelineMappings) && raw.pipelineMappings.every(isMapping)) {
     settings.pipelineMappings = raw.pipelineMappings;
   }
@@ -125,6 +129,10 @@ export function requiredResourceAttributes(settings: PluginSettings): string[] {
 
 export function isUpstreamCheckEnabled(settings: PluginSettings): boolean {
   return settings.upstreamCheck !== false;
+}
+
+export function isAssistantButtonsEnabled(settings: PluginSettings): boolean {
+  return settings.assistantButtons !== false;
 }
 
 export function isExcluded(settings: PluginSettings, uid: string): boolean {

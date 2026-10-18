@@ -46,6 +46,27 @@ describe('groupViolations', () => {
     expect(groups[0].libraries).toEqual(['otel-http', 'other-lib']);
     expect(groups[0].owners).toEqual([checkout, payments]);
   });
+
+  it('keeps the names as sent when they group under one registry name', () => {
+    const stored = (owner: typeof checkout | typeof payments, observed: string): Finding => ({
+      ...violation(owner, observed),
+      type: 'unit_mismatch',
+      matched: 'http.server.request.duration',
+      expected: 'http.server.request.duration',
+    });
+
+    const [group] = groupViolations([
+      stored(checkout, 'http_server_request_duration_milliseconds_bucket'),
+      stored(payments, 'http_server_request_duration_milliseconds_bucket'),
+      stored(payments, 'http_server_request_duration_milliseconds_count'),
+    ]);
+
+    expect(group.name).toBe('http.server.request.duration');
+    expect(group.observed).toEqual([
+      'http_server_request_duration_milliseconds_bucket',
+      'http_server_request_duration_milliseconds_count',
+    ]);
+  });
 });
 
 describe('serviceRows', () => {

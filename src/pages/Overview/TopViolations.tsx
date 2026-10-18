@@ -4,6 +4,8 @@ import { ViolationGroup } from '../../assessment/overview';
 import { testIds } from '../../components/testIds';
 import { ownerName, serviceLink } from '../../utils/serviceLink';
 import { ownerKey } from '../../assessment/stackAssessment';
+import { AskAssistant } from '../../assistant/AskAssistant';
+import { violationPrompt } from '../../assistant/prompts';
 
 const MAX_ROWS = 25;
 
@@ -19,9 +21,10 @@ const TYPE_LABELS: Record<string, string> = {
 interface TopViolationsProps {
   groups: ViolationGroup[];
   range: { from: string; to: string };
+  semconvVersion: string;
 }
 
-export function TopViolations({ groups, range }: TopViolationsProps) {
+export function TopViolations({ groups, range, semconvVersion }: TopViolationsProps) {
   if (groups.length === 0) {
     return <Text color="secondary">No violations for this signal in this window.</Text>;
   }
@@ -55,7 +58,7 @@ export function TopViolations({ groups, range }: TopViolationsProps) {
         columns={columns}
         data={groups.slice(0, MAX_ROWS)}
         getRowId={(group) => group.key}
-        renderExpandedRow={(group) => <AffectedServices group={group} range={range} />}
+        renderExpandedRow={(group) => <AffectedServices group={group} range={range} semconvVersion={semconvVersion} />}
       />
       {groups.length > MAX_ROWS && (
         <Text color="secondary" variant="bodySmall">
@@ -66,7 +69,13 @@ export function TopViolations({ groups, range }: TopViolationsProps) {
   );
 }
 
-function AffectedServices({ group, range }: { group: ViolationGroup; range: { from: string; to: string } }) {
+interface AffectedServicesProps {
+  group: ViolationGroup;
+  range: { from: string; to: string };
+  semconvVersion: string;
+}
+
+function AffectedServices({ group, range, semconvVersion }: AffectedServicesProps) {
   return (
     <Stack direction="column" gap={0.5} alignItems="flex-start">
       <Text color="secondary" variant="bodySmall">
@@ -85,6 +94,7 @@ function AffectedServices({ group, range }: { group: ViolationGroup; range: { fr
           </LinkButton>
         ))}
       </Stack>
+      <AskAssistant origin="top-violation" prompt={violationPrompt(group, range, semconvVersion)} />
     </Stack>
   );
 }

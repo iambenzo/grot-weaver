@@ -6,6 +6,7 @@ export interface ViolationGroup {
   signal: Signal;
   type: FindingType;
   name: string;
+  observed: string[];
   expected?: string;
   note?: string;
   services: number;
@@ -40,6 +41,7 @@ export function groupViolations(findings: Finding[]): ViolationGroup[] {
       signal: finding.signal,
       type: finding.type,
       name,
+      observed: [],
       expected: finding.expected,
       note: finding.note,
       owners: [],
@@ -51,6 +53,9 @@ export function groupViolations(findings: Finding[]): ViolationGroup[] {
     if (!group.ownerKeys.has(ownerKey(finding.owner))) {
       group.ownerKeys.add(ownerKey(finding.owner));
       group.owners.push(finding.owner);
+    }
+    if (!group.observed.includes(finding.observed)) {
+      group.observed.push(finding.observed);
     }
     group.volume += finding.volume;
     group.impactShare += finding.impact_share;

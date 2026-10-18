@@ -237,6 +237,7 @@ describe('TopViolations', () => {
     signal: 'traces',
     type: 'deprecated',
     name: `name.${index}`,
+    observed: [`name.${index}`],
     services: 1,
     owners: [{ kind: 'service', namespace: 'shop', name: 'checkout' }],
     libraries: [],
@@ -245,7 +246,7 @@ describe('TopViolations', () => {
   });
 
   it('links an expanded violation to each affected service on its signal', () => {
-    render(<TopViolations groups={[group(1)]} range={range} />);
+    render(<TopViolations groups={[group(1)]} range={range} semconvVersion="v1.44.0" />);
 
     fireEvent.click(screen.getByRole('button', { name: /toggle row expanded/i }));
 
@@ -256,7 +257,13 @@ describe('TopViolations', () => {
   });
 
   it('says when the list is capped', () => {
-    render(<TopViolations groups={Array.from({ length: 30 }, (_, index) => group(index))} range={range} />);
+    render(
+      <TopViolations
+        groups={Array.from({ length: 30 }, (_, index) => group(index))}
+        range={range}
+        semconvVersion="v1.44.0"
+      />
+    );
 
     expect(screen.getByText(/Showing the top 25 of 30 violations/)).toBeInTheDocument();
   });

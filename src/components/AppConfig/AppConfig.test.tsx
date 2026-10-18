@@ -39,7 +39,15 @@ describe('AppConfig', () => {
   it('shows every settings group', () => {
     render(<AppConfig {...props({})} />);
 
-    for (const group of ['Datasources', 'Metrics', 'Window and limits', 'Scoring', 'Pipelines', 'Updates']) {
+    for (const group of [
+      'Datasources',
+      'Metrics',
+      'Window and limits',
+      'Scoring',
+      'Pipelines',
+      'Updates',
+      'Grafana Assistant',
+    ]) {
       expect(screen.getByText(group)).toBeInTheDocument();
     }
     expect(screen.getByText('Translation strategy for Prometheus')).toBeInTheDocument();
@@ -55,6 +63,7 @@ describe('AppConfig', () => {
       'Log sample size',
       'Default window',
       'Weight scores by volume',
+      'Show Ask Assistant buttons',
       'Translation strategy for Prometheus',
       'Rule 1 metric name pattern',
       'Rule 1 action',

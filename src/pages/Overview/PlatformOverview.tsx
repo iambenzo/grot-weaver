@@ -146,7 +146,11 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
           ))}
         </TabsBar>
         <IncompleteNote reasons={incompleteFor(signal)} />
-        <TopViolations groups={groups.filter((group) => group.signal === signal)} range={range} />
+        <TopViolations
+          groups={groups.filter((group) => group.signal === signal)}
+          range={range}
+          semconvVersion={result.semconv_version}
+        />
       </Stack>
       <Stack direction="column" gap={1}>
         <SectionHeading title="Services, worst first" help={SERVICES_HELP} />

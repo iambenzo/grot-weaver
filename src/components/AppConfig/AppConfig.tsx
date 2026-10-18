@@ -249,6 +249,19 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
         </Field>
       </FieldSet>
 
+      <FieldSet label="Grafana Assistant">
+        <Field
+          label="Show Ask Assistant buttons"
+          description="Shown when the Grafana Assistant app is installed. If it is not yet connected to Grafana Cloud, the Assistant offers to set it up instead. A button opens the Assistant with a prompt you can edit before sending. The prompt holds the finding: its type, signal and scope, the metric, span or log attribute names as sent and as expected, the registry note, the semantic conventions version, the service and namespace, and library names and versions. On the overview it names up to ten affected services and adds the time range; on a service page it adds the datasource name and evidence query when there is one. Nothing is sent until you send the prompt."
+        >
+          <Switch
+            id="ac-assistant-buttons"
+            value={settings.assistantButtons !== false}
+            onChange={(event) => update({ assistantButtons: event.currentTarget.checked })}
+          />
+        </Field>
+      </FieldSet>
+
       {saveError && (
         <Alert severity="error" title="Settings were not saved" data-testid={testIds.appConfig.saveError}>
           <Text element="p">{saveError}</Text>

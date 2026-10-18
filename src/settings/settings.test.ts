@@ -3,6 +3,7 @@ import {
   concurrencyFrom,
   datasourceTypesFor,
   isExcluded,
+  isAssistantButtonsEnabled,
   isUpstreamCheckEnabled,
   isVolumeWeighted,
   readSettings,
@@ -46,6 +47,8 @@ describe('readSettings', () => {
       { traceSampleLimit: 50, logSampleLimit: 10, upstreamCheck: false },
       { traceSampleLimit: 50, logSampleLimit: 10, upstreamCheck: false },
     ],
+    [{ assistantButtons: false }, { assistantButtons: false }],
+    [{ assistantButtons: 'no' }, {}],
     [
       { pipelineMappings: [{ match: 'shop/*', pipeline: 'alloy-receiver' }] },
       { pipelineMappings: [{ match: 'shop/*', pipeline: 'alloy-receiver' }] },
@@ -92,6 +95,11 @@ describe('sampleLimit, upstream check and exclusions', () => {
   it('checks upstream releases unless turned off', () => {
     expect(isUpstreamCheckEnabled({})).toBe(true);
     expect(isUpstreamCheckEnabled({ upstreamCheck: false })).toBe(false);
+  });
+
+  it('shows Assistant buttons unless turned off', () => {
+    expect(isAssistantButtonsEnabled({})).toBe(true);
+    expect(isAssistantButtonsEnabled({ assistantButtons: false })).toBe(false);
   });
 
   it('excludes listed datasources only', () => {

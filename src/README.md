@@ -38,6 +38,11 @@ When a check had to be limited, for example volume sampled because TraceQL metri
    - **Instrumentation**: which library or SDK emits the name, and how to upgrade or configure it.
    - **Pipeline rule**: for names that can be renamed safely, an OpenTelemetry Collector or Grafana Alloy processor that renames them, as a stopgap.
    - **Raise with owner**: a summary to paste into a ticket.
+4. Where the [Grafana Assistant](https://grafana.com/docs/grafana-cloud/platform/grafana-assistant/) app is installed, **Ask Assistant** on a finding or a top violation opens it with a prompt about that finding, for example to find the dashboards, alert rules and recording rules that use an old name.
+
+## Grafana Assistant
+
+The Ask Assistant buttons appear when the Grafana Assistant app is installed. It answers on Grafana Cloud and on a self-managed Grafana connected to Grafana Cloud; on one that is not connected yet, the Assistant offers to set it up instead. The prompt opens unsent so you can edit it first. It holds the finding: its type, signal and scope, the metric, span or log attribute names as sent and as expected, the registry note, the semantic conventions version, the service and namespace, and library names and versions. On the overview it names up to ten affected services and adds the time range; on a service page it adds the datasource name and evidence query when there is one. Nothing goes to the Assistant until you send it. An admin can hide the buttons in the app settings.
 
 ## Requirements
 

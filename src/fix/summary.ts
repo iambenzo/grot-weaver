@@ -40,7 +40,7 @@ export function ownerSummary(owner: Owner, items: SummaryItem[], semconvVersion:
   return lines.join('\n');
 }
 
-function findingLine(finding: Finding): string {
+export function findingLine(finding: Pick<Finding, 'type' | 'signal' | 'scope' | 'observed' | 'expected'>): string {
   const kind = TYPE_TEXT[finding.type];
   const where = `${finding.signal}${finding.scope ? `, ${finding.scope}` : ''}`;
   if (finding.type === 'required_attribute_not_present' || finding.type === 'recommended_attribute_not_present') {
