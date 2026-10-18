@@ -72,7 +72,7 @@ describe('FindingsTable', () => {
   });
 
   it('formats impact shares for people', () => {
-    expect(formatImpact(0)).toBe('—');
+    expect(formatImpact(0)).toBe('0%');
     expect(formatImpact(0.004)).toBe('<1%');
     expect(formatImpact(0.256)).toBe('26%');
   });

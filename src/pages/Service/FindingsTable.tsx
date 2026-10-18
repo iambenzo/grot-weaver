@@ -102,10 +102,7 @@ function byPriority(a: Finding, b: Finding): number {
 }
 
 export function formatImpact(share: number): string {
-  if (share <= 0) {
-    return '—';
-  }
-  if (share < 0.01) {
+  if (share > 0 && share < 0.01) {
     return '<1%';
   }
   return `${Math.round(share * 100)}%`;

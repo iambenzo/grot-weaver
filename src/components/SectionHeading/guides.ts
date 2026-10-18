@@ -78,7 +78,7 @@ export const FINDINGS_HELP: GuideItem[] = [
   {
     term: 'Impact',
     meaning:
-      "Share of all of this signal's volume in the scan that carries the name: series, spans or log lines. A dash means no volume was measured for it.",
+      "The volume this finding applies to, such as the series of the affected metric or the service's spans, as a share of all of this signal's volume in the scan. 0% means that volume was zero or could not be measured.",
   },
   {
     term: 'Fixing',
