@@ -7,7 +7,7 @@ export const SIGNAL_TILES_HELP: GuideItem[] = [
   {
     term: 'Naming',
     meaning:
-      'Share of distinct names in each stability bucket that use the current semconv name. N/A means none from that bucket were seen.',
+      'Share of names in each stability bucket that use the current semconv name. Each name counts once, or by volume when volume weighting is on, as the page header says. N/A means none from that bucket were seen.',
   },
   { term: 'Requirements', meaning: 'Attributes semconv marks as required, present where they could be checked.' },
   { term: 'Resource', meaning: 'service.name is set and is not the SDK default.' },
@@ -16,6 +16,7 @@ export const SIGNAL_TILES_HELP: GuideItem[] = [
     meaning: 'Your list from the plugin settings, per service. Scored on its own, not part of the semconv scores.',
   },
   { term: 'Coverage', meaning: 'Share of volume that came from an OTel SDK and is tied to a service.' },
+  { meaning: 'The line under each score shows what it was counted from, or why there is nothing to score.' },
 ];
 
 export const TOP_VIOLATIONS_HELP: GuideItem[] = [

@@ -12,7 +12,7 @@ import {
   StackStatus,
   hasOTelServices,
 } from '../../components/StackStatus/StackStatus';
-import { PluginSettings, isUpstreamCheckEnabled } from '../../settings/settings';
+import { PluginSettings, isUpstreamCheckEnabled, isVolumeWeighted } from '../../settings/settings';
 import { UpstreamBanner } from '../../upstream/UpstreamBanner';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
@@ -95,6 +95,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
             row={result.signals.find((row) => row.signal === candidate)}
             coverage={coverageFor(result, candidate)}
             unmeasured={unmeasuredFor(result, candidate)}
+            volumeWeighted={isVolumeWeighted(settings)}
           />
         ))}
       </Stack>
@@ -139,7 +140,8 @@ function OverviewHeader({
     <Stack direction="column" gap={1} data-testid={testIds.overview.header}>
       <OverviewIntro semconvVersion={assessment.result.semconv_version} />
       <Text>
-        Scored against semantic conventions <strong>{assessment.result.semconv_version}</strong> for {windowLabel}.
+        Scored against semantic conventions <strong>{assessment.result.semconv_version}</strong> for {windowLabel}.{' '}
+        {weightingText(isVolumeWeighted(settings))}
       </Text>
       <Stack gap={1} wrap="wrap">
         {all.map((ds) => {
@@ -165,4 +167,10 @@ function OverviewHeader({
       <UpstreamBanner currentVersion={assessment.result.semconv_version} enabled={isUpstreamCheckEnabled(settings)} />
     </Stack>
   );
+}
+
+export function weightingText(volumeWeighted: boolean): string {
+  return volumeWeighted
+    ? 'Names count by volume: series, spans or log lines.'
+    : 'Each distinct name counts once, whatever its volume.';
 }
