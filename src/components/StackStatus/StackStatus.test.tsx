@@ -52,7 +52,7 @@ describe('LoadingProgress', () => {
 
 describe('ScanStatus', () => {
   it('marks partial results with how many datasources are in, without an alert', () => {
-    render(<ScanStatus progress={[prom, tempo]} partial result={result({})} />);
+    render(<ScanStatus progress={[prom, tempo]} partial limits={[]} />);
 
     expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent('Scores cover 1 of 2 datasources so far');
     expect(screen.getByText('Tempo (traces): collecting')).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('ScanStatus', () => {
   });
 
   it('says the scan finished and hides per-datasource progress', () => {
-    render(<ScanStatus progress={[prom]} partial={false} result={result({})} />);
+    render(<ScanStatus progress={[prom]} partial={false} limits={[]} />);
 
     expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent('Scan finished across 1 datasource.');
     expect(screen.queryByTestId(testIds.status.progress)).not.toBeInTheDocument();
@@ -68,12 +68,7 @@ describe('ScanStatus', () => {
 
   it('describes the progress as the fresh scan when a saved scan is showing', () => {
     render(
-      <ScanStatus
-        progress={[prom, tempo]}
-        partial={false}
-        result={result({})}
-        savedAtMs={Date.now() - 2 * 60 * 60 * 1000}
-      />
+      <ScanStatus progress={[prom, tempo]} partial={false} limits={[]} savedAtMs={Date.now() - 2 * 60 * 60 * 1000} />
     );
 
     expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent(
@@ -83,7 +78,7 @@ describe('ScanStatus', () => {
 
   it('keeps limited checks collapsed until asked', () => {
     const capped = { ...prom, labelChecks: { checked: 1000, total: 1500 } };
-    render(<ScanStatus progress={[capped]} partial={false} result={result({})} />);
+    render(<ScanStatus progress={[capped]} partial={false} limits={scanLimits([capped], result({}))} />);
 
     expect(screen.getByText('Limited checks (1)')).toBeInTheDocument();
     expect(screen.queryByText(/label keys checked/)).not.toBeInTheDocument();
@@ -96,7 +91,7 @@ describe('ScanStatus', () => {
   });
 
   it('renders nothing without datasources', () => {
-    const { container } = render(<ScanStatus progress={[]} partial={false} result={result({})} />);
+    const { container } = render(<ScanStatus progress={[]} partial={false} limits={[]} />);
 
     expect(container).toBeEmptyDOMElement();
   });
@@ -176,14 +171,26 @@ describe('emptyKind', () => {
   } as unknown as Partial<AssessmentResult>);
 
   it('tells no datasources, no telemetry and no OpenTelemetry services apart', () => {
-    expect(emptyKind([], result({}), false)).toBe('no-datasources');
-    expect(emptyKind([prom], result({}), false)).toBe('no-telemetry');
-    expect(emptyKind([prom], sources, false)).toBe('no-otel-services');
-    expect(emptyKind([prom], sources, true)).toBeUndefined();
+    expect(emptyKind({ progress: [], result: result({}), partial: false })).toBe('no-datasources');
+    expect(emptyKind({ progress: [prom], result: result({}), partial: false })).toBe('no-telemetry');
+    expect(emptyKind({ progress: [prom], result: sources, partial: false })).toBe('no-otel-services');
+    expect(emptyKind({ progress: [prom], result: sources, partial: true })).toBeUndefined();
+  });
+
+  it('does not call a scan with no readable datasource empty of telemetry', () => {
+    expect(emptyKind({ progress: [tempoFailed, lokiDenied], result: result({}), partial: false })).toBe('unreadable');
+    expect(emptyKind({ progress: [prom, tempoFailed], result: result({}), partial: false })).toBe('no-telemetry');
+
+    render(<EmptyTelemetry kind="unreadable" result={result({})} />);
+
+    expect(screen.getByText('Could not read your datasources')).toBeInTheDocument();
+    expect(screen.queryByText('No telemetry found in this window')).not.toBeInTheDocument();
   });
 
   it('never claims telemetry exists when there are no datasources', () => {
-    render(<EmptyTelemetry kind={emptyKind([], result({}), false)!} result={result({})} />);
+    render(
+      <EmptyTelemetry kind={emptyKind({ progress: [], result: result({}), partial: false })!} result={result({})} />
+    );
 
     expect(screen.getByText('No metrics, trace or log datasources found')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /add a datasource/i })).toHaveAttribute(

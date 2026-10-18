@@ -49,6 +49,7 @@ import {
   ScanStatus,
   ScanWarnings,
   emptyKind,
+  scanLimits,
 } from '../../components/StackStatus/StackStatus';
 import { HopCandidates } from './HopCandidates';
 import { ResourceAttributes } from './ResourceAttributes';
@@ -114,7 +115,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   }
 
   const { assessment } = load;
-  const empty = emptyKind(load.progress, assessment.result, assessment.partial);
+  const empty = emptyKind(assessment);
   const identities = mergeOwners(assessment.result).filter(
     (identity) => identity.owner.kind === 'service' || identity.owner.kind === 'unattributed'
   );
@@ -128,7 +129,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
       <ScanStatus
         progress={load.progress}
         partial={assessment.partial}
-        result={assessment.result}
+        limits={scanLimits(assessment.progress, assessment.result)}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
       >
@@ -151,7 +152,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
         refreshError={load.refreshError}
       />
       {empty && <EmptyTelemetry kind={empty} result={assessment.result} />}
-      {(empty === undefined || empty === 'no-otel-services') && (
+      {(empty === undefined || empty === 'no-otel-services') && identities.length > 0 && (
         <ServicePicker model={model} identities={identities} selected={selected} />
       )}
       {selected ? (

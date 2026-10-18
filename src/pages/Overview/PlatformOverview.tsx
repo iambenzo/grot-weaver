@@ -17,6 +17,7 @@ import {
   ScanStatus,
   ScanWarnings,
   emptyKind,
+  scanLimits,
 } from '../../components/StackStatus/StackStatus';
 import { PluginSettings, isUpstreamCheckEnabled, isVolumeWeighted } from '../../settings/settings';
 import { UpstreamBanner } from '../../upstream/UpstreamBanner';
@@ -68,7 +69,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
       <ScanStatus
         progress={load.progress}
         partial={assessment.partial}
-        result={result}
+        limits={scanLimits(assessment.progress, result)}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
       >
@@ -83,7 +84,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
     </>
   );
 
-  const empty = emptyKind(load.progress, result, assessment.partial);
+  const empty = emptyKind(assessment);
   if (empty) {
     return (
       <Stack direction="column" gap={3}>

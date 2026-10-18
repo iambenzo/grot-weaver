@@ -18,7 +18,7 @@ import {
 } from '@grafana/ui';
 import pluginJson from '../../plugin.json';
 import { AssessmentResult, Signal } from '../../api/types';
-import { DatasourceProgress, DatasourceState, mergeOwners } from '../../assessment/stackAssessment';
+import { DatasourceProgress, DatasourceState, StackAssessment, mergeOwners } from '../../assessment/stackAssessment';
 import { LabelProgress } from '../../inventory/prometheus';
 import { loadingText } from '../../assessment/useStackAssessment';
 import { testIds } from '../testIds';
@@ -66,7 +66,7 @@ export function LoadingProgress({ progress, labels }: { progress: DatasourceProg
 interface ScanStatusProps {
   progress: DatasourceProgress[];
   partial: boolean;
-  result: AssessmentResult;
+  limits: string[];
   labels?: LabelProgress;
   savedAtMs?: number;
   children?: React.ReactNode;
@@ -94,13 +94,12 @@ export function scanSummary({
   return `Scan finished across ${progress.length} ${progress.length === 1 ? 'datasource' : 'datasources'}.`;
 }
 
-export function ScanStatus({ progress, partial, result, labels, savedAtMs, children }: ScanStatusProps) {
+export function ScanStatus({ progress, partial, limits, labels, savedAtMs, children }: ScanStatusProps) {
   const styles = useStyles2(getStyles);
   if (progress.length === 0) {
     return null;
   }
   const scanning = partial || progress.some((entry) => entry.state === 'pending');
-  const limits = scanLimits(progress, result);
   return (
     <div className={styles.panel} data-testid={testIds.status.panel}>
       <Stack direction="column" gap={1}>
@@ -241,26 +240,30 @@ export function hasOTelServices(result: AssessmentResult): boolean {
   return mergeOwners(result).some((identity) => identity.owner.kind === 'service');
 }
 
-export type EmptyKind = 'no-datasources' | 'no-telemetry' | 'no-otel-services';
+export type EmptyKind = 'no-datasources' | 'unreadable' | 'no-telemetry' | 'no-otel-services';
 
-export function emptyKind(
-  progress: DatasourceProgress[],
-  result: AssessmentResult,
-  partial: boolean
-): EmptyKind | undefined {
+export function emptyKind({
+  progress,
+  result,
+  partial,
+}: Pick<StackAssessment, 'progress' | 'result' | 'partial'>): EmptyKind | undefined {
   if (progress.length === 0) {
     return 'no-datasources';
   }
   if (partial || hasOTelServices(result)) {
     return undefined;
   }
-  return mergeOwners(result).length === 0 ? 'no-telemetry' : 'no-otel-services';
+  if (mergeOwners(result).length > 0) {
+    return 'no-otel-services';
+  }
+  return progress.some((entry) => entry.state === 'ok') ? 'no-telemetry' : 'unreadable';
 }
 
 export function EmptyTelemetry({ kind, result }: { kind: EmptyKind; result: AssessmentResult }) {
   return (
     <div data-testid={testIds.status.empty}>
       {kind === 'no-datasources' && <NoDatasources />}
+      {kind === 'unreadable' && <Unreadable />}
       {kind === 'no-telemetry' && <NoTelemetry />}
       {kind === 'no-otel-services' && <NoOTelServices result={result} />}
     </div>
@@ -289,11 +292,20 @@ function NoDatasources() {
   );
 }
 
+function Unreadable() {
+  return (
+    <EmptyState variant="not-found" message="Could not read your datasources">
+      Every datasource failed or is not visible to you, so there is nothing to score. The warnings above say why: retry
+      a datasource, or ask an admin for access.
+    </EmptyState>
+  );
+}
+
 function NoTelemetry() {
   return (
     <EmptyState variant="not-found" message="No telemetry found in this window">
-      Your datasources returned no metrics, spans or logs for this time range. Widen the time range, or check that your
-      services send telemetry to these datasources.
+      The datasources that answered returned no metrics, spans or logs for this time range. Widen the time range, or
+      check that your services send telemetry to these datasources.
     </EmptyState>
   );
 }
