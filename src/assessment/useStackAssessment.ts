@@ -80,17 +80,25 @@ export function useStackAssessment(
 export interface ServiceLoad {
   load: Load;
   quick: boolean;
+  fullStopped?: boolean;
+}
+
+function quickView(full: Load, quick: Load): ServiceLoad {
+  if (full.status === 'ready' && full.scanError && quick.status === 'ready') {
+    return { load: { ...quick, scanError: full.scanError }, quick: true, fullStopped: true };
+  }
+  return { load: quick, quick: true };
 }
 
 export function chooseServiceLoad(full: Load, quick: Load, preferQuick = false): ServiceLoad {
   const complete = (load: Load) => load.status === 'ready' && !load.assessment.partial;
   if (preferQuick && complete(quick)) {
-    return { load: quick, quick: true };
+    return quickView(full, quick);
   }
   if (complete(full) || full.status === 'failed' || !complete(quick)) {
     return { load: full, quick: false };
   }
-  return { load: quick, quick: true };
+  return quickView(full, quick);
 }
 
 export function useServiceAssessment(

@@ -89,6 +89,9 @@ describe('ScanStatus', () => {
     expect(scanSummary({ progress: [prom, tempo], partial: true, scanning: false })).toBe(
       'Scores cover 1 of 2 datasources. The scan stopped before the rest arrived.'
     );
+    expect(scanSummary({ progress: [prom], partial: true, scanning: false })).toBe(
+      'All 1 datasources were collected, but the scan stopped before final scoring, so these scores are partial.'
+    );
 
     render(<ScanWarnings progress={[prom]} onRetry={jest.fn()} scanError="boom" />);
 

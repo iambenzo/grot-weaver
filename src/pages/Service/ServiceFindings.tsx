@@ -151,7 +151,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   const { service, namespace, signal, settings } = model.useState();
   const timeRangeObject = sceneGraph.getTimeRange(model) as SceneTimeRange;
   const { value: timeRange } = timeRangeObject.useState();
-  const { load, quick } = useServiceAssessment(settings, timeRange, service, namespace);
+  const { load, quick, fullStopped } = useServiceAssessment(settings, timeRange, service, namespace);
   const resolved =
     load.status === 'ready' ? selectedIdentity(pickableIdentities(load.assessment), service, namespace) : undefined;
   const title = servicePageTitle(resolved?.owner);
@@ -186,8 +186,9 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
       >
         {quick && (
           <Text color="secondary" data-testid={testIds.service.quickView}>
-            Quick view: only {service} has been scanned so far. Labels that a pipeline adds to every service, and the
-            impact ranking, can change when the full scan of the stack finishes, and this page then updates.
+            {fullStopped
+              ? `Quick view: only ${service} has been scanned. The full scan of the stack stopped, so labels a pipeline adds to every service and the impact ranking may be missing.`
+              : `Quick view: only ${service} has been scanned so far. Labels that a pipeline adds to every service, and the impact ranking, can change when the full scan of the stack finishes, and this page then updates.`}
           </Text>
         )}
         {empty !== 'unreadable' && (

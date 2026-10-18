@@ -91,7 +91,9 @@ export function scanSummary({
     return `Showing your saved scan from ${age}. A fresh scan is running, ${done} of ${progress.length} datasources so far, and replaces it when it finishes.${labelText}`;
   }
   if ((partial || pending > 0) && !scanning) {
-    return `Scores cover ${done} of ${progress.length} datasources. The scan stopped before the rest arrived.`;
+    return pending === 0
+      ? `All ${progress.length} datasources were collected, but the scan stopped before final scoring, so these scores are partial.`
+      : `Scores cover ${done} of ${progress.length} datasources. The scan stopped before the rest arrived.`;
   }
   if (partial || pending > 0) {
     return `Scores cover ${done} of ${progress.length} datasources so far and update as the rest arrive.${labelText}`;

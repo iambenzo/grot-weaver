@@ -1,8 +1,9 @@
 import { StackAssessment } from './stackAssessment';
 import { Load, chooseServiceLoad } from './useStackAssessment';
 
-const ready = (partial: boolean): Load => ({
+const ready = (partial: boolean, scanError?: string): Load => ({
   status: 'ready',
+  scanError,
   assessment: { partial } as StackAssessment,
   window: { startSeconds: 0, endSeconds: 1 },
   progress: [],
@@ -37,5 +38,21 @@ describe('chooseServiceLoad with a saved scan that lacks the service', () => {
 
     expect(chooseServiceLoad(ready(false), quick, true)).toEqual({ load: quick, quick: true });
     expect(chooseServiceLoad(ready(false), loading, true).quick).toBe(false);
+  });
+});
+
+describe('chooseServiceLoad when the full scan stopped', () => {
+  it('keeps the complete quick view but carries the full scan failure with it', () => {
+    const stopped = ready(true, 'scoring failed');
+    const quick = ready(false);
+
+    const chosen = chooseServiceLoad(stopped, quick);
+
+    expect(chosen.quick).toBe(true);
+    expect(chosen.fullStopped).toBe(true);
+    expect(chosen.load).toMatchObject({
+      assessment: quick.status === 'ready' && quick.assessment,
+      scanError: 'scoring failed',
+    });
   });
 });
