@@ -100,7 +100,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
       <Stack direction="column" gap={3}>
         <OverviewHeader
           assessment={assessment}
-          windowLabel={rangeUtil.describeTimeRange(timeRange.raw)}
+          windowLabel={rangeUtil.describeTimeRange(timeRange.raw, timeRangeObject.getTimeZone())}
           settings={settings}
         />
         {status(0)}
@@ -114,7 +114,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
     <Stack direction="column" gap={3}>
       <OverviewHeader
         assessment={assessment}
-        windowLabel={rangeUtil.describeTimeRange(timeRange.raw)}
+        windowLabel={rangeUtil.describeTimeRange(timeRange.raw, timeRangeObject.getTimeZone())}
         settings={settings}
       />
       {status(result.findings.length)}
@@ -201,7 +201,7 @@ function OverviewHeader({
               text={`${ds.name} (${SIGNAL_LABELS[ds.signal].toLowerCase()}${strategy}${limits.map((limit) => `, ${limit}`).join('')})`}
               tooltip={
                 example
-                  ? `How this datasource stores OpenTelemetry metric names: ${example}.${summary?.mixed ? ' Some names use another form.' : ''}`
+                  ? `How this datasource stores OpenTelemetry metric names, by base name: ${example}.${summary?.mixed ? ' Some names use another form.' : ''}`
                   : undefined
               }
             />

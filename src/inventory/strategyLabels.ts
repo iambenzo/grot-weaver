@@ -7,20 +7,20 @@ export interface StrategyLabel {
 
 export const STRATEGY_LABELS: Record<TranslationStrategy, StrategyLabel> = {
   UnderscoreEscapingWithSuffixes: {
-    label: 'underscores, with unit suffixes',
-    example: 'http.server.request.duration is stored as http_server_request_duration_seconds',
+    label: 'underscores, with unit and type suffixes',
+    example: 'http.server.request.duration becomes http_server_request_duration_seconds, and counters also get _total',
   },
   UnderscoreEscapingWithoutSuffixes: {
-    label: 'underscores, no unit suffixes',
-    example: 'http.server.request.duration is stored as http_server_request_duration',
+    label: 'underscores, no suffixes',
+    example: 'http.server.request.duration becomes http_server_request_duration',
   },
   NoUTF8EscapingWithSuffixes: {
-    label: 'dots kept, with unit suffixes',
-    example: 'http.server.request.duration is stored as http.server.request.duration_seconds',
+    label: 'dots kept, with unit and type suffixes',
+    example: 'http.server.request.duration becomes http.server.request.duration_seconds, and counters also get _total',
   },
   NoTranslation: {
     label: 'names as sent',
-    example: 'http.server.request.duration is stored unchanged',
+    example: 'http.server.request.duration keeps its name, with no suffixes added',
   },
 };
 
