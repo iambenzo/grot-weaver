@@ -45,6 +45,27 @@ describe('AppConfig', () => {
     expect(screen.getByText('Translation strategy for Prometheus')).toBeInTheDocument();
   });
 
+  it('gives every settings control an accessible name', () => {
+    render(<AppConfig {...props({ pipelineMappings: [{ match: 'shop/*', pipeline: 'alloy' }] })} />);
+    fireEvent.click(screen.getByRole('button', { name: /add rule/i }));
+
+    for (const label of [
+      'Concurrent queries',
+      'Trace sample size',
+      'Log sample size',
+      'Default window',
+      'Weight scores by volume',
+      'Translation strategy for Prometheus',
+      'Rule 1 metric name pattern',
+      'Rule 1 action',
+      'Mapping 1 service pattern',
+      'Mapping 1 pipeline',
+    ]) {
+      expect(screen.getByLabelText(new RegExp(`^${label}`))).toBeInTheDocument();
+    }
+    expect(screen.getByRole('button', { name: 'Remove rule 1' })).toBeInTheDocument();
+  });
+
   it('shows why a save failed and keeps the edited settings for a retry', async () => {
     fetch.mockReturnValue(throwError(() => ({ status: 403, data: { message: 'Permission denied' } })));
     render(<AppConfig {...props({})} />);

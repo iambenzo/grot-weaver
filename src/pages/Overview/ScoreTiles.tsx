@@ -195,7 +195,13 @@ export function ScoreTiles(props: ScoreTilesProps) {
       <IncompleteNote reasons={props.incomplete ?? []} />
       <div className={styles.grid}>
         {scoreTiles(props).map((tile) => (
-          <div key={tile.label} className={cx(styles.tile, tile.status && styles[tile.status])} title={tile.help}>
+          <div
+            key={tile.label}
+            className={cx(styles.tile, tile.status && styles[tile.status])}
+            title={tile.help}
+            role="group"
+            aria-label={tile.label}
+          >
             <Text color="secondary" variant="bodySmall">
               {tile.label}
             </Text>

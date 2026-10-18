@@ -79,6 +79,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
             description="Plugin type ids that are discovered for this signal."
           >
             <TagsInput
+              id={`ac-datasource-types-${signal}`}
               tags={typesFor(signal)}
               onChange={(tags) => update({ datasourceTypes: { ...settings.datasourceTypes, [signal]: tags } })}
             />
@@ -86,6 +87,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
         ))}
         <Field label="Excluded datasources" description="Never queried, for example usage or ML datasources.">
           <MultiCombobox
+            id="ac-excluded-datasources"
             options={datasources.map((ds) => ({ value: ds.uid, label: `${ds.name} (${ds.type})` }))}
             value={settings.excludedDatasources ?? []}
             onChange={(options) => update({ excludedDatasources: options.map((option) => String(option.value)) })}
@@ -102,6 +104,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
             description="Leave on detected unless the detection is wrong."
           >
             <Combobox
+              id={`ac-strategy-${ds.uid}`}
               width={50}
               options={[
                 { value: DETECTED, label: 'Detected from metric names' },
@@ -128,6 +131,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
       <FieldSet label="Window and limits">
         <Field label="Default window">
           <Combobox
+            id="ac-default-window"
             width={30}
             options={WINDOW_PRESETS.map((preset) => ({ value: preset.from, label: preset.display }))}
             value={settings.defaultWindow ?? DEFAULT_WINDOW}
@@ -139,6 +143,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
         </Field>
         <Field label="Concurrent queries" description="Maximum datasource requests in flight at once (1 to 32).">
           <NumberInput
+            id="ac-concurrency"
             value={settings.concurrency}
             placeholder={DEFAULT_CONCURRENCY}
             onChange={(concurrency) => update({ concurrency })}
@@ -146,6 +151,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
         </Field>
         <Field label="Trace sample size" description="Traces fetched per span-group check or library lookup.">
           <NumberInput
+            id="ac-trace-sample-size"
             value={settings.traceSampleLimit}
             placeholder={DEFAULT_TRACE_SAMPLE_LIMIT}
             onChange={(traceSampleLimit) => update({ traceSampleLimit })}
@@ -156,6 +162,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
           description="Log lines sampled per service when detected fields are unavailable."
         >
           <NumberInput
+            id="ac-log-sample-size"
             value={settings.logSampleLimit}
             placeholder={DEFAULT_LOG_SAMPLE_LIMIT}
             onChange={(logSampleLimit) => update({ logSampleLimit })}
@@ -169,6 +176,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
           description="Off: every distinct name counts once. On: names count by series, span or log volume."
         >
           <Switch
+            id="ac-volume-weighted"
             value={settings.volumeWeighted === true}
             onChange={(event) => update({ volumeWeighted: event.currentTarget.checked })}
           />
@@ -178,6 +186,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
           description="Attribute namespaces owned by your organisation. Names under them are custom, not semconv violations."
         >
           <TagsInput
+            id="ac-custom-namespaces"
             tags={settings.customNamespaces ?? []}
             onChange={(customNamespaces) => update({ customNamespaces })}
           />
@@ -186,9 +195,11 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
           label="Required resource attributes"
           description="Checked on every service for each signal and scored separately from semconv conformance. Semconv itself only requires service.name."
           data-testid={testIds.appConfig.requiredAttributes}
+          htmlFor="ac-required-attributes"
         >
           <Stack direction="column" gap={1} alignItems="flex-start">
             <TagsInput
+              id="ac-required-attributes"
               tags={requiredResourceAttributes(settings)}
               onChange={(attributes) => update({ requiredResourceAttributes: attributes })}
             />
@@ -223,6 +234,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
           description="Your browser asks GitHub once a day. The catalogue itself only changes with a plugin update."
         >
           <Switch
+            id="ac-upstream-check"
             value={settings.upstreamCheck !== false}
             onChange={(event) => update({ upstreamCheck: event.currentTarget.checked })}
           />
@@ -253,16 +265,19 @@ function withOverride(overrides: Record<string, TranslationStrategy> | undefined
 }
 
 function NumberInput({
+  id,
   value,
   placeholder,
   onChange,
 }: {
+  id: string;
   value?: number;
   placeholder: number;
   onChange: (value: number | undefined) => void;
 }) {
   return (
     <Input
+      id={id}
       width={12}
       type="number"
       min={1}
@@ -290,12 +305,14 @@ function RuleEditor({
       {rules.map((rule, index) => (
         <Stack key={index} gap={1} alignItems="center">
           <Input
+            aria-label={`Rule ${index + 1} metric name pattern`}
             width={40}
             value={rule.pattern}
             placeholder="traces_spanmetrics_*"
             onChange={(event) => replace(index, { ...rule, pattern: event.currentTarget.value })}
           />
           <Combobox
+            aria-label={`Rule ${index + 1} action`}
             width={20}
             options={[
               { value: 'exclude', label: 'Exclude' },
@@ -308,7 +325,7 @@ function RuleEditor({
           />
           <IconButton
             name="trash-alt"
-            tooltip="Remove rule"
+            tooltip={`Remove rule ${index + 1}`}
             onClick={() => onChange(rules.filter((_, position) => position !== index))}
           />
         </Stack>
@@ -341,12 +358,14 @@ function MappingEditor({
       {mappings.map((mapping, index) => (
         <Stack key={index} gap={1} alignItems="center">
           <Input
+            aria-label={`Mapping ${index + 1} service pattern`}
             width={30}
             value={mapping.match}
             placeholder="shop/*"
             onChange={(event) => replace(index, { ...mapping, match: event.currentTarget.value })}
           />
           <Input
+            aria-label={`Mapping ${index + 1} pipeline`}
             width={30}
             value={mapping.pipeline}
             placeholder="alloy-receiver"
@@ -354,7 +373,7 @@ function MappingEditor({
           />
           <IconButton
             name="trash-alt"
-            tooltip="Remove mapping"
+            tooltip={`Remove mapping ${index + 1}`}
             onClick={() => onChange(mappings.filter((_, position) => position !== index))}
           />
         </Stack>
