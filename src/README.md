@@ -1,50 +1,49 @@
-<!-- This README file is going to be the one displayed on the Grafana.com website for your plugin. Uncomment and replace the content here before publishing.
+# OTel Semconv Compliance
 
-Remove any remaining comments before publishing as these may be displayed on Grafana.com -->
+Scores how well your telemetry follows the [OpenTelemetry semantic conventions](https://opentelemetry.io/docs/specs/semconv/) and shows where to fix it.
 
-# Semconv-Compliance
+The app reads the metric names, and the attribute and label keys, that your services send to Prometheus, Tempo and Loki. It checks them against the semantic conventions registry bundled with the plugin and tells you, service by service, which names are out of date, which units are wrong and which required attributes are missing.
 
-<!-- To help maximize the impact of your README and improve usability for users, we propose the following loose structure:
+## What it scans
 
-**BEFORE YOU BEGIN**
-- Ensure all links are absolute URLs so that they will work when the README is displayed within Grafana and Grafana.com
-- Be inspired ✨
-  - [grafana-polystat-panel](https://github.com/grafana/grafana-polystat-panel)
-  - [volkovlabs-variable-panel](https://github.com/volkovlabs/volkovlabs-variable-panel)
+- **Metrics** from Prometheus-compatible datasources: metric names, label keys and `target_info`.
+- **Traces** from Tempo: span and resource attribute keys, and the instrumentation libraries that emit them.
+- **Logs** from Loki: stream labels and structured metadata keys.
 
-**ADD SOME BADGES**
+Every query runs through Grafana's datasource proxy as you, the signed-in user. The app only reads, never writes, and only sees the datasources you can query. Datasources you cannot see are named on the page, and the scores leave them out.
 
-Badges convey useful information at a glance for users whether in the Catalog or viewing the source code. You can use the generator on [Shields.io](https://shields.io/badges/dynamic-json-badge) together with the Grafana.com API
-to create dynamic badges that update automatically when you publish a new version to the marketplace.
+## How scores work
 
-- For the URL parameter use `https://grafana.com/api/plugins/your-plugin-id`.
-- Example queries:
-  - Downloads: `$.downloads`
-  - Catalog Version: `$.version`
-  - Grafana Dependency: `$.grafanaDependency`
-  - Signature Type: `$.versionSignatureType`
-- Optionally, for the logo parameter use `grafana`.
+Each signal gets separate scores, so one weak area does not hide behind a good average:
 
-Full example: ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?logo=grafana&query=$.version&url=https://grafana.com/api/plugins/grafana-polystat-panel&label=Marketplace&prefix=v&color=F47A20)
+- **Naming: Stable, Release candidate, Experimental**: the share of names in each stability bucket that use the current semantic convention name, including the forms Prometheus stores them in.
+- **Requirements**: required attributes present where they could be checked.
+- **Resource**: `service.name` is set and is not the SDK default.
+- **Required resource attributes**: your own list from the app settings, scored separately from semantic convention conformance.
+- **Coverage**: the share of volume that came from an OpenTelemetry SDK and is tied to a service.
 
-Consider other [badges](https://shields.io/badges) as you feel appropriate for your project.
+Every score shows what it was counted from, for example "10 of 12 names". By default each name counts once per service; turn on volume weighting in the settings to count names by series, spans or log lines instead. "N/A" means there was nothing to score.
 
-## Overview / Introduction
-Provide one or more paragraphs as an introduction to your plugin to help users understand why they should use it.
+## Reading partial results
 
-Consider including screenshots:
-- in [plugin.json](https://grafana.com/developers/plugin-tools/reference/plugin-json#info) include them as relative links.
-- in the README ensure they are absolute URLs.
+Large stacks take a while to scan, so scores appear as each datasource answers and the status panel says how far the scan has got. Your last complete scan of the same time range is kept in your browser for up to seven days, so returning to the page shows it at once while a fresh scan runs.
+
+When a check had to be limited, for example volume sampled because TraceQL metrics are unavailable, the affected scores say "Based on limited data", and **Limited checks** in the status panel lists every limit.
+
+## From finding to fix
+
+1. On the **Overview**, start with **Services, worst first**, or with **Top violations**, which lists the names seen across the most services.
+2. Open a service to see each finding with its level (violation, improvement or information) and its share of the signal's volume.
+3. Expand a finding for evidence in Explore and three ways to fix it:
+   - **Instrumentation**: which library or SDK emits the name, and how to upgrade or configure it.
+   - **Pipeline rule**: an OpenTelemetry Collector or Grafana Alloy processor that renames it, as a stopgap.
+   - **Raise with owner**: a summary to paste into a ticket.
 
 ## Requirements
-List any requirements or dependencies they may need to run the plugin.
 
-## Getting Started
-Provide a quick start on how to configure and use the plugin.
+- Grafana 13.2.0 or later.
+- At least one Prometheus, Tempo or Loki datasource. Other plugin types can be added for each signal in the app settings.
 
-## Documentation
-If your project has dedicated documentation available for users, provide links here. For help in following Grafana's style recommendations for technical documentation, refer to our [Writer's Toolkit](https://grafana.com/docs/writers-toolkit/).
+## Settings
 
-## Contributing
-Do you want folks to contribute to the plugin or provide feedback through specific means? If so, tell them how!
--->
+Open **Administration > Plugins and data > Plugins > OTel Semconv Compliance > Configuration** to change which datasources are scanned, the default time window, query limits, volume weighting, your custom attribute namespaces, required resource attributes and service-to-pipeline mappings. The app can also check GitHub once a day for a newer semantic conventions release; new registry versions arrive with plugin updates.

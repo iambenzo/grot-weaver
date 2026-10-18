@@ -1,117 +1,52 @@
-# Grafana Scenes App Plugin Template
+# OTel Semconv Compliance
 
-This template is a starting point for building an app plugin with [scenes](https://grafana.com/developers/scenes) for Grafana.
+A Grafana app plugin that scores how well a stack's telemetry follows the OpenTelemetry semantic conventions and shows where to fix it. What the plugin does for its users is described in [src/README.md](./src/README.md), which is also the page shown in the Grafana plugin catalogue.
 
-## What are Grafana app plugins?
+## Layout
 
-App plugins can let you create a custom out-of-the-box monitoring experience by custom pages, nested datasources and panel plugins.
+| Path                               | What it holds                                                                                                                                 |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/`                             | Frontend: a Grafana Scenes app. It queries Prometheus, Tempo and Loki through the datasource proxy and builds an inventory of names and keys. |
+| `pkg/`                             | Backend (Go): scores an inventory against the embedded semantic conventions catalogue and returns findings, scores and fix guidance.          |
+| `cmd/catalogue-gen/`, `catalogue/` | Generates the embedded catalogue (`pkg/catalogue/data/`) from the semantic conventions registry with Weaver.                                  |
+| `dev/`                             | Local stack (Prometheus, Loki, Tempo, Collector, emitters) for development. See [dev/README.md](./dev/README.md).                             |
+| `tests/`                           | End-to-end and accessibility tests with `@grafana/plugin-e2e`.                                                                                |
+| `backlog/`                         | Tasks, decisions and design docs, managed with Backlog.md.                                                                                    |
 
-## What is @grafana/scenes?
+## Requirements
 
-[@grafana/scenes](https://github.com/grafana/scenes) is a framework to enable versatile app plugins implementation. It provides an easy way to build apps that resemble Grafana's dashboarding experience, including template variables support, versatile layouts, panels rendering and more.
+- Node.js (version in `.nvmrc`) and npm
+- Go (version in `go.mod`) and [Mage](https://magefile.org/)
+- Docker, for the local Grafana and dev stack
 
-To learn more about @grafana/scenes usage please refer to the [documentation](https://grafana.com/developers/scenes)
+## Develop
 
-## What does this template contain?
+```sh
+npm install
+npm run dev                      # frontend in watch mode
+go run github.com/magefile/mage@v1.17.2 build:linuxARM64   # backend for the dev container
+docker compose up -d --build     # Grafana on http://localhost:13000 plus the dev stack
+```
 
-1. An example of a simple scene. See [Home scene](./src/pages/Home/Home.tsx)
-1. An example of a scene with tabs. See [Scene with tabs](./src/pages/WithTabs/WithTabs.tsx)
-1. An example of a scene with drill down. See [Scene with drill down](./src/pages/WithDrilldown/WithDrilldown.tsx)
+Grafana loads the plugin from `dist/`. Restart Grafana after changing `src/plugin.json`.
 
-### Frontend
+## Test
 
-1. Install dependencies
+```sh
+npm run typecheck
+npm run lint
+npm run test:ci                  # Jest unit tests
+go test ./...                    # backend tests
+npm run e2e                      # Playwright, against the running Grafana
+```
 
-   ```bash
-   npm install
-   ```
+## Build
 
-2. Build plugin in development mode and run in watch mode
+```sh
+npm run build                    # frontend, production
+go run github.com/magefile/mage@v1.17.2   # backend for all platforms
+```
 
-   ```bash
-   npm run dev
-   ```
+## Licence
 
-3. Build plugin in production mode
-
-   ```bash
-   npm run build
-   ```
-
-4. Run the tests (using Jest)
-
-   ```bash
-   # Runs the tests and watches for changes, requires git init first
-   npm run test
-
-   # Exits after running all the tests
-   npm run test:ci
-   ```
-
-5. Spin up a Grafana instance and run the plugin inside it (using Docker)
-
-   ```bash
-   npm run server
-   ```
-
-6. Run the E2E tests (using Playwright)
-
-   ```bash
-   # Spins up a Grafana instance first that we tests against
-   npm run server
-
-   # If you wish to start a certain Grafana version. If not specified will use latest by default
-   GRAFANA_VERSION=11.3.0 npm run server
-
-   # Starts the tests
-   npm run e2e
-   ```
-
-7. Run the linter
-
-   ```bash
-   npm run lint
-
-   # or
-
-   npm run lint:fix
-   ```
-
-# Distributing your plugin
-
-When distributing a Grafana plugin either within the community or privately the plugin must be signed so the Grafana application can verify its authenticity. This can be done with the `@grafana/sign-plugin` package.
-
-_Note: It's not necessary to sign a plugin during development. The docker development environment that is scaffolded with `@grafana/create-plugin` caters for running the plugin without a signature._
-
-## Initial steps
-
-Before signing a plugin please read the Grafana [plugin publishing and signing criteria](https://grafana.com/legal/plugins/#plugin-publishing-and-signing-criteria) documentation carefully.
-
-`@grafana/create-plugin` has added the necessary commands and workflows to make signing and distributing a plugin via the grafana plugins catalog as straightforward as possible.
-
-Before signing a plugin for the first time please consult the Grafana [plugin signature levels](https://grafana.com/legal/plugins/#what-are-the-different-classifications-of-plugins) documentation to understand the differences between the types of signature level.
-
-1. Create a [Grafana Cloud account](https://grafana.com/signup).
-2. Make sure that the first part of the plugin ID matches the slug of your Grafana Cloud account.
-   - _You can find the plugin ID in the `plugin.json` file inside your plugin directory. For example, if your account slug is `acmecorp`, you need to prefix the plugin ID with `acmecorp-`._
-3. Create a Grafana Cloud API key with the `PluginPublisher` role.
-4. Keep a record of this API key as it will be required for signing a plugin
-
-## Signing a plugin
-
-### Using Github actions release workflow
-
-If the plugin is using the github actions supplied with `@grafana/create-plugin` signing a plugin is included out of the box. The [release workflow](./.github/workflows/release.yml) can prepare everything to make submitting your plugin to Grafana as easy as possible. Before being able to sign the plugin however a secret needs adding to the Github repository.
-
-1. Please navigate to "settings > secrets > actions" within your repo to create secrets.
-2. Click "New repository secret"
-3. Name the secret "GRAFANA_API_KEY"
-4. Paste your Grafana Cloud API key in the Secret field
-5. Click "Add secret"
-
-#### Push a version tag
-
-To trigger the workflow we need to push a version tag to github. This can be achieved with the following steps:
-
-1. Run `npm version <major|minor|patch>`
-2. Run `git push origin main --follow-tags`
+AGPL-3.0-only. See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
