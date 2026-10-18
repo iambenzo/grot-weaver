@@ -7,7 +7,7 @@ export const SIGNAL_TILES_HELP: GuideItem[] = [
   {
     term: 'Naming',
     meaning:
-      'Share of names in each stability bucket that use the current semconv name. Each name counts once per service, or by its volume when volume weighting is on, as the page header says. N/A means none from that bucket were seen.',
+      'Share of names in each stability bucket that use the current semconv name. Each name counts once per service, or by its volume when volume weighting is on, as the page header says. N/A means none from that bucket were seen, or, with volume weighting, none had measured volume.',
   },
   { term: 'Requirements', meaning: 'Attributes semconv marks as required, present where they could be checked.' },
   { term: 'Resource', meaning: 'service.name is set and is not the SDK default.' },

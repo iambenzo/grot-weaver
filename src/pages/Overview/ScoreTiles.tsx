@@ -41,14 +41,14 @@ export function ratioBasis(ratio: Ratio | undefined, unit: string, emptyReason: 
 
 interface Counting {
   unit: string;
-  emptyReason?: string;
+  weighted?: boolean;
 }
 
 function countingFor(volumeWeighted: boolean, signal: Signal, unweightedUnit: string): Counting {
   if (!volumeWeighted) {
     return { unit: unweightedUnit };
   }
-  return { unit: `weighted by ${VOLUME_UNITS[signal]}`, emptyReason: 'No measured volume' };
+  return { unit: `weighted by ${VOLUME_UNITS[signal]}`, weighted: true };
 }
 
 function formatCount(count: number): string {
@@ -65,7 +65,11 @@ function ratioTile(
   return {
     label,
     value: formatRatio(ratio),
-    basis: ratioBasis(ratio, counting.unit, counting.emptyReason ?? emptyReason),
+    basis: ratioBasis(
+      ratio,
+      counting.unit,
+      counting.weighted ? `${emptyReason}, or none with measured volume` : emptyReason
+    ),
     help,
   };
 }

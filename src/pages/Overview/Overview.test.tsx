@@ -67,7 +67,7 @@ describe('ScoreTiles', () => {
     expect(basis['Resource']).toBe('1,500 of 3,000 checks');
   });
 
-  it('says no volume was measured when weighted scores have nothing to divide by', () => {
+  it('allows for unmeasured volume when weighted scores have nothing to divide by', () => {
     const empty = { value: null, numerator: 0, denominator: 0 };
     const row = {
       owner: { kind: 'service' as const, name: '' },
@@ -89,8 +89,8 @@ describe('ScoreTiles', () => {
       scoreTiles({ signal: 'traces', row, volumeWeighted: true }).map((tile) => [tile.label, tile.basis])
     );
 
-    expect(basis['Naming: Stable']).toBe('No measured volume');
-    expect(basis['Requirements']).toBe('No measured volume');
+    expect(basis['Naming: Stable']).toBe('No stable names seen, or none with measured volume');
+    expect(basis['Requirements']).toBe('No required attributes to check, or none with measured volume');
     expect(basis['Resource']).toBe('No service identity to check');
   });
 });
