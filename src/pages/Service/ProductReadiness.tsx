@@ -1,10 +1,9 @@
 import React from 'react';
-import { Badge, BadgeColor, Column, InteractiveTable, Stack, Text } from '@grafana/ui';
+import { useStyles2, Badge, BadgeColor, Stack, Text } from '@grafana/ui';
 import { ShareStatus, formatShare, shareStatus } from '../../components/ShareStatus/shareStatus';
 import { Owner, ServiceReadinessRow, Signal } from '../../api/types';
 import {
   ReadinessCounts,
-  ServiceProductReadiness,
   SignalReadiness,
   countsOf,
   readinessBasis,
@@ -13,6 +12,7 @@ import {
 import { testIds } from '../../components/testIds';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { PRODUCT_READINESS_HELP } from '../../components/SectionHeading/guides';
+import { getTableStyles } from './tableStyles';
 
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 
@@ -23,34 +23,48 @@ interface ProductReadinessProps {
 }
 
 export function ProductReadiness({ rows, owner, signals }: ProductReadinessProps) {
+  const styles = useStyles2(getTableStyles);
   const products = serviceReadiness(rows, owner);
   if (products.length === 0) {
     return null;
   }
 
-  const columns: Array<Column<ServiceProductReadiness>> = [
-    { id: 'product', header: 'Product', cell: ({ row }) => <Text weight="medium">{row.original.name}</Text> },
-    {
-      id: 'overall',
-      header: 'Overall',
-      cell: ({ row }) => (
-        <Stack direction="column" gap={0.5} alignItems="flex-start">
-          <ShareBadge share={row.original.overall} />
-          <Basis counts={row.original.overallCounts} />
-        </Stack>
-      ),
-    },
-    ...signals.map((signal): Column<ServiceProductReadiness> => ({
-      id: signal,
-      header: SIGNAL_LABELS[signal],
-      cell: ({ row }) => <SignalCell readiness={row.original.signals[signal]} />,
-    })),
-  ];
-
   return (
     <Stack direction="column" gap={1} data-testid={testIds.service.productReadiness}>
       <SectionHeading title="Product readiness" help={PRODUCT_READINESS_HELP} variant="h4" />
-      <InteractiveTable columns={columns} data={products} getRowId={(product) => product.product} />
+      <div className={styles.scroll} role="region" aria-label="Product readiness" tabIndex={0}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">Overall</th>
+              {signals.map((signal) => (
+                <th key={signal} scope="col">
+                  {SIGNAL_LABELS[signal]}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => (
+              <tr key={product.product}>
+                <th scope="row">{product.name}</th>
+                <td>
+                  <Stack direction="column" gap={0.5} alignItems="flex-start">
+                    <ShareBadge share={product.overall} />
+                    <Basis counts={product.overallCounts} />
+                  </Stack>
+                </td>
+                {signals.map((signal) => (
+                  <td key={signal}>
+                    <SignalCell readiness={product.signals[signal]} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Stack>
   );
 }
