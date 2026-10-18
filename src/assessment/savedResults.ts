@@ -102,6 +102,10 @@ async function prune(database: IDBFactory, nowMs: number): Promise<void> {
       opened.close();
       reject(transaction.error);
     };
+    transaction.onabort = () => {
+      opened.close();
+      reject(transaction.error ?? new Error('saved results cleanup was aborted'));
+    };
   });
 }
 
