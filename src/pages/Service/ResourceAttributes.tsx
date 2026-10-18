@@ -1,13 +1,12 @@
 import React from 'react';
 import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
-import { Badge, BadgeColor, Stack, Text, TextLink, useStyles2 } from '@grafana/ui';
+import { Badge, BadgeColor, Column, InteractiveTable, Stack, Text, TextLink, useStyles2 } from '@grafana/ui';
 import { Owner, PresenceState, ResourceAttributeCheck, Signal } from '../../api/types';
 import { sameOwner } from '../../assessment/traceAssessment';
 import { testIds } from '../../components/testIds';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { RESOURCE_ATTRIBUTES_HELP } from '../../components/SectionHeading/guides';
-import { getTableStyles } from './tableStyles';
 
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 const SDK_ENVIRONMENT_URL = 'https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/';
@@ -42,7 +41,6 @@ export function bestCheck(
 }
 
 export function ResourceAttributes({ checks, owners, signals }: ResourceAttributesProps) {
-  const styles = useStyles2(getTableStyles);
   const linkStyles = useStyles2(getLinkStyles);
   const owned = ownerResourceChecks(checks, owners);
   const attributes = [...new Set(owned.map((check) => check.attribute))];
@@ -50,50 +48,20 @@ export function ResourceAttributes({ checks, owners, signals }: ResourceAttribut
     return null;
   }
   const anyMissing = owned.some((check) => check.state === 'missing');
+  const rows = attributes.map((attribute) => ({ attribute }));
+  const columns: Array<Column<{ attribute: string }>> = [
+    { id: 'attribute', header: 'Attribute', cell: ({ row }) => <code>{row.original.attribute}</code> },
+    ...signals.map((signal): Column<{ attribute: string }> => ({
+      id: signal,
+      header: SIGNAL_LABELS[signal],
+      cell: ({ row }) => <CheckCell check={bestCheck(owned, row.original.attribute, signal)} />,
+    })),
+  ];
 
   return (
     <Stack direction="column" gap={1} data-testid={testIds.service.resourceAttributes}>
       <SectionHeading title="Required resource attributes" help={RESOURCE_ATTRIBUTES_HELP} variant="h4" />
-      <div className={styles.scroll}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th scope="col">Attribute</th>
-              {signals.map((signal) => (
-                <th key={signal} scope="col">
-                  {SIGNAL_LABELS[signal]}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {attributes.map((attribute) => (
-              <tr key={attribute}>
-                <th scope="row">
-                  <code>{attribute}</code>
-                </th>
-                {signals.map((signal) => {
-                  const check = bestCheck(owned, attribute, signal);
-                  return (
-                    <td key={signal}>
-                      {check ? (
-                        <Stack direction="column" gap={0.5} alignItems="flex-start">
-                          <Badge text={STATES[check.state].label} color={STATES[check.state].color} />
-                          <Text color="secondary" variant="bodySmall">
-                            {check.evidence}
-                          </Text>
-                        </Stack>
-                      ) : (
-                        <Text color="secondary">N/A</Text>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <InteractiveTable columns={columns} data={rows} getRowId={(row) => row.attribute} />
       {anyMissing && (
         <Text color="secondary">
           To add a missing attribute, set it in the SDK with <code>OTEL_RESOURCE_ATTRIBUTES</code> (for example{' '}
@@ -114,6 +82,20 @@ export function ResourceAttributes({ checks, owners, signals }: ResourceAttribut
           </span>
         </Text>
       )}
+    </Stack>
+  );
+}
+
+function CheckCell({ check }: { check?: ResourceAttributeCheck }) {
+  if (!check) {
+    return <Text color="secondary">N/A</Text>;
+  }
+  return (
+    <Stack direction="column" gap={0.5} alignItems="flex-start">
+      <Badge text={STATES[check.state].label} color={STATES[check.state].color} />
+      <Text color="secondary" variant="bodySmall">
+        {check.evidence}
+      </Text>
     </Stack>
   );
 }
