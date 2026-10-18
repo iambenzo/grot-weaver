@@ -28,6 +28,7 @@ export const testIds = {
     saved: 'data-testid status-saved',
     panel: 'data-testid status-panel',
     refreshFailed: 'data-testid status-refresh-failed',
+    fullScanFailed: 'data-testid status-full-scan-failed',
     incomplete: 'data-testid status-incomplete',
   },
   fix: {

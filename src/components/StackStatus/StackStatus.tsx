@@ -159,9 +159,10 @@ interface ScanWarningsProps {
   onRetry: (uid: string) => void;
   savedAtMs?: number;
   scanError?: string;
+  fullScanError?: string;
 }
 
-export function ScanWarnings({ progress, onRetry, savedAtMs, scanError }: ScanWarningsProps) {
+export function ScanWarnings({ progress, onRetry, savedAtMs, scanError, fullScanError }: ScanWarningsProps) {
   const notVisible = progress.filter((entry) => entry.state === 'not_visible');
   const failed = progress.filter((entry) => entry.state === 'errors');
   return (
@@ -174,6 +175,16 @@ export function ScanWarnings({ progress, onRetry, savedAtMs, scanError }: ScanWa
       {scanError && savedAtMs === undefined && (
         <Alert severity="warning" title="The scan stopped before finishing" data-testid={testIds.status.refreshFailed}>
           The scores shown cover only what was collected before it stopped. {scanError}
+        </Alert>
+      )}
+      {fullScanError && (
+        <Alert
+          severity="warning"
+          title="The full scan of the stack stopped"
+          data-testid={testIds.status.fullScanFailed}
+        >
+          This page shows a quick scan of this service only, so labels a pipeline adds to every service and the impact
+          ranking may be missing. {fullScanError}
         </Alert>
       )}
       {notVisible.length > 0 && (

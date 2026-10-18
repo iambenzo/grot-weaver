@@ -42,17 +42,13 @@ describe('chooseServiceLoad with a saved scan that lacks the service', () => {
 });
 
 describe('chooseServiceLoad when the full scan stopped', () => {
-  it('keeps the complete quick view but carries the full scan failure with it', () => {
-    const stopped = ready(true, 'scoring failed');
+  it('keeps the complete quick view and reports the full scan failure separately', () => {
     const quick = ready(false);
 
-    const chosen = chooseServiceLoad(stopped, quick);
-
-    expect(chosen.quick).toBe(true);
-    expect(chosen.fullStopped).toBe(true);
-    expect(chosen.load).toMatchObject({
-      assessment: quick.status === 'ready' && quick.assessment,
-      scanError: 'scoring failed',
+    expect(chooseServiceLoad(ready(true, 'scoring failed'), quick)).toEqual({
+      load: quick,
+      quick: true,
+      fullScanError: 'scoring failed',
     });
   });
 });

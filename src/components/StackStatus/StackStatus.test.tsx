@@ -154,6 +154,14 @@ describe('ScanWarnings', () => {
     expect(screen.getByTestId(testIds.status.refreshFailed)).toHaveTextContent('boom');
   });
 
+  it('names a stopped full scan separately from the quick view shown', () => {
+    render(<ScanWarnings progress={[prom]} onRetry={jest.fn()} fullScanError="scoring failed" />);
+
+    expect(screen.getByTestId(testIds.status.fullScanFailed)).toHaveTextContent('The full scan of the stack stopped');
+    expect(screen.getByTestId(testIds.status.fullScanFailed)).toHaveTextContent('quick scan of this service only');
+    expect(screen.queryByTestId(testIds.status.refreshFailed)).not.toBeInTheDocument();
+  });
+
   it('renders nothing when all is well', () => {
     const { container } = render(<ScanWarnings progress={[prom]} onRetry={jest.fn()} savedAtMs={Date.now()} />);
 

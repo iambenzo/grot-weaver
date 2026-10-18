@@ -80,12 +80,12 @@ export function useStackAssessment(
 export interface ServiceLoad {
   load: Load;
   quick: boolean;
-  fullStopped?: boolean;
+  fullScanError?: string;
 }
 
 function quickView(full: Load, quick: Load): ServiceLoad {
-  if (full.status === 'ready' && full.scanError && quick.status === 'ready') {
-    return { load: { ...quick, scanError: full.scanError }, quick: true, fullStopped: true };
+  if (full.status === 'ready' && full.scanError) {
+    return { load: quick, quick: true, fullScanError: full.scanError };
   }
   return { load: quick, quick: true };
 }
