@@ -67,9 +67,12 @@ export const PRODUCT_READINESS_HELP: GuideItem[] = [
   {
     term: 'Counts',
     meaning:
-      'The line under each share says how many needed attributes are present out of those checked. Attributes that could not be checked are left out of the share and counted separately.',
+      'The line under each share says how many needed attributes are present out of those checked. Attributes that could not be checked are left out of the share and counted separately; if none are missing but some could not be checked, the share shows Not checkable instead of 100%.',
   },
-  { term: 'Overall', meaning: 'All needed attributes across every signal the product uses, added together.' },
+  {
+    term: 'Overall',
+    meaning: 'All needed attributes across every assessed signal this service sends, added together.',
+  },
   {
     term: 'Also unlocks',
     meaning: 'Recommended attributes that turn on extra features, such as linking to Kubernetes.',
