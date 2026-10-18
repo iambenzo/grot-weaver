@@ -71,6 +71,20 @@ describe('FindingsTable', () => {
     expect(within(rows[1]).getByText('42%')).toBeInTheDocument();
   });
 
+  it('shows type, bucket, source and confidence as plain text', () => {
+    render(
+      <FindingsTable
+        findings={[{ ...renamed, confidence: 'medium' }]}
+        libraryFor={none}
+        evidenceFor={none}
+        {...shared}
+      />
+    );
+
+    expect(screen.getByText('Stable · semconv · medium confidence')).toBeInTheDocument();
+    expect(screen.getByText('Deprecated').tagName).toBe('SPAN');
+  });
+
   it('formats impact shares for people', () => {
     expect(formatImpact(0)).toBe('0%');
     expect(formatImpact(0.004)).toBe('<1%');
@@ -83,8 +97,7 @@ describe('FindingsTable', () => {
     expect(screen.getByText('http.method')).toBeInTheDocument();
     expect(screen.getByText('http.request.method')).toBeInTheDocument();
     expect(screen.getByText('Deprecated')).toBeInTheDocument();
-    expect(screen.getByText('Stable')).toBeInTheDocument();
-    expect(screen.getByText('semconv')).toBeInTheDocument();
+    expect(screen.getByText('Stable · semconv')).toBeInTheDocument();
     expect(screen.getByText(/instrumentation-http/)).toBeInTheDocument();
     expect(screen.getByText('high confidence, from TraceQL metrics')).toBeInTheDocument();
     expect(screen.getByText('2026-10-12 08:00:00')).toBeInTheDocument();
@@ -105,7 +118,7 @@ describe('FindingsTable', () => {
     const { unmount } = render(
       <FindingsTable findings={[renamed]} libraryFor={() => likely} evidenceFor={none} {...shared} />
     );
-    expect(screen.getByText('Likely')).toBeInTheDocument();
+    expect(screen.getByText(/Likely:/)).toBeInTheDocument();
     unmount();
 
     render(<FindingsTable findings={[renamed]} libraryFor={none} evidenceFor={none} {...shared} />);
@@ -117,7 +130,7 @@ describe('FindingsTable', () => {
 
     const row = screen.getByText('net_peer_name').closest('tr') as HTMLElement;
     expect(within(row).getByText('net.peer.name')).toBeInTheDocument();
-    expect(within(row).getByText('Experimental')).toBeInTheDocument();
+    expect(within(row).getByText(/Experimental/)).toBeInTheDocument();
   });
 
   it('shows the registry note verbatim when there is no single replacement', async () => {

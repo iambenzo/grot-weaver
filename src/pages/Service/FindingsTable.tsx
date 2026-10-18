@@ -1,7 +1,17 @@
 import React from 'react';
 import { css } from '@emotion/css';
 import { dateTimeFormat, GrafanaTheme2 } from '@grafana/data';
-import { Badge, BadgeColor, Column, IconName, InteractiveTable, LinkButton, Stack, Text, useStyles2 } from '@grafana/ui';
+import {
+  Badge,
+  BadgeColor,
+  Column,
+  IconName,
+  InteractiveTable,
+  LinkButton,
+  Stack,
+  Text,
+  useStyles2,
+} from '@grafana/ui';
 import { Bucket, Finding, FindingType, Level, RegistrySource } from '../../api/types';
 import { findingKey } from '../../assessment/traceAssessment';
 import { LibraryInfo } from '../../assessment/libraries';
@@ -25,17 +35,17 @@ interface FindingsTableProps {
   fetchFix?: FetchFixOptions;
 }
 
-const TYPE_LABELS: Record<FindingType, { text: string; color: BadgeColor }> = {
-  conformant: { text: 'Conformant', color: 'green' },
-  deprecated: { text: 'Deprecated', color: 'orange' },
-  unit_mismatch: { text: 'Unit mismatch', color: 'orange' },
-  required_attribute_not_present: { text: 'Required missing', color: 'red' },
-  recommended_attribute_not_present: { text: 'Recommended missing', color: 'blue' },
-  misplaced_attribute: { text: 'Misplaced', color: 'blue' },
-  not_in_registry: { text: 'Not in registry', color: 'red' },
-  custom: { text: 'Custom', color: 'darkgrey' },
-  sdk_default_service_name: { text: 'SDK default service name', color: 'red' },
-  missing_service_name: { text: 'No service name', color: 'red' },
+const TYPE_LABELS: Record<FindingType, string> = {
+  conformant: 'Conformant',
+  deprecated: 'Deprecated',
+  unit_mismatch: 'Unit mismatch',
+  required_attribute_not_present: 'Required missing',
+  recommended_attribute_not_present: 'Recommended missing',
+  misplaced_attribute: 'Misplaced',
+  not_in_registry: 'Not in registry',
+  custom: 'Custom',
+  sdk_default_service_name: 'SDK default service name',
+  missing_service_name: 'No service name',
 };
 
 const LEVEL_BADGES: Record<Exclude<Level, ''>, { text: string; color: BadgeColor; icon: IconName }> = {
@@ -149,14 +159,18 @@ function NameCell({ finding }: { finding: Finding }) {
 }
 
 function FindingBadges({ finding }: { finding: Finding }) {
-  const type = TYPE_LABELS[finding.type];
+  const context = [
+    finding.bucket && BUCKET_LABELS[finding.bucket],
+    finding.source && SOURCE_LABELS[finding.source],
+    finding.confidence && finding.confidence !== 'high' && `${finding.confidence} confidence`,
+  ].filter((part): part is string => Boolean(part));
   return (
-    <Stack gap={0.5} wrap="wrap">
-      <Badge text={type.text} color={type.color} />
-      {finding.bucket && <Badge text={BUCKET_LABELS[finding.bucket]} color="purple" />}
-      {finding.source && <Badge text={SOURCE_LABELS[finding.source]} color="darkgrey" />}
-      {finding.confidence && finding.confidence !== 'high' && (
-        <Badge text={`${finding.confidence} confidence`} color="blue" />
+    <Stack direction="column" gap={0}>
+      <Text weight="medium">{TYPE_LABELS[finding.type]}</Text>
+      {context.length > 0 && (
+        <Text color="secondary" variant="bodySmall">
+          {context.join(' · ')}
+        </Text>
       )}
     </Stack>
   );
@@ -173,7 +187,8 @@ function LibraryCell({ library }: { library?: LibraryInfo }) {
     <Stack direction="column" gap={0}>
       {library.libraries.map((entry) => (
         <span key={`${entry.name}@${entry.version ?? ''}`}>
-          {library.likely && <Badge text="Likely" color="blue" />} {entry.name || '(no scope name)'} {entry.version}
+          {library.likely && 'Likely: '}
+          {entry.name || '(no scope name)'} {entry.version}
         </span>
       ))}
       <Text color="secondary" variant="bodySmall">
