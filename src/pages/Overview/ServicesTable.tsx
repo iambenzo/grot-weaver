@@ -1,12 +1,13 @@
 import React from 'react';
 import { css } from '@emotion/css';
-import { Column, InteractiveTable, LinkButton, useStyles2 } from '@grafana/ui';
+import { Column, InteractiveTable, LinkButton, Text, useStyles2 } from '@grafana/ui';
 import { Owner, Signal } from '../../api/types';
 import { ServiceRow } from '../../assessment/overview';
 import { prefixRoute } from '../../utils/utils.routing';
 import { ROUTES } from '../../constants';
 import { testIds } from '../../components/testIds';
 import { formatRatio } from './ScoreTiles';
+import { formatShare } from '../../components/ShareStatus/shareStatus';
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
 
@@ -27,6 +28,13 @@ export function ownerName(owner: Owner): string {
 
 export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { from: string; to: string } }) {
   const styles = useStyles2(getStyles);
+  if (rows.length === 0) {
+    return (
+      <Text color="secondary" data-testid={testIds.overview.services}>
+        No services scored yet.
+      </Text>
+    );
+  }
   const columns: Array<Column<ServiceRow>> = [
     {
       id: 'service',
@@ -39,18 +47,18 @@ export function ServicesTable({ rows, range }: { rows: ServiceRow[]; range: { fr
     },
     {
       id: 'worst',
-      header: 'Lowest score',
-      cell: ({ row }) => (row.original.worst === null ? 'N/A' : `${Math.round(row.original.worst * 100)}%`),
+      header: 'Lowest naming score',
+      cell: ({ row }) => (row.original.worst === null ? 'N/A' : formatShare(row.original.worst)),
     },
     { id: 'violations', header: 'Violations', cell: ({ row }) => row.original.violations },
     {
       id: 'requiredResource',
-      header: 'Required attributes',
+      header: 'Required resource attributes',
       cell: ({ row }) => formatRatio(row.original.requiredResource),
     },
     ...SIGNALS.map((signal): Column<ServiceRow> => ({
       id: signal,
-      header: `${signal[0].toUpperCase()}${signal.slice(1)}`,
+      header: `${signal[0].toUpperCase()}${signal.slice(1)}: stable naming`,
       cell: ({ row }) => formatRatio(row.original.scores[signal]?.naming_stable),
     })),
   ];

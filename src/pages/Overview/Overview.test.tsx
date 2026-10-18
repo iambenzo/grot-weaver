@@ -159,6 +159,8 @@ describe('ServicesTable', () => {
     );
     render(<ServicesTable rows={[row]} range={{ from: 'now-24h', to: 'now' }} />);
     expect(screen.getByRole('link', { name: 'shop/checkout' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Lowest naming score' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Traces: stable naming' })).toBeInTheDocument();
     expect(screen.getByText('40%')).toBeInTheDocument();
     expect(screen.getByText('80%')).toBeInTheDocument();
   });
@@ -176,6 +178,30 @@ describe('OwnerSections', () => {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
     expect(screen.queryByText('No pipeline-introduced findings in this window.')).toBeNull();
+  });
+
+  it('opens a section that has owners and explains what it holds', () => {
+    const result = {
+      findings: [
+        {
+          type: 'not_in_registry',
+          level: 'violation',
+          signal: 'metrics',
+          owner: { kind: 'source', name: 'node' },
+          observed: 'node_cpu_seconds_total',
+          scope: 'metric',
+          volume: 1,
+          impact_share: 0,
+        },
+      ],
+      metric_attributions: [],
+    } as unknown as AssessmentResult;
+
+    render(<OwnerSections result={result} />);
+
+    expect(screen.getByText('node')).toBeVisible();
+    expect(screen.getByText(/no OpenTelemetry SDK service identity/)).toBeVisible();
+    expect(screen.queryByText(/Set OTEL_SERVICE_NAME/)).toBeNull();
   });
 });
 
