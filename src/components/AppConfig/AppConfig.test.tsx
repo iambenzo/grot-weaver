@@ -64,6 +64,8 @@ describe('AppConfig', () => {
       expect(screen.getByLabelText(new RegExp(`^${label}`))).toBeInTheDocument();
     }
     expect(screen.getByRole('button', { name: 'Remove rule 1' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: /^Reclassification rules/ })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: /^Service to pipeline mappings/ })).toBeInTheDocument();
     const ids = [...document.querySelectorAll('[id]')].map((element) => element.id);
     expect(new Set(ids).size).toBe(ids.length);
   });

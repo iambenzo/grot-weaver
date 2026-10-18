@@ -12,6 +12,7 @@ import {
   FieldSet,
   IconButton,
   Input,
+  Label,
   MultiCombobox,
   Stack,
   Switch,
@@ -122,7 +123,8 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
             />
           </Field>
         ))}
-        <Field
+        <FieldGroup
+          id="ac-reclassification"
           label="Reclassification rules"
           description="Glob patterns for metric names that are excluded, or treated as pipeline telemetry. Leave empty to use the defaults."
         >
@@ -130,7 +132,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
             rules={settings.reclassification ?? []}
             onChange={(rules) => update({ reclassification: rules.length > 0 ? rules : undefined })}
           />
-        </Field>
+        </FieldGroup>
       </FieldSet>
 
       <FieldSet label="Window and limits">
@@ -222,7 +224,8 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
       </FieldSet>
 
       <FieldSet label="Pipelines">
-        <Field
+        <FieldGroup
+          id="ac-pipeline-mappings"
           label="Service to pipeline mappings"
           description="Glob on namespace/name, for example shop/*, mapped to the collector or Alloy pipeline that carries it."
         >
@@ -230,7 +233,7 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
             mappings={settings.pipelineMappings ?? []}
             onChange={(pipelineMappings) => update({ pipelineMappings })}
           />
-        </Field>
+        </FieldGroup>
       </FieldSet>
 
       <FieldSet label="Updates">
@@ -293,6 +296,28 @@ function NumberInput({
         onChange(Number.isNaN(parsed) ? undefined : parsed);
       }}
     />
+  );
+}
+
+function FieldGroup({
+  id,
+  label,
+  description,
+  children,
+}: {
+  id: string;
+  label: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  const styles = useStyles2(getStyles);
+  return (
+    <div role="group" aria-labelledby={`${id}-label`} className={styles.group}>
+      <Label id={`${id}-label`} description={description}>
+        {label}
+      </Label>
+      {children}
+    </div>
   );
 }
 
@@ -407,6 +432,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
   page: css({
     marginTop: theme.spacing(4),
     maxWidth: theme.spacing(120),
+  }),
+  group: css({
+    marginBottom: theme.spacing(2),
   }),
 });
 
