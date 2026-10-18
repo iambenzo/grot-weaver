@@ -78,7 +78,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
         limits={limits}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
-        refreshing={load.refreshing}
+        scanning={load.scanning}
       >
         {empty !== 'unreadable' && (
           <WidenWindowPrompt window={load.window} observedItems={observedItems} timeRange={timeRangeObject} />
@@ -88,7 +88,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
         progress={assessment.progress}
         onRetry={load.retry}
         savedAtMs={load.savedAtMs}
-        refreshError={load.refreshError}
+        scanError={load.scanError}
       />
     </>
   );

@@ -7,7 +7,7 @@ const ready = (partial: boolean): Load => ({
   window: { startSeconds: 0, endSeconds: 1 },
   progress: [],
   retry: () => undefined,
-  refreshing: false,
+  scanning: false,
 });
 const loading: Load = { status: 'loading', progress: [] };
 

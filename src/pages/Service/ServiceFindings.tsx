@@ -175,7 +175,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
         limits={scanLimits(assessment.progress, assessment.result)}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
-        refreshing={load.refreshing}
+        scanning={load.scanning}
       >
         {quick && (
           <Text color="secondary" data-testid={testIds.service.quickView}>
@@ -195,7 +195,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
         progress={assessment.progress}
         onRetry={load.retry}
         savedAtMs={load.savedAtMs}
-        refreshError={load.refreshError}
+        scanError={load.scanError}
       />
       {empty && <EmptyTelemetry kind={empty} result={assessment.result} />}
       {(empty === undefined || empty === 'no-otel-services') && identities.length > 0 && (

@@ -55,7 +55,7 @@ describe('LoadingProgress', () => {
 
 describe('ScanStatus', () => {
   it('marks partial results with how many datasources are in, without an alert', () => {
-    render(<ScanStatus progress={[prom, tempo]} partial limits={[]} />);
+    render(<ScanStatus progress={[prom, tempo]} partial limits={[]} scanning />);
 
     expect(screen.getByTestId(testIds.status.partial)).toHaveTextContent('Scores cover 1 of 2 datasources so far');
     expect(screen.getByText('Tempo (traces): collecting')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('ScanStatus', () => {
         partial={false}
         limits={[]}
         savedAtMs={Date.now() - 2 * 60 * 60 * 1000}
-        refreshing
+        scanning
       />
     );
 
@@ -85,11 +85,22 @@ describe('ScanStatus', () => {
     );
   });
 
+  it('says when a partial scan stopped and explains why', () => {
+    expect(scanSummary({ progress: [prom, tempo], partial: true, scanning: false })).toBe(
+      'Scores cover 1 of 2 datasources. The scan stopped before the rest arrived.'
+    );
+
+    render(<ScanWarnings progress={[prom]} onRetry={jest.fn()} scanError="boom" />);
+
+    expect(screen.getByTestId(testIds.status.refreshFailed)).toHaveTextContent('The scan stopped before finishing');
+    expect(screen.getByTestId(testIds.status.refreshFailed)).toHaveTextContent('boom');
+  });
+
   it('says a fresh scan is running exactly while the store is still refreshing', () => {
-    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now(), refreshing: true })).toContain(
+    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now(), scanning: true })).toContain(
       'A fresh scan is running, 1 of 1 datasources so far'
     );
-    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now(), refreshing: false })).toBe(
+    expect(scanSummary({ progress: [prom], partial: false, savedAtMs: Date.now(), scanning: false })).toBe(
       'Showing your saved scan from a few seconds ago.'
     );
   });
@@ -134,7 +145,7 @@ describe('ScanWarnings', () => {
   });
 
   it('warns when the fresh scan failed and the saved scan is still showing', () => {
-    render(<ScanWarnings progress={[prom]} onRetry={jest.fn()} savedAtMs={Date.now()} refreshError="boom" />);
+    render(<ScanWarnings progress={[prom]} onRetry={jest.fn()} savedAtMs={Date.now()} scanError="boom" />);
 
     expect(screen.getByTestId(testIds.status.refreshFailed)).toHaveTextContent('The fresh scan failed');
     expect(screen.getByTestId(testIds.status.refreshFailed)).toHaveTextContent('boom');

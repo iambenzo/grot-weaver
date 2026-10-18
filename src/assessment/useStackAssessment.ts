@@ -23,8 +23,8 @@ export type Load =
       labels?: LabelProgress;
       retry: (uid: string) => void;
       savedAtMs?: number;
-      refreshing: boolean;
-      refreshError?: string;
+      scanning: boolean;
+      scanError?: string;
     };
 
 const sharedStore = createAssessmentStore(browserDependencies, Date.now, browserSavedResults());
@@ -67,8 +67,8 @@ export function useStackAssessment(
       labels: state.labels,
       retry: (uid) => store.retry(run, uid),
       savedAtMs: state.savedAtMs,
-      refreshing: state.savedAtMs !== undefined && state.scanning === true,
-      refreshError: state.savedAtMs !== undefined ? state.message : undefined,
+      scanning: state.scanning === true,
+      scanError: state.scanning === true ? undefined : state.message,
     };
   }
   if (state.message !== undefined) {

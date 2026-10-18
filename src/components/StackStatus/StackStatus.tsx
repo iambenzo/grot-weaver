@@ -69,7 +69,7 @@ interface ScanStatusProps {
   limits: ScanLimit[];
   labels?: LabelProgress;
   savedAtMs?: number;
-  refreshing?: boolean;
+  scanning?: boolean;
   children?: React.ReactNode;
 }
 
@@ -78,17 +78,20 @@ export function scanSummary({
   partial,
   labels,
   savedAtMs,
-  refreshing = false,
-}: Pick<ScanStatusProps, 'progress' | 'partial' | 'labels' | 'savedAtMs' | 'refreshing'>): string {
+  scanning = false,
+}: Pick<ScanStatusProps, 'progress' | 'partial' | 'labels' | 'savedAtMs' | 'scanning'>): string {
   const pending = progress.filter((entry) => entry.state === 'pending').length;
   const done = progress.length - pending;
   const labelText = labels && labels.total > 0 ? ` Checking metric labels ${labels.done} of ${labels.total}.` : '';
   if (savedAtMs !== undefined) {
     const age = dateTimeFormatTimeAgo(savedAtMs);
-    if (!refreshing) {
+    if (!scanning) {
       return `Showing your saved scan from ${age}.`;
     }
     return `Showing your saved scan from ${age}. A fresh scan is running, ${done} of ${progress.length} datasources so far, and replaces it when it finishes.${labelText}`;
+  }
+  if ((partial || pending > 0) && !scanning) {
+    return `Scores cover ${done} of ${progress.length} datasources. The scan stopped before the rest arrived.`;
   }
   if (partial || pending > 0) {
     return `Scores cover ${done} of ${progress.length} datasources so far and update as the rest arrive.${labelText}`;
@@ -102,24 +105,25 @@ export function ScanStatus({
   limits,
   labels,
   savedAtMs,
-  refreshing = false,
+  scanning = false,
   children,
 }: ScanStatusProps) {
   const styles = useStyles2(getStyles);
   if (progress.length === 0) {
     return null;
   }
-  const scanning = refreshing || partial || progress.some((entry) => entry.state === 'pending');
+  const collecting =
+    scanning && (savedAtMs !== undefined || partial || progress.some((entry) => entry.state === 'pending'));
   return (
     <div className={styles.panel} data-testid={testIds.status.panel}>
       <Stack direction="column" gap={1}>
         <Stack gap={1} alignItems="center">
-          {scanning ? <Spinner inline /> : <Icon name={savedAtMs === undefined ? 'check-circle' : 'history'} />}
+          {collecting ? <Spinner inline /> : <Icon name={savedAtMs === undefined ? 'check-circle' : 'history'} />}
           <div aria-live="polite" data-testid={savedAtMs === undefined ? testIds.status.partial : testIds.status.saved}>
-            <Text>{scanSummary({ progress, partial, labels, savedAtMs, refreshing })}</Text>
+            <Text>{scanSummary({ progress, partial, labels, savedAtMs, scanning })}</Text>
           </div>
         </Stack>
-        {scanning && <DatasourceProgressList progress={progress} />}
+        {collecting && <DatasourceProgressList progress={progress} />}
         {children}
         {limits.length > 0 && <LimitedChecks limits={limits} />}
       </Stack>
@@ -152,17 +156,22 @@ interface ScanWarningsProps {
   progress: DatasourceProgress[];
   onRetry: (uid: string) => void;
   savedAtMs?: number;
-  refreshError?: string;
+  scanError?: string;
 }
 
-export function ScanWarnings({ progress, onRetry, savedAtMs, refreshError }: ScanWarningsProps) {
+export function ScanWarnings({ progress, onRetry, savedAtMs, scanError }: ScanWarningsProps) {
   const notVisible = progress.filter((entry) => entry.state === 'not_visible');
   const failed = progress.filter((entry) => entry.state === 'errors');
   return (
     <>
-      {savedAtMs !== undefined && refreshError && (
+      {scanError && savedAtMs !== undefined && (
         <Alert severity="warning" title="The fresh scan failed" data-testid={testIds.status.refreshFailed}>
-          The scores shown are from your saved scan from {dateTimeFormatTimeAgo(savedAtMs)}. {refreshError}
+          The scores shown are from your saved scan from {dateTimeFormatTimeAgo(savedAtMs)}. {scanError}
+        </Alert>
+      )}
+      {scanError && savedAtMs === undefined && (
+        <Alert severity="warning" title="The scan stopped before finishing" data-testid={testIds.status.refreshFailed}>
+          The scores shown cover only what was collected before it stopped. {scanError}
         </Alert>
       )}
       {notVisible.length > 0 && (
