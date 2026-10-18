@@ -72,7 +72,11 @@ describe('AppConfig', () => {
     });
 
     const request = fetch.mock.calls[0][0];
-    expect(request).toMatchObject({ url: '/api/plugins/iambenzo-semconvcompliance-app/settings', method: 'POST' });
+    expect(request).toMatchObject({
+      url: '/api/plugins/iambenzo-semconvcompliance-app/settings',
+      method: 'POST',
+      showErrorAlert: false,
+    });
     expect(request.data).toMatchObject({
       enabled: true,
       pinned: true,

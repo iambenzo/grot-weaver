@@ -387,6 +387,7 @@ const updatePlugin = async (pluginId: string, data: Partial<PluginMeta>) => {
     url: `/api/plugins/${pluginId}/settings`,
     method: 'POST',
     data,
+    showErrorAlert: false,
   });
   return lastValueFrom(response);
 };
