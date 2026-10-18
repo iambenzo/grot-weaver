@@ -17,6 +17,7 @@ interface FakeLokiOptions {
   statsFails?: boolean;
   seriesFails?: boolean;
   serviceNames?: string[];
+  noLabelsInWindow?: boolean;
 }
 
 function fakeLoki(options: FakeLokiOptions = {}) {
@@ -30,9 +31,11 @@ function fakeLoki(options: FakeLokiOptions = {}) {
     calls.push({ path: requestPath, params, headers });
     switch (requestPath) {
       case '/loki/api/v1/labels':
-        return fixture('labels.json');
+        return options.noLabelsInWindow ? { status: 'success' } : fixture('labels.json');
       case '/loki/api/v1/label/service_name/values':
-        return { status: 'success', data: options.serviceNames ?? ['checkout'] };
+        return options.noLabelsInWindow
+          ? { status: 'success' }
+          : { status: 'success', data: options.serviceNames ?? ['checkout'] };
       case '/loki/api/v1/series':
         if (options.seriesFails) {
           throw { status: 500, data: 'loki exploded' };
@@ -205,6 +208,17 @@ describe('collectLokiInventory', () => {
         .map((call) => call.params.limit)
         .sort()
     ).toEqual(['20', '5']);
+  });
+});
+
+describe('empty window', () => {
+  it('reports no services, and no error, when Loki leaves data out of empty label responses', async () => {
+    const { get } = fakeLoki({ noLabelsInWindow: true });
+
+    const { datasource, errors } = await collectLokiInventory('loki', get, createLimiter(4), window);
+
+    expect(errors).toEqual([]);
+    expect(datasource).toEqual({ uid: 'loki', labels: [], services: [] });
   });
 });
 

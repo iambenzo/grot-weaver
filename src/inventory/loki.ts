@@ -32,6 +32,11 @@ interface LokiResponse<T> {
   data: T;
 }
 
+interface LokiLabelResponse {
+  status?: string;
+  data?: string[];
+}
+
 interface DetectedFieldsResponse {
   fields?: Array<{ label: string; parsers?: string[] | null }>;
 }
@@ -83,9 +88,9 @@ export async function collectLokiInventory(
 ): Promise<LokiCollection> {
   const context: Context = { uid, get, limit, window, errors: [], sampleLimit, service };
   const [labels, serviceNames, volumes] = await Promise.all([
-    guarded(context, 'labels', () => lokiGet<string[]>(context, '/loki/api/v1/labels', lokiWindowParams(window))),
+    guarded(context, 'labels', () => lokiLabels(context, '/loki/api/v1/labels')),
     guarded(context, 'service names', async () =>
-      (await lokiGet<string[]>(context, `/loki/api/v1/label/${SERVICE_NAME}/values`, lokiWindowParams(window))).filter(
+      (await lokiLabels(context, `/loki/api/v1/label/${SERVICE_NAME}/values`)).filter(
         (name) => service === undefined || name === service
       )
     ),
@@ -259,6 +264,13 @@ async function serviceVolume(
 async function lokiGet<T>(context: Context, path: string, params: Record<string, string>): Promise<T> {
   const response = await context.limit(() => context.get<LokiResponse<T>>(context.uid, path, params));
   return response.data;
+}
+
+async function lokiLabels(context: Context, path: string): Promise<string[]> {
+  const response = await context.limit(() =>
+    context.get<LokiLabelResponse>(context.uid, path, lokiWindowParams(context.window))
+  );
+  return response.data ?? [];
 }
 
 function metadataOf(streams: SampleStream[]): Array<Record<string, string>> {
