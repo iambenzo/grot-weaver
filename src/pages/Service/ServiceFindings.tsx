@@ -48,7 +48,9 @@ import {
   LoadingProgress,
   ScanStatus,
   ScanWarnings,
+  IncompleteNote,
   emptyKind,
+  incompleteReasons,
   scanLimits,
 } from '../../components/StackStatus/StackStatus';
 import { HopCandidates } from './HopCandidates';
@@ -237,6 +239,9 @@ function SelectedService({ identity, signal, onSignal, assessment, window, setti
           />
         ))}
       </TabsBar>
+      <IncompleteNote
+        reasons={incompleteReasons(assessment.progress, scanLimits(assessment.progress, assessment.result), signal)}
+      />
       {!identity.signals.includes(signal) ? (
         <Text color="secondary">No {SIGNAL_LABELS[signal].toLowerCase()} from this service in this window.</Text>
       ) : actionable.length === 0 ? (

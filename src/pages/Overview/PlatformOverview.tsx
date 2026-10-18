@@ -16,7 +16,9 @@ import {
   LoadingProgress,
   ScanStatus,
   ScanWarnings,
+  IncompleteNote,
   emptyKind,
+  incompleteReasons,
   scanLimits,
 } from '../../components/StackStatus/StackStatus';
 import { PluginSettings, isUpstreamCheckEnabled, isVolumeWeighted } from '../../settings/settings';
@@ -64,12 +66,15 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const { result } = assessment;
   const range = { from: String(timeRange.raw.from), to: String(timeRange.raw.to) };
   const groups = groupViolations(result.findings);
+  const limits = scanLimits(assessment.progress, result);
+  const incompleteFor = (candidate: Signal) => incompleteReasons(assessment.progress, limits, candidate);
+  const limitedSignals = SIGNALS.filter((candidate) => incompleteFor(candidate).length > 0);
   const status = (observedItems: number) => (
     <>
       <ScanStatus
         progress={load.progress}
         partial={assessment.partial}
-        limits={scanLimits(assessment.progress, result)}
+        limits={limits}
         labels={load.labels}
         savedAtMs={load.savedAtMs}
       >
@@ -110,6 +115,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
             unmeasured={unmeasuredFor(result, candidate)}
             uncheckable={uncheckableResourceFor(result, candidate)}
             volumeWeighted={isVolumeWeighted(settings)}
+            incomplete={incompleteFor(candidate)}
           />
         ))}
       </Stack>
@@ -126,10 +132,14 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
             />
           ))}
         </TabsBar>
+        <IncompleteNote reasons={incompleteFor(signal)} />
         <TopViolations groups={groups.filter((group) => group.signal === signal)} range={range} />
       </Stack>
       <Stack direction="column" gap={1}>
         <SectionHeading title="Services, worst first" help={SERVICES_HELP} />
+        <IncompleteNote
+          reasons={limitedSignals.map((candidate) => `${SIGNAL_LABELS[candidate].toLowerCase()} scores`)}
+        />
         <ServicesTable rows={serviceRows(result)} range={range} />
       </Stack>
       <OwnerSections result={result} />

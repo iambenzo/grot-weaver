@@ -27,6 +27,7 @@ export const testIds = {
     saved: 'data-testid status-saved',
     panel: 'data-testid status-panel',
     refreshFailed: 'data-testid status-refresh-failed',
+    incomplete: 'data-testid status-incomplete',
   },
   fix: {
     tabs: 'data-testid fix-tabs',

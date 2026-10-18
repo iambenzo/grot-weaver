@@ -8,7 +8,9 @@ import {
   LoadingProgress,
   ScanStatus,
   ScanWarnings,
+  IncompleteNote,
   hasOTelServices,
+  incompleteReasons,
   scanLimits,
 } from './StackStatus';
 import { testIds } from '../testIds';
@@ -129,6 +131,30 @@ describe('ScanWarnings', () => {
   });
 });
 
+describe('incompleteReasons', () => {
+  it('names failures, hidden datasources and limits for one signal only', () => {
+    const sampled = { ...tempo, state: 'ok' as const, keysMethod: 'sample' as const };
+    const progress = [prom, sampled, tempoFailed, lokiDenied];
+
+    expect(incompleteReasons(progress, scanLimits(progress, result({})), 'traces')).toEqual([
+      'failed queries on Tempo',
+      'keys from a sample',
+    ]);
+    expect(incompleteReasons(progress, scanLimits(progress, result({})), 'logs')).toEqual(['Loki not visible to you']);
+    expect(incompleteReasons(progress, scanLimits(progress, result({})), 'metrics')).toEqual([]);
+  });
+
+  it('renders a note only when there is a reason', () => {
+    const { container } = render(<IncompleteNote reasons={[]} />);
+    expect(container).toBeEmptyDOMElement();
+
+    render(<IncompleteNote reasons={['keys from a sample']} />);
+    expect(screen.getByTestId(testIds.status.incomplete)).toHaveTextContent(
+      'Based on limited data: keys from a sample.'
+    );
+  });
+});
+
 describe('scanLimits', () => {
   it('names sampled span volume and uncheckable units', () => {
     const sampled = { ...tempo, state: 'ok' as const, volumeMethod: 'sample' as const, keysMethod: 'sample' as const };
@@ -136,7 +162,9 @@ describe('scanLimits', () => {
       datasources: [{ uid: 'prom', strategy: 'UnderscoreEscapingWithoutSuffixes', unit_checkable: false }],
     } as unknown as Partial<AssessmentResult>);
 
-    const limits = scanLimits([prom, sampled], summaries).join('\n');
+    const limits = scanLimits([prom, sampled], summaries)
+      .map((limit) => limit.detail)
+      .join('\n');
 
     expect(limits).toContain('Tempo: volume from sample');
     expect(limits).toContain('Tempo: keys from sample');
@@ -146,7 +174,7 @@ describe('scanLimits', () => {
   it('names services whose volume was sampled beside measured ones', () => {
     const mixed = { ...tempo, state: 'ok' as const, volumeMethod: 'mixed' as const };
 
-    expect(scanLimits([mixed], result({}))[0]).toContain(
+    expect(scanLimits([mixed], result({}))[0].detail).toContain(
       'Tempo: volume from sample for services missing from TraceQL metrics'
     );
   });
@@ -155,7 +183,11 @@ describe('scanLimits', () => {
     const failed = { ...lokiDenied, state: 'errors' as const, errors: [], unmeasuredVolumes: 2 };
 
     expect(scanLimits([failed], result({}))).toEqual([
-      'Loki: volume not measured for 2 services because the query failed, so their findings rank last',
+      {
+        signal: 'logs',
+        summary: 'some volumes not measured',
+        detail: 'Loki: volume not measured for 2 services because the query failed, so their findings rank last',
+      },
     ]);
   });
 

@@ -7,6 +7,7 @@ import { testIds } from '../../components/testIds';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { SIGNAL_TILES_HELP } from '../../components/SectionHeading/guides';
 import { ShareStatus, formatShare, shareStatus } from '../../components/ShareStatus/shareStatus';
+import { IncompleteNote } from '../../components/StackStatus/StackStatus';
 
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
 const VOLUME_UNITS: Record<Signal, string> = { metrics: 'series', traces: 'spans', logs: 'log lines' };
@@ -18,6 +19,7 @@ interface ScoreTilesProps {
   unmeasured?: number;
   uncheckable?: number;
   volumeWeighted?: boolean;
+  incomplete?: string[];
 }
 
 interface Tile {
@@ -190,6 +192,7 @@ export function ScoreTiles(props: ScoreTilesProps) {
         help={SIGNAL_TILES_HELP}
         divided={props.signal === 'metrics'}
       />
+      <IncompleteNote reasons={props.incomplete ?? []} />
       <div className={styles.grid}>
         {scoreTiles(props).map((tile) => (
           <div key={tile.label} className={cx(styles.tile, tile.status && styles[tile.status])} title={tile.help}>

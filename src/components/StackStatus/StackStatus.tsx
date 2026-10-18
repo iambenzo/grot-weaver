@@ -66,7 +66,7 @@ export function LoadingProgress({ progress, labels }: { progress: DatasourceProg
 interface ScanStatusProps {
   progress: DatasourceProgress[];
   partial: boolean;
-  limits: string[];
+  limits: ScanLimit[];
   labels?: LabelProgress;
   savedAtMs?: number;
   children?: React.ReactNode;
@@ -117,7 +117,7 @@ export function ScanStatus({ progress, partial, limits, labels, savedAtMs, child
   );
 }
 
-function LimitedChecks({ limits }: { limits: string[] }) {
+function LimitedChecks({ limits }: { limits: ScanLimit[] }) {
   const [open, setOpen] = useState(false);
   return (
     <div data-testid={testIds.status.limits}>
@@ -128,8 +128,8 @@ function LimitedChecks({ limits }: { limits: string[] }) {
       >
         <ul>
           {limits.map((limit) => (
-            <li key={limit}>
-              <Text variant="bodySmall">{limit}</Text>
+            <li key={limit.detail}>
+              <Text variant="bodySmall">{limit.detail}</Text>
             </li>
           ))}
         </ul>
@@ -199,41 +199,101 @@ function DatasourceErrors({ entry, onRetry }: { entry: DatasourceProgress; onRet
   );
 }
 
-export function scanLimits(progress: DatasourceProgress[], result: AssessmentResult): string[] {
+export interface ScanLimit {
+  signal: Signal;
+  summary: string;
+  detail: string;
+}
+
+export function scanLimits(progress: DatasourceProgress[], result: AssessmentResult): ScanLimit[] {
+  const limit = (entry: { signal: Signal }, summary: string, detail: string): ScanLimit => ({
+    signal: entry.signal,
+    summary,
+    detail,
+  });
   return [
     ...progress
       .filter((entry) => entry.volumeMethod === 'sample')
-      .map((entry) => `${entry.ref.name}: volume from sample, TraceQL metrics are unavailable`),
+      .map((entry) =>
+        limit(entry, 'volume from a sample', `${entry.ref.name}: volume from sample, TraceQL metrics are unavailable`)
+      ),
     ...progress
       .filter((entry) => entry.volumeMethod === 'mixed')
-      .map(
-        (entry) =>
+      .map((entry) =>
+        limit(
+          entry,
+          'some volumes from a sample',
           `${entry.ref.name}: volume from sample for services missing from TraceQL metrics, so they rank lower than measured services`
+        )
       ),
     ...progress.flatMap((entry) =>
       entry.unmeasuredVolumes
         ? [
-            `${entry.ref.name}: volume not measured for ${entry.unmeasuredVolumes} ${entry.unmeasuredVolumes === 1 ? 'service' : 'services'} because the query failed, so their findings rank last`,
+            limit(
+              entry,
+              'some volumes not measured',
+              `${entry.ref.name}: volume not measured for ${entry.unmeasuredVolumes} ${entry.unmeasuredVolumes === 1 ? 'service' : 'services'} because the query failed, so their findings rank last`
+            ),
           ]
         : []
     ),
     ...progress.flatMap((entry) =>
       entry.labelChecks
         ? [
-            `${entry.ref.name}: label keys checked for the ${entry.labelChecks.checked} busiest of ${entry.labelChecks.total} metric and owner pairs, the rest are not checked`,
+            limit(
+              entry,
+              'label keys checked for the busiest metrics only',
+              `${entry.ref.name}: label keys checked for the ${entry.labelChecks.checked} busiest of ${entry.labelChecks.total} metric and owner pairs, the rest are not checked`
+            ),
           ]
         : []
     ),
     ...progress
       .filter((entry) => entry.keysMethod === 'sample')
-      .map(
-        (entry) =>
+      .map((entry) =>
+        limit(
+          entry,
+          'keys from a sample',
           `${entry.ref.name}: keys from sample, Tempo ignores the per-service tag filter so rare attributes can be missed`
+        )
       ),
     ...(result.datasources ?? [])
       .filter((summary) => !summary.unit_checkable)
-      .map((summary) => `${nameOf(progress, summary.uid)}: unit not checkable, metric names carry no unit suffix`),
+      .map((summary) =>
+        limit(
+          summary,
+          'units not checkable',
+          `${nameOf(progress, summary.uid)}: unit not checkable, metric names carry no unit suffix`
+        )
+      ),
   ];
+}
+
+export function incompleteReasons(progress: DatasourceProgress[], limits: ScanLimit[], signal: Signal): string[] {
+  const reasons = [
+    ...progress
+      .filter((entry) => entry.signal === signal && entry.state === 'errors')
+      .map((entry) => `failed queries on ${entry.ref.name}`),
+    ...progress
+      .filter((entry) => entry.signal === signal && entry.state === 'not_visible')
+      .map((entry) => `${entry.ref.name} not visible to you`),
+    ...limits.filter((entry) => entry.signal === signal).map((entry) => entry.summary),
+  ];
+  return [...new Set(reasons)];
+}
+
+export function IncompleteNote({ reasons }: { reasons: string[] }) {
+  if (reasons.length === 0) {
+    return null;
+  }
+  return (
+    <Stack gap={0.5} alignItems="center" data-testid={testIds.status.incomplete}>
+      <Icon name="exclamation-triangle" size="sm" aria-hidden />
+      <Text color="secondary" variant="bodySmall">
+        Based on limited data: {reasons.join(', ')}.
+      </Text>
+    </Stack>
+  );
 }
 
 export function hasOTelServices(result: AssessmentResult): boolean {
