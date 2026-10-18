@@ -16,6 +16,8 @@ describe('messageOf', () => {
     ['the status when nothing else is usable', { status: 403, data: {} }, 'request failed with status 403'],
     ['a plain error message', new Error('timed out'), 'timed out'],
     ['a thrown string', 'boom', 'boom'],
+    ['a fallback for an empty thrown string', '', 'unknown error'],
+    ['a fallback for undefined', undefined, 'unknown error'],
   ])('returns %s', (_, error, expected) => {
     expect(messageOf(error)).toBe(expected);
   });
