@@ -39,12 +39,35 @@ export function ratioBasis(ratio: Ratio | undefined, unit: string, emptyReason: 
   return `${formatCount(ratio.numerator)} of ${formatCount(ratio.denominator)} ${unit}`;
 }
 
+interface Counting {
+  unit: string;
+  emptyReason?: string;
+}
+
+function countingFor(volumeWeighted: boolean, signal: Signal, unweightedUnit: string): Counting {
+  if (!volumeWeighted) {
+    return { unit: unweightedUnit };
+  }
+  return { unit: `weighted by ${VOLUME_UNITS[signal]}`, emptyReason: 'No measured volume' };
+}
+
 function formatCount(count: number): string {
   return Math.round(count).toLocaleString('en-US');
 }
 
-function ratioTile(label: string, ratio: Ratio | undefined, unit: string, emptyReason: string, help: string): Tile {
-  return { label, value: formatRatio(ratio), basis: ratioBasis(ratio, unit, emptyReason), help };
+function ratioTile(
+  label: string,
+  ratio: Ratio | undefined,
+  counting: Counting,
+  emptyReason: string,
+  help: string
+): Tile {
+  return {
+    label,
+    value: formatRatio(ratio),
+    basis: ratioBasis(ratio, counting.unit, counting.emptyReason ?? emptyReason),
+    help,
+  };
 }
 
 function coverageBasis(coverage: Ratio | undefined, unit: string, unmeasured: number): string {
@@ -57,68 +80,68 @@ function coverageBasis(coverage: Ratio | undefined, unit: string, unmeasured: nu
 
 export function scoreTiles({ signal, row, coverage, unmeasured = 0, volumeWeighted = false }: ScoreTilesProps): Tile[] {
   const scores = row?.scores;
-  const volumeUnit = VOLUME_UNITS[signal];
-  const nameUnit = volumeWeighted ? volumeUnit : 'names';
-  const checkUnit = volumeWeighted ? volumeUnit : 'checks';
+  const names = countingFor(volumeWeighted, signal, 'names');
+  const requirementChecks = countingFor(volumeWeighted, signal, 'checks');
+  const checks = { unit: 'checks' };
   return [
     ratioTile(
       'Naming: Stable',
       scores?.naming_stable,
-      nameUnit,
+      names,
       'No stable names seen',
       'Share of observed names in the Stable bucket that are current'
     ),
     ratioTile(
       'Naming: Release candidate',
       scores?.naming_release_candidate,
-      nameUnit,
+      names,
       'No release-candidate names seen',
       'The same for release-candidate names'
     ),
     ratioTile(
       'Naming: Experimental',
       scores?.naming_experimental,
-      nameUnit,
+      names,
       'No development or alpha names seen',
       'The same for development and alpha names'
     ),
     ratioTile(
       'Requirements',
       scores?.requirements,
-      checkUnit,
+      requirementChecks,
       'No required attributes to check',
       'Required attributes present where checked'
     ),
     ratioTile(
       'Resource',
       scores?.resource,
-      'checks',
+      checks,
       'No service identity to check',
       'service.name present and not the SDK default'
     ),
     ratioTile(
       'Required resource attributes',
       scores?.required_resource,
-      'checks',
+      checks,
       'None configured or checkable',
       'Your required resource attributes present per service; separate from semconv conformance'
     ),
     {
       label: 'Deprecated',
       value: String(scores?.deprecated ?? 0),
-      basis: 'distinct names',
+      basis: 'names, counted per service',
       help: 'Distinct deprecated names in use',
     },
     {
       label: 'Unclassified',
       value: String(scores?.unclassified ?? 0),
-      basis: 'distinct names',
+      basis: 'names, counted per service',
       help: 'Names in a semconv namespace that match nothing',
     },
     {
       label: 'Coverage',
       value: formatRatio(coverage),
-      basis: coverageBasis(coverage, volumeUnit, unmeasured),
+      basis: coverageBasis(coverage, VOLUME_UNITS[signal], unmeasured),
       help:
         unmeasured > 0
           ? `Share of volume that is SDK-origin and attributed to a service; ${unmeasured} services are left out because their volume could not be measured`
@@ -131,7 +154,11 @@ export function ScoreTiles(props: ScoreTilesProps) {
   const styles = useStyles2(getStyles);
   return (
     <Stack direction="column" gap={1} data-testid={testIds.overview.tiles}>
-      <SectionHeading title={SIGNAL_LABELS[props.signal]} help={SIGNAL_TILES_HELP} divided={props.signal === 'metrics'} />
+      <SectionHeading
+        title={SIGNAL_LABELS[props.signal]}
+        help={SIGNAL_TILES_HELP}
+        divided={props.signal === 'metrics'}
+      />
       <div className={styles.grid}>
         {scoreTiles(props).map((tile) => (
           <div key={tile.label} className={styles.tile} title={tile.help}>

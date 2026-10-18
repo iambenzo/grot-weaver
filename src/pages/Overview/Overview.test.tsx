@@ -60,16 +60,43 @@ describe('ScoreTiles', () => {
       scoreTiles({ signal: 'metrics', row, volumeWeighted: true }).map((tile) => [tile.label, tile.basis])
     );
 
-    expect(basis['Naming: Stable']).toBe('1,500 of 3,000 series');
-    expect(basis['Requirements']).toBe('1,500 of 3,000 series');
+    expect(basis['Naming: Stable']).toBe('1,500 of 3,000 weighted by series');
+    expect(basis['Requirements']).toBe('1,500 of 3,000 weighted by series');
     expect(basis['Resource']).toBe('1,500 of 3,000 checks');
+  });
+
+  it('says no volume was measured when weighted scores have nothing to divide by', () => {
+    const empty = { value: null, numerator: 0, denominator: 0 };
+    const row = {
+      owner: { kind: 'service' as const, name: '' },
+      signal: 'traces' as const,
+      scores: {
+        naming_stable: empty,
+        naming_release_candidate: empty,
+        naming_experimental: empty,
+        requirements: empty,
+        resource: empty,
+        required_resource: empty,
+        deprecated: 0,
+        unclassified: 0,
+        custom: 0,
+      },
+    };
+
+    const basis = Object.fromEntries(
+      scoreTiles({ signal: 'traces', row, volumeWeighted: true }).map((tile) => [tile.label, tile.basis])
+    );
+
+    expect(basis['Naming: Stable']).toBe('No measured volume');
+    expect(basis['Requirements']).toBe('No measured volume');
+    expect(basis['Resource']).toBe('No service identity to check');
   });
 });
 
 describe('weightingText', () => {
   it('says how names are counted', () => {
-    expect(weightingText(false)).toBe('Each distinct name counts once, whatever its volume.');
-    expect(weightingText(true)).toBe('Names count by volume: series, spans or log lines.');
+    expect(weightingText(false)).toBe('Each name counts once per service, whatever its volume.');
+    expect(weightingText(true)).toBe('Each name counts by its volume in each service: series, spans or log lines.');
   });
 });
 

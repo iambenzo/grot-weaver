@@ -171,6 +171,6 @@ function OverviewHeader({
 
 export function weightingText(volumeWeighted: boolean): string {
   return volumeWeighted
-    ? 'Names count by volume: series, spans or log lines.'
-    : 'Each distinct name counts once, whatever its volume.';
+    ? 'Each name counts by its volume in each service: series, spans or log lines.'
+    : 'Each name counts once per service, whatever its volume.';
 }
