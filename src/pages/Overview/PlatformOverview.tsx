@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { rangeUtil } from '@grafana/data';
 import { SceneComponentProps, SceneObjectBase, SceneObjectState, SceneTimeRange, sceneGraph } from '@grafana/scenes';
 import { Alert, Badge, Stack, Tab, TabsBar, Text } from '@grafana/ui';
 import { Signal } from '../../api/types';
@@ -23,6 +24,7 @@ import {
 } from '../../components/StackStatus/StackStatus';
 import { PluginSettings, isUpstreamCheckEnabled, isVolumeWeighted } from '../../settings/settings';
 import { UpstreamBanner } from '../../upstream/UpstreamBanner';
+import { strategyExample, strategyLabel } from '../../inventory/strategyLabels';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { SectionHeading } from '../../components/SectionHeading/SectionHeading';
 import { SERVICES_HELP, TOP_VIOLATIONS_HELP } from '../../components/SectionHeading/guides';
@@ -96,7 +98,11 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   if (empty) {
     return (
       <Stack direction="column" gap={3}>
-        <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
+        <OverviewHeader
+          assessment={assessment}
+          windowLabel={rangeUtil.describeTimeRange(timeRange.raw)}
+          settings={settings}
+        />
         {status(0)}
         <EmptyTelemetry kind={empty} result={result} />
         {empty === 'no-otel-services' && <OwnerSections result={result} />}
@@ -106,7 +112,11 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
 
   return (
     <Stack direction="column" gap={3}>
-      <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
+      <OverviewHeader
+        assessment={assessment}
+        windowLabel={rangeUtil.describeTimeRange(timeRange.raw)}
+        settings={settings}
+      />
       {status(result.findings.length)}
       <Stack direction="column" gap={2}>
         {SIGNALS.map((candidate) => (
@@ -168,15 +178,16 @@ function OverviewHeader({
     <Stack direction="column" gap={1} data-testid={testIds.overview.header}>
       <OverviewIntro semconvVersion={assessment.result.semconv_version} />
       <Text>
-        Scored against semantic conventions <strong>{assessment.result.semconv_version}</strong> for {windowLabel}.{' '}
+        Scored against semantic conventions <strong>{assessment.result.semconv_version}</strong>. Window: {windowLabel}.{' '}
         {weightingText(isVolumeWeighted(settings))}
       </Text>
       <Stack gap={1} wrap="wrap">
         {all.map((ds) => {
           const summary = summaries.find((candidate) => candidate.uid === ds.uid);
-          const strategy = summary
-            ? `, ${summary.strategy}${summary.mixed ? ' (mixed)' : ''}${summary.unit_checkable ? '' : ', unit not checkable'}`
+          const strategy = summary?.strategy
+            ? `, ${strategyLabel(summary.strategy)}${summary.mixed ? ' (mixed)' : ''}${summary.unit_checkable ? '' : ', unit not checkable'}`
             : '';
+          const example = summary?.strategy ? strategyExample(summary.strategy) : undefined;
           const entry = assessment.progress.find((candidate) => candidate.ref.uid === ds.uid);
           const limits = [
             entry?.volumeMethod === 'sample' ? 'volume from sample' : '',
@@ -188,6 +199,11 @@ function OverviewHeader({
               key={ds.uid}
               color="darkgrey"
               text={`${ds.name} (${SIGNAL_LABELS[ds.signal].toLowerCase()}${strategy}${limits.map((limit) => `, ${limit}`).join('')})`}
+              tooltip={
+                example
+                  ? `How this datasource stores OpenTelemetry metric names: ${example}.${summary?.mixed ? ' Some names use another form.' : ''}`
+                  : undefined
+              }
             />
           );
         })}

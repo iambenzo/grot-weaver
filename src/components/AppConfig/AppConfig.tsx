@@ -34,6 +34,7 @@ import {
 } from '../../settings/settings';
 import { DEFAULT_WINDOW, WINDOW_PRESETS } from '../../window/presets';
 import { ReclassificationRule, TRANSLATION_STRATEGIES, TranslationStrategy } from '../../inventory/types';
+import { STRATEGY_LABELS } from '../../inventory/strategyLabels';
 import { messageOf } from '../../api/errors';
 
 export interface AppConfigProps extends PluginConfigPageProps<AppPluginMeta<PluginSettings>> {}
@@ -101,14 +102,18 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
           <Field
             key={ds.uid}
             label={`Translation strategy for ${ds.name}`}
-            description="Leave on detected unless the detection is wrong."
+            description="How this datasource stores OpenTelemetry metric names. Leave on detected unless the detection is wrong."
           >
             <Combobox
               id={`ac-strategy-${ds.uid}`}
               width={50}
               options={[
                 { value: DETECTED, label: 'Detected from metric names' },
-                ...TRANSLATION_STRATEGIES.map((strategy) => ({ value: strategy, label: strategy })),
+                ...TRANSLATION_STRATEGIES.map((strategy) => ({
+                  value: strategy,
+                  label: `${STRATEGY_LABELS[strategy].label} (${strategy})`,
+                  description: STRATEGY_LABELS[strategy].example,
+                })),
               ]}
               value={settings.strategyOverrides?.[ds.uid] ?? DETECTED}
               onChange={(option: ComboboxOption | null) =>
