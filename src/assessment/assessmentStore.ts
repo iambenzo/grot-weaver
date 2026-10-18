@@ -7,6 +7,7 @@ import { fetchProducts } from '../api/products';
 import { LabelProgress } from '../inventory/prometheus';
 import { PluginSettings, concurrencyFrom } from '../settings/settings';
 import { QueryWindow } from '../window/window';
+import { SavedResults, noSavedResults } from './savedResults';
 import {
   DatasourceProgress,
   StackAssessment,
@@ -24,6 +25,7 @@ export interface RunState {
   labels?: LabelProgress;
   assessment?: StackAssessment;
   message?: string;
+  savedAtMs?: number;
 }
 
 export interface Run {
@@ -70,7 +72,8 @@ export function runKey(settings: PluginSettings, rawRange: { from: unknown; to: 
 
 export function createAssessmentStore(
   dependencies: DependencyFactory = browserDependencies,
-  nowMs: () => number = Date.now
+  nowMs: () => number = Date.now,
+  saved: SavedResults = noSavedResults
 ) {
   let current: ActiveRun | undefined;
 
@@ -90,9 +93,14 @@ export function createAssessmentStore(
       service: run.service,
       onLabelProgress: (labels) => patch(run, { labels }),
       onProgress: (progress) => patch(run, { progress }),
-      onPartial: (assessment) => patch(run, { assessment }),
+      onPartial: (assessment) => run.state.savedAtMs === undefined && patch(run, { assessment }),
     })
-      .then((assessment) => patch(run, { assessment, progress: assessment.progress, message: undefined }))
+      .then((assessment) => {
+        patch(run, { assessment, progress: assessment.progress, message: undefined, savedAtMs: undefined });
+        if (run.service === undefined && !assessment.partial && !run.controller.signal.aborted) {
+          void saved.save(run.key, assessment);
+        }
+      })
       .catch((error: unknown) => patch(run, { message: messageOf(error) }));
 
   const enqueue = (run: ActiveRun, next: () => Start | undefined, settled: () => void = () => undefined) => {
@@ -143,6 +151,17 @@ export function createAssessmentStore(
       };
       current = run;
       enqueue(run, () => (deps) => assessStack(discoverStack(settings), window, settings, deps));
+      if (service === undefined) {
+        void saved.load(key).then((found) => {
+          if (found && run.state.assessment === undefined) {
+            patch(run, {
+              assessment: found.assessment,
+              progress: found.assessment.progress,
+              savedAtMs: found.savedAtMs,
+            });
+          }
+        });
+      }
       return run;
     },
 

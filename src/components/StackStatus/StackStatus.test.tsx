@@ -2,7 +2,14 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AssessmentResult } from '../../api/types';
 import { DatasourceProgress } from '../../assessment/stackAssessment';
-import { EmptyTelemetry, FeatureLimits, LoadingProgress, StackStatus, hasOTelServices } from './StackStatus';
+import {
+  EmptyTelemetry,
+  FeatureLimits,
+  LoadingProgress,
+  SavedScanNotice,
+  StackStatus,
+  hasOTelServices,
+} from './StackStatus';
 import { testIds } from '../testIds';
 
 const ref = (uid: string, name: string, type: string) => ({ uid, name, type });
@@ -121,6 +128,27 @@ describe('FeatureLimits', () => {
 
   it('renders nothing without limits', () => {
     const { container } = render(<FeatureLimits progress={[prom]} result={result({})} />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe('SavedScanNotice', () => {
+  it('says the saved scan is showing while a fresh one runs', () => {
+    render(<SavedScanNotice savedAtMs={Date.now() - 2 * 60 * 60 * 1000} />);
+
+    expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent('Showing your saved scan from 2 hours ago');
+    expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent('A fresh scan is running');
+  });
+
+  it('names a failed fresh scan', () => {
+    render(<SavedScanNotice savedAtMs={Date.now()} refreshError="boom" />);
+
+    expect(screen.getByTestId(testIds.status.saved)).toHaveTextContent('The fresh scan failed: boom');
+  });
+
+  it('renders nothing without a saved scan', () => {
+    const { container } = render(<SavedScanNotice />);
 
     expect(container).toBeEmptyDOMElement();
   });

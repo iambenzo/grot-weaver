@@ -8,6 +8,7 @@ import { useStackAssessment } from '../../assessment/useStackAssessment';
 import {
   EmptyTelemetry,
   LoadingProgress,
+  SavedScanNotice,
   StackStatus,
   hasOTelServices,
 } from '../../components/StackStatus/StackStatus';
@@ -56,7 +57,10 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const range = { from: String(timeRange.raw.from), to: String(timeRange.raw.to) };
   const groups = groupViolations(result.findings);
   const status = (
-    <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
+    <>
+      <SavedScanNotice savedAtMs={load.savedAtMs} refreshError={load.refreshError} />
+      <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
+    </>
   );
 
   if (!assessment.partial && !hasOTelServices(result)) {

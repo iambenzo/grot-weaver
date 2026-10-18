@@ -220,4 +220,62 @@ describe('assessment store', () => {
 
     expect(runs[0].deps.service).toBe('checkout');
   });
+
+  describe('saved results', () => {
+    const savedAssessment = { progress: [], partial: false, result: { tag: 'saved' } } as unknown as StackAssessment;
+    const fakeSaved = (found?: StackAssessment) => ({
+      load: jest.fn(async () => (found ? { assessment: found, savedAtMs: 123 } : undefined)),
+      save: jest.fn(async () => undefined),
+    });
+    const storeWith = (saved: ReturnType<typeof fakeSaved>) =>
+      createAssessmentStore(
+        () => ({}) as ReturnType<DependencyFactory>,
+        () => 0,
+        saved
+      );
+
+    it('shows the saved result at once, keeps it through partial results, then swaps in and saves the fresh one', async () => {
+      const runs = controlledRuns(assessStack as jest.Mock);
+      const saved = fakeSaved(savedAssessment);
+      const store = storeWith(saved);
+      const run = store.acquire('a', window, settings);
+      await settle();
+
+      expect(run.state).toMatchObject({ assessment: savedAssessment, savedAtMs: 123 });
+      runs[0].deps.onPartial?.({ progress: [], partial: true } as unknown as StackAssessment);
+      expect(run.state.assessment).toBe(savedAssessment);
+
+      const fresh = { progress: [], partial: false } as unknown as StackAssessment;
+      runs[0].resolve(fresh);
+      await settle();
+
+      expect(run.state.assessment).toBe(fresh);
+      expect(run.state.savedAtMs).toBeUndefined();
+      expect(saved.save).toHaveBeenCalledWith('a', fresh);
+    });
+
+    it('keeps the saved result and the error when the fresh scan fails', async () => {
+      (assessStack as jest.Mock).mockImplementation(() => Promise.reject(new Error('boom')));
+      const store = storeWith(fakeSaved(savedAssessment));
+      const run = store.acquire('a', window, settings);
+      await settle();
+
+      expect(run.state).toMatchObject({ assessment: savedAssessment, savedAtMs: 123, message: 'boom' });
+    });
+
+    it('does not save partial results, and never loads or saves for a single-service quick scan', async () => {
+      const runs = controlledRuns(assessStack as jest.Mock);
+      const saved = fakeSaved(savedAssessment);
+      const store = storeWith(saved);
+      store.acquire('quick', window, settings, 'checkout');
+      store.acquire('partial', window, settings);
+      runs[0].resolve(assessment);
+      runs[1].resolve({ progress: [], partial: true } as unknown as StackAssessment);
+      await settle();
+
+      expect(saved.load).toHaveBeenCalledTimes(1);
+      expect(saved.load).toHaveBeenCalledWith('partial');
+      expect(saved.save).not.toHaveBeenCalled();
+    });
+  });
 });

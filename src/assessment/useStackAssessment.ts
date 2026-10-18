@@ -4,7 +4,8 @@ import { LabelProgress } from '../inventory/prometheus';
 import { PluginSettings } from '../settings/settings';
 import { QueryWindow, toQueryWindow } from '../window/window';
 import { DatasourceProgress, StackAssessment } from './stackAssessment';
-import { AssessmentStore, Run, RunState, createAssessmentStore, runKey } from './assessmentStore';
+import { AssessmentStore, Run, RunState, browserDependencies, createAssessmentStore, runKey } from './assessmentStore';
+import { browserSavedResults } from './savedResults';
 
 export { messageOf } from './assessmentStore';
 
@@ -23,9 +24,11 @@ export type Load =
       progress: DatasourceProgress[];
       labels?: LabelProgress;
       retry: (uid: string) => void;
+      savedAtMs?: number;
+      refreshError?: string;
     };
 
-const sharedStore = createAssessmentStore();
+const sharedStore = createAssessmentStore(browserDependencies, Date.now, browserSavedResults());
 const quickStore = createAssessmentStore();
 
 export interface AssessmentOptions {
@@ -64,6 +67,8 @@ export function useStackAssessment(
       progress: state.progress,
       labels: state.labels,
       retry: (uid) => store.retry(run, uid),
+      savedAtMs: state.savedAtMs,
+      refreshError: state.savedAtMs !== undefined ? state.message : undefined,
     };
   }
   if (state.message !== undefined) {

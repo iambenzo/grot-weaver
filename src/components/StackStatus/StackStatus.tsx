@@ -1,4 +1,5 @@
 import React from 'react';
+import { dateTimeFormatTimeAgo } from '@grafana/data';
 import { Alert, Badge, BadgeColor, Button, LinkButton, LoadingPlaceholder, Stack, Text } from '@grafana/ui';
 import { AssessmentResult, Signal } from '../../api/types';
 import { DatasourceProgress, DatasourceState, mergeOwners } from '../../assessment/stackAssessment';
@@ -117,6 +118,25 @@ function DatasourceErrors({ entry, onRetry }: { entry: DatasourceProgress; onRet
           </Button>
         </div>
       </Stack>
+    </Alert>
+  );
+}
+
+export function SavedScanNotice({ savedAtMs, refreshError }: { savedAtMs?: number; refreshError?: string }) {
+  if (savedAtMs === undefined) {
+    return null;
+  }
+  const age = dateTimeFormatTimeAgo(savedAtMs);
+  if (refreshError) {
+    return (
+      <Alert severity="warning" title={`Showing your saved scan from ${age}`} data-testid={testIds.status.saved}>
+        The fresh scan failed: {refreshError}
+      </Alert>
+    );
+  }
+  return (
+    <Alert severity="info" title={`Showing your saved scan from ${age}`} data-testid={testIds.status.saved}>
+      A fresh scan is running and will replace it when it finishes.
     </Alert>
   );
 }

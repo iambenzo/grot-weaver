@@ -43,6 +43,7 @@ import {
   EmptyTelemetry,
   FeatureLimits,
   LoadingProgress,
+  SavedScanNotice,
   StackStatus,
   hasOTelServices,
 } from '../../components/StackStatus/StackStatus';
@@ -127,6 +128,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
           ranking, can change when the full scan of the stack finishes, and this page then updates.
         </Alert>
       )}
+      <SavedScanNotice savedAtMs={load.savedAtMs} refreshError={load.refreshError} />
       <StackStatus progress={load.progress} partial={assessment.partial} labels={load.labels} onRetry={load.retry} />
       <FeatureLimits progress={load.progress} result={assessment.result} />
       {!assessment.partial && !hasOTelServices(assessment.result) && <EmptyTelemetry result={assessment.result} />}

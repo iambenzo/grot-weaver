@@ -23,6 +23,7 @@ export const testIds = {
     datasourceErrors: 'data-testid status-datasource-errors',
     limits: 'data-testid status-limits',
     empty: 'data-testid status-empty',
+    saved: 'data-testid status-saved',
   },
   fix: {
     tabs: 'data-testid fix-tabs',
