@@ -16,7 +16,7 @@ import {
   LoadingProgress,
   SavedScanNotice,
   StackStatus,
-  hasOTelServices,
+  emptyKind,
 } from '../../components/StackStatus/StackStatus';
 import { PluginSettings, isUpstreamCheckEnabled, isVolumeWeighted } from '../../settings/settings';
 import { UpstreamBanner } from '../../upstream/UpstreamBanner';
@@ -76,14 +76,17 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
     </>
   );
 
-  if (!assessment.partial && !hasOTelServices(result)) {
+  const empty = emptyKind(load.progress, result, assessment.partial);
+  if (empty) {
     return (
       <Stack direction="column" gap={3}>
         <OverviewHeader assessment={assessment} windowLabel={`${range.from} to ${range.to}`} settings={settings} />
         {status}
-        <EmptyTelemetry result={result} />
-        <WidenWindowPrompt window={load.window} observedItems={0} timeRange={timeRangeObject} />
-        <OwnerSections result={result} />
+        <EmptyTelemetry kind={empty} result={result} />
+        {empty !== 'no-datasources' && (
+          <WidenWindowPrompt window={load.window} observedItems={0} timeRange={timeRangeObject} />
+        )}
+        {empty === 'no-otel-services' && <OwnerSections result={result} />}
       </Stack>
     );
   }

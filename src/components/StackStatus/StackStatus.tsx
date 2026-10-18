@@ -1,6 +1,7 @@
 import React from 'react';
 import { dateTimeFormatTimeAgo } from '@grafana/data';
-import { Alert, Badge, BadgeColor, Button, LinkButton, LoadingPlaceholder, Stack, Text } from '@grafana/ui';
+import { Alert, Badge, BadgeColor, Button, EmptyState, LinkButton, LoadingPlaceholder, Stack, Text } from '@grafana/ui';
+import pluginJson from '../../plugin.json';
 import { AssessmentResult, Signal } from '../../api/types';
 import { DatasourceProgress, DatasourceState, mergeOwners } from '../../assessment/stackAssessment';
 import { LabelProgress } from '../../inventory/prometheus';
@@ -9,6 +10,8 @@ import { testIds } from '../testIds';
 
 const OTEL_LANGUAGES_DOCS = 'https://opentelemetry.io/docs/languages/';
 const GRAFANA_INSTRUMENT_DOCS = 'https://grafana.com/docs/opentelemetry/instrument/';
+const NEW_DATASOURCE_URL = '/connections/datasources/new';
+const APP_SETTINGS_URL = `/plugins/${pluginJson.id}`;
 const MAX_ERRORS_SHOWN = 5;
 
 const SIGNAL_NAMES: Record<Signal, string> = { metrics: 'metrics', traces: 'traces', logs: 'logs' };
@@ -55,11 +58,7 @@ interface StackStatusProps {
 
 export function StackStatus({ progress, partial, labels, onRetry, refreshing = false }: StackStatusProps) {
   if (progress.length === 0) {
-    return (
-      <Alert severity="info" title="No metrics, trace or log datasources found">
-        Add a Prometheus, Tempo or Loki datasource, or add its type in the app settings.
-      </Alert>
-    );
+    return null;
   }
   const notVisible = progress.filter((entry) => entry.state === 'not_visible');
   const failed = progress.filter((entry) => entry.state === 'errors');
@@ -201,39 +200,85 @@ export function hasOTelServices(result: AssessmentResult): boolean {
   return mergeOwners(result).some((identity) => identity.owner.kind === 'service');
 }
 
-export function EmptyTelemetry({ result }: { result: AssessmentResult }) {
+export type EmptyKind = 'no-datasources' | 'no-telemetry' | 'no-otel-services';
+
+export function emptyKind(
+  progress: DatasourceProgress[],
+  result: AssessmentResult,
+  partial: boolean
+): EmptyKind | undefined {
+  if (progress.length === 0) {
+    return 'no-datasources';
+  }
+  if (partial || hasOTelServices(result)) {
+    return undefined;
+  }
+  return mergeOwners(result).length === 0 ? 'no-telemetry' : 'no-otel-services';
+}
+
+export function EmptyTelemetry({ kind, result }: { kind: EmptyKind; result: AssessmentResult }) {
+  return (
+    <div data-testid={testIds.status.empty}>
+      {kind === 'no-datasources' && <NoDatasources />}
+      {kind === 'no-telemetry' && <NoTelemetry />}
+      {kind === 'no-otel-services' && <NoOTelServices result={result} />}
+    </div>
+  );
+}
+
+function NoDatasources() {
+  return (
+    <EmptyState
+      variant="call-to-action"
+      message="No metrics, trace or log datasources found"
+      button={
+        <Stack gap={1} justifyContent="center" wrap="wrap">
+          <LinkButton href={NEW_DATASOURCE_URL} icon="plus" size="lg">
+            Add a datasource
+          </LinkButton>
+          <LinkButton href={APP_SETTINGS_URL} icon="cog" size="lg" variant="secondary">
+            App settings
+          </LinkButton>
+        </Stack>
+      }
+    >
+      This app scores the telemetry in your Prometheus, Tempo and Loki datasources. If yours use another plugin type,
+      add that type in the app settings.
+    </EmptyState>
+  );
+}
+
+function NoTelemetry() {
+  return (
+    <EmptyState variant="not-found" message="No telemetry found in this window">
+      Your datasources returned no metrics, spans or logs for this time range. Widen the time range, or check that your
+      services send telemetry to these datasources.
+    </EmptyState>
+  );
+}
+
+function NoOTelServices({ result }: { result: AssessmentResult }) {
   const owners = mergeOwners(result);
   const count = (kind: 'source' | 'unattributed') => owners.filter((identity) => identity.owner.kind === kind).length;
   return (
-    <Alert severity="info" title="No OpenTelemetry services found in this window" data-testid={testIds.status.empty}>
-      <Stack direction="column" gap={1}>
-        <Text>
-          Telemetry exists but none of it carries an OpenTelemetry service identity: {count('source')} sources (non-OTel
-          or collector-scraped) and {count('unattributed')} unattributed owners (no service.name).
-        </Text>
-        <Text>To score services, instrument them with an OpenTelemetry SDK.</Text>
-        <Stack gap={1}>
-          <LinkButton
-            href={OTEL_LANGUAGES_DOCS}
-            target="_blank"
-            variant="secondary"
-            fill="outline"
-            icon="external-link-alt"
-          >
+    <EmptyState
+      variant="call-to-action"
+      message="No OpenTelemetry services found in this window"
+      button={
+        <Stack gap={1} justifyContent="center" wrap="wrap">
+          <LinkButton href={OTEL_LANGUAGES_DOCS} target="_blank" variant="secondary" icon="external-link-alt">
             OpenTelemetry language guides
           </LinkButton>
-          <LinkButton
-            href={GRAFANA_INSTRUMENT_DOCS}
-            target="_blank"
-            variant="secondary"
-            fill="outline"
-            icon="external-link-alt"
-          >
+          <LinkButton href={GRAFANA_INSTRUMENT_DOCS} target="_blank" variant="secondary" icon="external-link-alt">
             Grafana OpenTelemetry instrumentation
           </LinkButton>
         </Stack>
-      </Stack>
-    </Alert>
+      }
+    >
+      Telemetry exists but none of it carries an OpenTelemetry service identity: {count('source')} sources (non-OTel or
+      collector-scraped) and {count('unattributed')} unattributed owners (no service.name). To score services,
+      instrument them with an OpenTelemetry SDK.
+    </EmptyState>
   );
 }
 

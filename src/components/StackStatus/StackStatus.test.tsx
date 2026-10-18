@@ -4,6 +4,7 @@ import { AssessmentResult } from '../../api/types';
 import { DatasourceProgress } from '../../assessment/stackAssessment';
 import {
   EmptyTelemetry,
+  emptyKind,
   FeatureLimits,
   LoadingProgress,
   SavedScanNotice,
@@ -74,10 +75,10 @@ describe('StackStatus', () => {
     expect(onRetry).toHaveBeenCalledWith('tempo');
   });
 
-  it('says when no datasources were found', () => {
-    render(<StackStatus progress={[]} partial={false} onRetry={jest.fn()} />);
+  it('leaves the no-datasources message to the empty state', () => {
+    const { container } = render(<StackStatus progress={[]} partial={false} onRetry={jest.fn()} />);
 
-    expect(screen.getByText('No metrics, trace or log datasources found')).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 });
 
@@ -165,16 +166,45 @@ describe('SavedScanNotice', () => {
   });
 });
 
-describe('EmptyTelemetry', () => {
+describe('emptyKind', () => {
+  const sources = result({
+    metric_attributions: [{ owner: { kind: 'source', name: 'node' } }, { owner: { kind: 'source', name: 'mysql' } }],
+    attributions: [{ owner: { kind: 'unattributed', name: '' } }],
+  } as unknown as Partial<AssessmentResult>);
+
+  it('tells no datasources, no telemetry and no OpenTelemetry services apart', () => {
+    expect(emptyKind([], result({}), false)).toBe('no-datasources');
+    expect(emptyKind([prom], result({}), false)).toBe('no-telemetry');
+    expect(emptyKind([prom], sources, false)).toBe('no-otel-services');
+    expect(emptyKind([prom], sources, true)).toBeUndefined();
+  });
+
+  it('never claims telemetry exists when there are no datasources', () => {
+    render(<EmptyTelemetry kind={emptyKind([], result({}), false)!} result={result({})} />);
+
+    expect(screen.getByText('No metrics, trace or log datasources found')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /add a datasource/i })).toHaveAttribute(
+      'href',
+      '/connections/datasources/new'
+    );
+    expect(screen.getByRole('link', { name: /app settings/i })).toHaveAttribute(
+      'href',
+      '/plugins/iambenzo-semconvcompliance-app'
+    );
+    expect(screen.queryByText(/Telemetry exists/)).not.toBeInTheDocument();
+  });
+
+  it('says when the datasources returned nothing', () => {
+    render(<EmptyTelemetry kind="no-telemetry" result={result({})} />);
+
+    expect(screen.getByText('No telemetry found in this window')).toBeInTheDocument();
+    expect(screen.queryByText(/Telemetry exists/)).not.toBeInTheDocument();
+  });
+
   it('links to instrumentation docs and counts sources and unattributed owners', () => {
-    const empty = result({
-      metric_attributions: [{ owner: { kind: 'source', name: 'node' } }, { owner: { kind: 'source', name: 'mysql' } }],
-      attributions: [{ owner: { kind: 'unattributed', name: '' } }],
-    } as unknown as Partial<AssessmentResult>);
+    render(<EmptyTelemetry kind="no-otel-services" result={sources} />);
 
-    render(<EmptyTelemetry result={empty} />);
-
-    expect(hasOTelServices(empty)).toBe(false);
+    expect(hasOTelServices(sources)).toBe(false);
     expect(screen.getByTestId(testIds.status.empty)).toHaveTextContent('2 sources');
     expect(screen.getByTestId(testIds.status.empty)).toHaveTextContent('1 unattributed owners');
     expect(screen.getByRole('link', { name: /opentelemetry language guides/i })).toHaveAttribute(

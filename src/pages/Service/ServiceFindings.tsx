@@ -22,7 +22,11 @@ import {
   Text,
   useStyles2,
   ClipboardButton,
+  EmptyState,
+  LinkButton,
 } from '@grafana/ui';
+import { prefixRoute } from '../../utils/utils.routing';
+import { ROUTES } from '../../constants';
 import { proxyGet } from '../../datasources/proxy';
 import { createLimiter } from '../../datasources/limiter';
 import { Finding, Owner, Signal } from '../../api/types';
@@ -45,7 +49,7 @@ import {
   LoadingProgress,
   SavedScanNotice,
   StackStatus,
-  hasOTelServices,
+  emptyKind,
 } from '../../components/StackStatus/StackStatus';
 import { HopCandidates } from './HopCandidates';
 import { ResourceAttributes } from './ResourceAttributes';
@@ -94,7 +98,6 @@ export class ServiceFindings extends SceneObjectBase<ServiceFindingsState> {
 }
 
 function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>) {
-  const styles = useStyles2(getStyles);
   const { service, namespace, signal, settings } = model.useState();
   const timeRangeObject = sceneGraph.getTimeRange(model) as SceneTimeRange;
   const { value: timeRange } = timeRangeObject.useState();
@@ -112,6 +115,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   }
 
   const { assessment } = load;
+  const empty = emptyKind(load.progress, assessment.result, assessment.partial);
   const identities = mergeOwners(assessment.result).filter(
     (identity) => identity.owner.kind === 'service' || identity.owner.kind === 'unattributed'
   );
@@ -137,28 +141,17 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
         refreshing={load.savedAtMs !== undefined}
       />
       <FeatureLimits progress={load.progress} result={assessment.result} />
-      {!assessment.partial && !hasOTelServices(assessment.result) && <EmptyTelemetry result={assessment.result} />}
-      <WidenWindowPrompt
-        window={load.window}
-        observedItems={assessment.result.findings.length}
-        timeRange={timeRangeObject}
-      />
-      <Field
-        label="Service"
-        description={`${identities.length} services seen in this window`}
-        className={styles.picker}
-      >
-        <Combobox
-          options={identities.map(toOption)}
-          value={selected ? ownerKey(selected.owner) : null}
-          onChange={(option: ComboboxOption | null) =>
-            model.selectService(identities.find((identity) => ownerKey(identity.owner) === option?.value)?.owner)
-          }
-          placeholder="Choose a service"
-          isClearable
-          data-testid={testIds.service.picker}
+      {empty && <EmptyTelemetry kind={empty} result={assessment.result} />}
+      {empty !== 'no-datasources' && (
+        <WidenWindowPrompt
+          window={load.window}
+          observedItems={assessment.result.findings.length}
+          timeRange={timeRangeObject}
         />
-      </Field>
+      )}
+      {(empty === undefined || empty === 'no-otel-services') && (
+        <ServicePicker model={model} identities={identities} selected={selected} />
+      )}
       {selected ? (
         <SelectedService
           identity={selected}
@@ -170,7 +163,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
           range={{ from: String(timeRange.raw.from), to: String(timeRange.raw.to) }}
         />
       ) : (
-        <Text color="secondary">Choose a service to see its findings.</Text>
+        empty === undefined && <NoServiceSelected />
       )}
     </Stack>
   );
@@ -322,6 +315,53 @@ function useLibraryEvidence(
     };
   }, [findings, assessment, window, settings]);
   return loaded && loaded.key === findings ? loaded.value : NO_EVIDENCE;
+}
+
+function ServicePicker({
+  model,
+  identities,
+  selected,
+}: {
+  model: ServiceFindings;
+  identities: ServiceIdentity[];
+  selected?: ServiceIdentity;
+}) {
+  const styles = useStyles2(getStyles);
+  return (
+    <Field
+      label="Service"
+      description={`${identities.length} ${identities.length === 1 ? 'service' : 'services'} seen in this window`}
+      className={styles.picker}
+    >
+      <Combobox
+        options={identities.map(toOption)}
+        value={selected ? ownerKey(selected.owner) : null}
+        onChange={(option: ComboboxOption | null) =>
+          model.selectService(identities.find((identity) => ownerKey(identity.owner) === option?.value)?.owner)
+        }
+        placeholder="Choose a service"
+        isClearable
+        data-testid={testIds.service.picker}
+      />
+    </Field>
+  );
+}
+
+function NoServiceSelected() {
+  return (
+    <EmptyState
+      variant="call-to-action"
+      message="Choose a service to see its findings"
+      hideImage
+      button={
+        <LinkButton href={prefixRoute(ROUTES.Overview)} variant="secondary" icon="arrow-left">
+          Services on the Overview
+        </LinkButton>
+      }
+    >
+      Pick one in the list above, or open one from the services table on the Overview, worst first.
+    </EmptyState>
+  );
 }
 
 function ownerLabel(owner: Owner): string {
