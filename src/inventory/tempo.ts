@@ -10,6 +10,7 @@ import { KeysMethod, isTagFilterIgnored, sampleServiceKeys } from './traceKeys';
 import { guardStep, markUnknown } from './guard';
 import { MAX_TRACE_SERVICES, limitError } from './limits';
 import { Volumes, addVolume, volumeOf } from './volumes';
+import { limitSearchRange } from './searchRange';
 
 const SERVICE_NAME_TAG = 'resource.service.name';
 const SERVICE_NAMESPACE_TAG = 'resource.service.namespace';
@@ -37,6 +38,7 @@ export interface TempoCollection {
   errors: CollectionError[];
   volumeMethod?: VolumeMethod;
   keysMethod?: KeysMethod;
+  searchWindow?: QueryWindow;
 }
 
 interface SearchResponse {
@@ -85,7 +87,17 @@ export async function collectTempoInventory(
   sampleLimit?: number,
   service?: string
 ): Promise<TempoCollection> {
-  const context: CollectorContext = { uid, get, limit, window, errors: [], spanGroupRules, sampleLimit, service };
+  const searchRange = limitSearchRange(get);
+  const context: CollectorContext = {
+    uid,
+    get: searchRange.get,
+    limit,
+    window,
+    errors: [],
+    spanGroupRules,
+    sampleLimit,
+    service,
+  };
   const [serviceNames, filterIgnored, measured] = await Promise.all([
     guarded(context, 'service names', async () =>
       (await tagValues(context, SERVICE_NAME_TAG)).filter((name) => service === undefined || name === service)
@@ -94,7 +106,7 @@ export async function collectTempoInventory(
     measureServices(context),
   ]);
   if ((serviceNames ?? []).length > MAX_TRACE_SERVICES) {
-    return notScanned(context, serviceNames!.length);
+    return notScanned(context, serviceNames!.length, searchRange.searched());
   }
   const metricVolumes = measured?.volumes;
   const keysMethod: KeysMethod = filterIgnored ? 'sample' : 'tags';
@@ -106,7 +118,7 @@ export async function collectTempoInventory(
     )
   ).flat();
   if (discovered.length > MAX_TRACE_SERVICES) {
-    return notScanned(context, discovered.length);
+    return notScanned(context, discovered.length, searchRange.searched());
   }
   const services = await Promise.all(
     discovered.map((service) => collectService(context, service, keysMethod, measured))
@@ -128,17 +140,25 @@ export async function collectTempoInventory(
     collection.volumeMethod = !metricVolumes ? 'sample' : unmeasured.length > 0 ? 'mixed' : 'metrics';
     collection.keysMethod = keysMethod;
   }
+  const searchWindow = searchRange.searched();
+  if (searchWindow) {
+    collection.searchWindow = searchWindow;
+  }
   return collection;
 }
 
-function notScanned(context: CollectorContext, count: number): TempoCollection {
-  return {
+function notScanned(context: CollectorContext, count: number, searchWindow?: QueryWindow): TempoCollection {
+  const collection: TempoCollection = {
     datasource: { uid: context.uid, services: [] },
     errors: [
       ...context.errors,
       limitError(context.uid, 'service names', count, MAX_TRACE_SERVICES, 'this datasource was not scanned'),
     ],
   };
+  if (searchWindow) {
+    collection.searchWindow = searchWindow;
+  }
+  return collection;
 }
 
 function servicesByNamespace(name: string, namespaces: string[] | undefined): DiscoveredService[] {

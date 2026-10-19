@@ -74,7 +74,11 @@ export function sliceWindow(window: QueryWindow, maxDurationSeconds: number): Qu
 }
 
 export function maxDurationOf(error: unknown): number | undefined {
-  const match = MAX_DURATION_PATTERN.exec(responseText(error));
+  return durationMatching(error, MAX_DURATION_PATTERN);
+}
+
+export function durationMatching(error: unknown, pattern: RegExp): number | undefined {
+  const match = pattern.exec(responseText(error));
   if (!match) {
     return undefined;
   }

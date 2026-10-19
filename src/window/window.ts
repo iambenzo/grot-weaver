@@ -23,7 +23,7 @@ export function createTimePicker(): SceneTimePicker {
 export function toQueryWindow(range: TimeRange): QueryWindow {
   return {
     startSeconds: Math.floor(range.from.valueOf() / 1000),
-    endSeconds: Math.ceil(range.to.valueOf() / 1000),
+    endSeconds: Math.floor(range.to.valueOf() / 1000),
   };
 }
 

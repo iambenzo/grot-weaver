@@ -65,6 +65,28 @@ function fakeTempo(failPaths: string[] = []): { get: ProxyGet; calls: Call[] } {
 }
 
 describe('collectTempoInventory', () => {
+  it('searches only the latest seven days of a longer window, and says so', async () => {
+    const { get, calls } = fakeTempo();
+    const day = 24 * 3600;
+    const month = { startSeconds: 1_000_000, endSeconds: 1_000_000 + 30 * day };
+
+    const collection = await collectTempoInventory('tempo', get, createLimiter(2), month);
+
+    const searches = calls.filter((call) => call.path.startsWith('/api/search') || call.path.startsWith('/api/v2/'));
+    expect(searches.length).toBeGreaterThan(0);
+    expect(searches.every((call) => Number(call.params.end) - Number(call.params.start) <= 7 * day)).toBe(true);
+    expect(collection.searchWindow).toEqual({ startSeconds: month.endSeconds - 7 * day, endSeconds: month.endSeconds });
+    expect(calls.some((call) => call.path === '/api/metrics/query_range' && call.params.start === '1000000')).toBe(
+      true
+    );
+  });
+
+  it('reports no search window when the window fits', async () => {
+    const { get } = fakeTempo();
+
+    expect((await collectTempoInventory('tempo', get, createLimiter(2), window)).searchWindow).toBeUndefined();
+  });
+
   it('collects every service from the window, including the one without a name', async () => {
     const { get, calls } = fakeTempo();
 
@@ -459,6 +481,19 @@ describe('scorer limits', () => {
     expect(errors.map((error) => error.message)).toContain(
       `${MAX_TRACE_SERVICES + 1} found, over the ${MAX_TRACE_SERVICES} the scorer accepts, so this datasource was not scanned`
     );
+  });
+
+  it('still reports a shortened search when it skips the datasource', async () => {
+    const day = 24 * 3600;
+    const many = (async () => ({
+      tagValues: Array.from({ length: MAX_TRACE_SERVICES + 1 }, (_, index) => ({ value: `svc-${index}` })),
+    })) as unknown as ProxyGet;
+    const month = { startSeconds: 0, endSeconds: 30 * day };
+
+    const collection = await collectTempoInventory('tempo', many, createLimiter(2), month);
+
+    expect(collection.datasource.services).toEqual([]);
+    expect(collection.searchWindow).toEqual({ startSeconds: 23 * day, endSeconds: 30 * day });
   });
 });
 

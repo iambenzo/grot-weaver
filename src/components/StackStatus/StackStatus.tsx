@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { css } from '@emotion/css';
-import { GrafanaTheme2, dateTimeFormatTimeAgo } from '@grafana/data';
+import { GrafanaTheme2, dateTimeFormat, dateTimeFormatTimeAgo } from '@grafana/data';
 import {
   Alert,
   Badge,
@@ -280,6 +280,17 @@ export function scanLimits(progress: DatasourceProgress[], result: AssessmentRes
           ]
         : []
     ),
+    ...progress.flatMap((entry) =>
+      entry.searchWindow
+        ? [
+            limit(
+              entry,
+              `traces searched over the last ${spanText(entry.searchWindow)} only`,
+              `${entry.ref.name}: Tempo searches at most ${spanText(entry.searchWindow)} at a time, so service names, attribute keys and samples come from ${timeText(entry.searchWindow.startSeconds)} to ${timeText(entry.searchWindow.endSeconds)} only`
+            ),
+          ]
+        : []
+    ),
     ...progress
       .filter((entry) => entry.keysMethod === 'sample')
       .map((entry) =>
@@ -299,6 +310,23 @@ export function scanLimits(progress: DatasourceProgress[], result: AssessmentRes
         )
       ),
   ];
+}
+
+function spanText(window: { startSeconds: number; endSeconds: number }): string {
+  const seconds = window.endSeconds - window.startSeconds;
+  const DAY = 24 * 3600;
+  if (seconds % DAY === 0) {
+    return seconds === DAY ? 'day' : `${seconds / DAY} days`;
+  }
+  if (seconds % 3600 === 0) {
+    return seconds === 3600 ? 'hour' : `${seconds / 3600} hours`;
+  }
+  const minutes = Math.max(Math.floor(seconds / 60), 1);
+  return minutes === 1 ? 'minute' : `${minutes} minutes`;
+}
+
+function timeText(seconds: number): string {
+  return dateTimeFormat(seconds * 1000, { format: 'YYYY-MM-DD HH:mm' });
 }
 
 export function incompleteReasons(progress: DatasourceProgress[], limits: ScanLimit[], signal: Signal): string[] {

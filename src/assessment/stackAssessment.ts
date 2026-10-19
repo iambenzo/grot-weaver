@@ -42,6 +42,7 @@ export interface DatasourceProgress {
   keysMethod?: KeysMethod;
   labelChecks?: LabelChecks;
   unmeasuredVolumes?: number;
+  searchWindow?: QueryWindow;
 }
 
 export interface Collection {
@@ -55,6 +56,7 @@ export interface Collection {
   keysMethod?: KeysMethod;
   labelChecks?: LabelChecks;
   unmeasuredVolumes?: number;
+  searchWindow?: QueryWindow;
 }
 
 export interface StackAssessment {
@@ -190,6 +192,7 @@ async function collect(
       volumeMethod: collected.volumeMethod,
       keysMethod: collected.keysMethod,
       unmeasuredVolumes: unmeasured(collected.datasource.services),
+      searchWindow: collected.searchWindow,
     };
   }
   if (signal === 'metrics') {
@@ -276,6 +279,7 @@ function progressOf(datasources: DatasourcesBySignal, collections: Collection[])
       keysMethod: collection.keysMethod,
       labelChecks: collection.labelChecks,
       unmeasuredVolumes: collection.unmeasuredVolumes,
+      searchWindow: collection.searchWindow,
     };
   });
 }

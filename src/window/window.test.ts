@@ -41,7 +41,14 @@ describe('window presets', () => {
 describe('backend window parameters', () => {
   it('converts a time range to whole seconds', () => {
     const range = { from: dateTime(1_000_500), to: dateTime(2_000_200), raw: { from: 'x', to: 'y' } };
-    expect(toQueryWindow(range)).toEqual({ startSeconds: 1000, endSeconds: 2001 });
+    expect(toQueryWindow(range)).toEqual({ startSeconds: 1000, endSeconds: 2000 });
+  });
+
+  it('never makes a range longer than the one selected', () => {
+    const sevenDaysMs = 7 * 24 * 3600 * 1000;
+    const range = { from: dateTime(1_000_500), to: dateTime(1_000_500 + sevenDaysMs), raw: { from: 'x', to: 'y' } };
+    const { startSeconds, endSeconds } = toQueryWindow(range);
+    expect(endSeconds - startSeconds).toBe(7 * 24 * 3600);
   });
 
   it('uses seconds for Prometheus and Tempo', () => {

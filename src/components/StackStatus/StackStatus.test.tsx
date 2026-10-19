@@ -183,6 +183,32 @@ describe('incompleteReasons', () => {
     expect(incompleteReasons(progress, scanLimits(progress, result({})), 'metrics')).toEqual([]);
   });
 
+  it('names a shortened Tempo search as a limit on traces', () => {
+    const day = 24 * 3600;
+    const shortened = {
+      ...tempo,
+      state: 'ok' as const,
+      searchWindow: { startSeconds: 1_791_737_188, endSeconds: 1_791_737_188 + 7 * day },
+    };
+
+    const limits = scanLimits([shortened], result({}));
+
+    expect(incompleteReasons([shortened], limits, 'traces')).toEqual(['traces searched over the last 7 days only']);
+    expect(limits[0].detail).toMatch(
+      /^Tempo: Tempo searches at most 7 days at a time, so service names, attribute keys and samples come from \d{4}-\d{2}-\d{2} \d{2}:\d{2} to \d{4}-\d{2}-\d{2} \d{2}:\d{2} only$/
+    );
+  });
+
+  it.each([
+    [90 * 60, 'traces searched over the last 90 minutes only'],
+    [3600, 'traces searched over the last hour only'],
+    [36 * 3600, 'traces searched over the last 36 hours only'],
+  ])('names a %p second search window exactly', (seconds, reason) => {
+    const shortened = { ...tempo, state: 'ok' as const, searchWindow: { startSeconds: 0, endSeconds: seconds } };
+
+    expect(incompleteReasons([shortened], scanLimits([shortened], result({})), 'traces')).toEqual([reason]);
+  });
+
   it('renders a note only when there is a reason', () => {
     const { container } = render(<IncompleteNote reasons={[]} />);
     expect(container).toBeEmptyDOMElement();

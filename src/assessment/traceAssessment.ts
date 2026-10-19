@@ -10,6 +10,7 @@ import {
 } from '../inventory/traceLibraries';
 import { CollectionError, TraceDatasource } from '../inventory/types';
 import { QueryWindow } from '../window/window';
+import { limitSearchRange } from '../inventory/searchRange';
 import { ScoreInventory } from '../api/score';
 import { namespaceScope } from './explore';
 import { FetchSpanGroupRules } from '../api/catalogue';
@@ -73,7 +74,13 @@ export async function lookupFindingLibraries(
 ): Promise<Map<string, LibraryEvidence>> {
   const evidence = new Map<string, LibraryEvidence>();
   const metricsByDatasource = new Map<string, Promise<boolean>>();
-  const contextFor = (uid: string): LookupContext => ({ uid, get: deps.get, limit: deps.limit, window });
+  const searchGets = new Map<string, LookupContext['get']>();
+  const contextFor = (uid: string): LookupContext => {
+    if (!searchGets.has(uid)) {
+      searchGets.set(uid, limitSearchRange(deps.get).get);
+    }
+    return { uid, get: searchGets.get(uid)!, limit: deps.limit, window };
+  };
 
   await Promise.all(
     findings.filter(isFlaggedTraceKey).map(async (finding) => {
