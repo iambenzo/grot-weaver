@@ -1,4 +1,7 @@
 import { config } from '@grafana/runtime';
+import { AssessmentResult } from '../api/types';
+import { scoreResponseOf, withLists } from '../api/score';
+import { canCompress, gunzipText, gzipBlob } from '../storage/compression';
 import { StackAssessment } from './stackAssessment';
 
 export const MAX_SAVED_RESULTS = 5;
@@ -19,9 +22,12 @@ export interface SavedResults {
   save(key: string, assessment: StackAssessment): Promise<void>;
 }
 
-interface Entry extends SavedResult {
+interface Entry {
   key: string;
   viewer: string;
+  savedAtMs: number;
+  assessment: Omit<StackAssessment, 'result'> & { result?: AssessmentResult };
+  compressedResult?: ArrayBuffer;
 }
 
 export interface Viewer {
@@ -63,7 +69,13 @@ export function browserSavedResults(
         if (!entry || entry.viewer !== id || nowMs() - entry.savedAtMs > MAX_SAVED_AGE_MS) {
           return undefined;
         }
-        return { assessment: entry.assessment, savedAtMs: entry.savedAtMs };
+        if (entry.compressedResult && !canCompress()) {
+          return undefined;
+        }
+        const result = entry.compressedResult
+          ? withLists(JSON.parse(await gunzipText(entry.compressedResult)))
+          : entry.assessment.result;
+        return result ? { assessment: { ...entry.assessment, result }, savedAtMs: entry.savedAtMs } : undefined;
       } catch {
         return undefined;
       }
@@ -74,7 +86,12 @@ export function browserSavedResults(
         return;
       }
       try {
-        const entry: Entry = { key: `${id}|${key}`, viewer: id, assessment, savedAtMs: nowMs() };
+        const response = canCompress() ? scoreResponseOf(assessment.result) : undefined;
+        const { result, ...withoutResult } = assessment;
+        const stored = { key: `${id}|${key}`, viewer: id, savedAtMs: nowMs() };
+        const entry: Entry = response
+          ? { ...stored, assessment: withoutResult, compressedResult: await gzipBlob(response) }
+          : { ...stored, assessment: { ...withoutResult, result } };
         await withStore(database, 'readwrite', (store) => store.put(entry));
         await prune(database, nowMs());
       } catch {

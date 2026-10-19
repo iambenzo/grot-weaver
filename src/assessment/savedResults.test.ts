@@ -1,9 +1,15 @@
 import { IDBFactory, IDBObjectStore } from 'fake-indexeddb';
 import { MAX_SAVED_AGE_MS, MAX_SAVED_RESULTS, browserSavedResults, noSavedResults, viewerId } from './savedResults';
 import { StackAssessment } from './stackAssessment';
+import { AssessmentResult } from '../api/types';
+import { rememberScoreResponse, withLists } from '../api/score';
+import { Blob as NodeBlob } from 'buffer';
+import { CompressionStream, DecompressionStream } from 'stream/web';
+import { TextDecoder as NodeTextDecoder } from 'util';
 import { deserialize, serialize } from 'v8';
 
 globalThis.structuredClone ??= (value) => deserialize(serialize(value));
+Object.assign(globalThis, { Blob: NodeBlob, CompressionStream, DecompressionStream, TextDecoder: NodeTextDecoder });
 
 describe('viewerId', () => {
   it('identifies a signed-in viewer by org and user', () => {
@@ -54,7 +60,8 @@ describe('browserSavedResults', () => {
 
 describe('browserSavedResults with IndexedDB', () => {
   const viewer = () => ({ isSignedIn: true, orgId: 1, uid: 'u1' });
-  const assessment = (marker: string) => ({ marker }) as unknown as StackAssessment;
+  const assessment = (marker: string) =>
+    ({ marker, result: { semconv_version: marker } }) as unknown as StackAssessment;
 
   it('keeps the newest saved results and drops old ones without reading every saved scan', async () => {
     const database = new IDBFactory();
@@ -88,6 +95,50 @@ describe('browserSavedResults with IndexedDB', () => {
 
     expect(await saved.load('old')).toBeUndefined();
     expect((await saved.load('fresh'))?.assessment).toEqual(assessment('fresh'));
+  });
+
+  it('stores the score response compressed and restores the same result from it', async () => {
+    const database = new IDBFactory();
+    const saved = browserSavedResults(viewer, () => 1_000_000, database);
+    const result = { semconv_version: 'v1.44.0', findings: [{ observed: 'http.method' }], owners: [] };
+    const scanned = {
+      ...assessment('scanned'),
+      result: rememberScoreResponse(result as unknown as AssessmentResult, new Blob([JSON.stringify(result)])),
+    };
+
+    await saved.save('scanned', scanned);
+
+    const stored = await storedEntry(database, '1:u1|scanned');
+    expect(stored.assessment.result).toBeUndefined();
+    expect(stored.compressedResult?.byteLength).toBeGreaterThan(0);
+    const loaded = await saved.load('scanned');
+    expect(loaded?.assessment.result).toEqual(withLists(result as unknown as AssessmentResult));
+    expect((loaded?.assessment as unknown as { marker: string }).marker).toBe('scanned');
+  });
+
+  it('saves the result uncompressed, and skips unreadable compressed entries, without the stream compression APIs', async () => {
+    const database = new IDBFactory();
+    const saved = browserSavedResults(viewer, () => 1_000_000, database);
+    const result = { semconv_version: 'v1.44.0', findings: [], owners: [] } as unknown as AssessmentResult;
+    await saved.save('compressed', {
+      ...assessment('compressed'),
+      result: rememberScoreResponse(result, new Blob(['{}'])),
+    });
+    const streams = {
+      CompressionStream: globalThis.CompressionStream,
+      DecompressionStream: globalThis.DecompressionStream,
+    };
+    Object.assign(globalThis, { CompressionStream: undefined, DecompressionStream: undefined });
+    try {
+      const plain = { ...assessment('plain'), result: rememberScoreResponse({ ...result }, new Blob(['{}'])) };
+
+      await saved.save('plain', plain);
+
+      expect((await saved.load('plain'))?.assessment.result).toEqual(plain.result);
+      expect(await saved.load('compressed')).toBeUndefined();
+    } finally {
+      Object.assign(globalThis, streams);
+    }
   });
 
   it('keeps results saved before the timestamp index existed, and prunes them', async () => {
@@ -151,6 +202,25 @@ function storedKeys(database: IDBFactory): Promise<string[]> {
         resolve((keys.result as string[]).sort());
       };
       keys.onerror = () => reject(keys.error);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function storedEntry(
+  database: IDBFactory,
+  key: string
+): Promise<{ assessment: { result?: unknown }; compressedResult?: ArrayBuffer }> {
+  return new Promise((resolve, reject) => {
+    const request = database.open('semconv-compliance');
+    request.onsuccess = () => {
+      const opened = request.result;
+      const read = opened.transaction('assessments').objectStore('assessments').get(key);
+      read.onsuccess = () => {
+        opened.close();
+        resolve(read.result);
+      };
+      read.onerror = () => reject(read.error);
     };
     request.onerror = () => reject(request.error);
   });
