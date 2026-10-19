@@ -4,7 +4,7 @@ import (
 	"cmp"
 	"slices"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 type RankedFinding struct {

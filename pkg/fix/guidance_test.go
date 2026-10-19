@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 var versions = Versions{Semconv: "v1.44.0", GenAICommit: "5293eff"}

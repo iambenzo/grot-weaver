@@ -3,8 +3,8 @@ package identity
 import (
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/nameindex"
 )
 
 func Test_ResolveLogService(t *testing.T) {

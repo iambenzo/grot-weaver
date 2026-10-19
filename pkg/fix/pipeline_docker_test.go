@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 const (

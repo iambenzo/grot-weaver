@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 var signals = []finding.Signal{finding.SignalMetrics, finding.SignalTraces, finding.SignalLogs}

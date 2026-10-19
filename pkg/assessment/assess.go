@@ -4,12 +4,12 @@ import (
 	"cmp"
 	"slices"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/identity"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/product"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/identity"
+	"github.com/iambenzo/grot-weaver/pkg/nameindex"
+	"github.com/iambenzo/grot-weaver/pkg/product"
+	"github.com/iambenzo/grot-weaver/pkg/scoring"
 )
 
 type Assessor struct {

@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
 )
 
 const (

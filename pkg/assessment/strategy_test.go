@@ -7,7 +7,7 @@ import (
 
 	"github.com/prometheus/otlptranslator"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
+	"github.com/iambenzo/grot-weaver/pkg/nameindex"
 )
 
 func fixtureNames(t *testing.T, target string) []string {

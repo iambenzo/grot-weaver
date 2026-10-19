@@ -10,9 +10,9 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/assessment"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
+	"github.com/iambenzo/grot-weaver/pkg/assessment"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/nameindex"
 )
 
 var (

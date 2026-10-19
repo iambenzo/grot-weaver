@@ -5,7 +5,7 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/app"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/plugin"
+	"github.com/iambenzo/grot-weaver/pkg/plugin"
 )
 
 func main() {

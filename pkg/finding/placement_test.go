@@ -3,8 +3,8 @@ package finding
 import (
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/nameindex"
 )
 
 func Test_Classifier_Misplacement(t *testing.T) {

@@ -3,7 +3,7 @@ package scoring
 import (
 	"encoding/json"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 type Ratio struct {

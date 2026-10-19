@@ -1,6 +1,6 @@
 package product
 
-import "github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+import "github.com/iambenzo/grot-weaver/pkg/finding"
 
 const (
 	kgDocs = "https://grafana.com/docs/grafana-cloud/platform/knowledge-graph/"

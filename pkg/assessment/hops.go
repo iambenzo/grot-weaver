@@ -7,8 +7,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/identity"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/identity"
 )
 
 const (

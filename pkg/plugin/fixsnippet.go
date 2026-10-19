@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/fix"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
+	"github.com/iambenzo/grot-weaver/pkg/fix"
+	"github.com/iambenzo/grot-weaver/pkg/scoring"
 )
 
 const maxFixRequestBytes = 1 << 20

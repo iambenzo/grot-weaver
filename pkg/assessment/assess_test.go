@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/scoring"
 )
 
 type tempoTags struct {

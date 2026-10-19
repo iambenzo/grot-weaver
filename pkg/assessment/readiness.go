@@ -3,9 +3,9 @@ package assessment
 import (
 	"slices"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/product"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/product"
+	"github.com/iambenzo/grot-weaver/pkg/scoring"
 )
 
 type ProductReadiness struct {

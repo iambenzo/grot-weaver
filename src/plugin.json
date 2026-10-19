@@ -25,19 +25,19 @@
     "links": [
       {
         "name": "documentation",
-        "url": "https://github.com/iambenzo/otel-semconv-compliance/blob/main/src/README.md"
+        "url": "https://github.com/iambenzo/grot-weaver/blob/main/src/README.md"
       },
       {
         "name": "repository",
-        "url": "https://github.com/iambenzo/otel-semconv-compliance"
+        "url": "https://github.com/iambenzo/grot-weaver"
       },
       {
         "name": "license",
-        "url": "https://github.com/iambenzo/otel-semconv-compliance/blob/main/LICENSE"
+        "url": "https://github.com/iambenzo/grot-weaver/blob/main/LICENSE"
       },
       {
         "name": "raise issue",
-        "url": "https://github.com/iambenzo/otel-semconv-compliance/issues"
+        "url": "https://github.com/iambenzo/grot-weaver/issues"
       }
     ],
     "logos": {

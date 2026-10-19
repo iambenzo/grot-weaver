@@ -3,7 +3,7 @@ package identity
 import (
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
+	"github.com/iambenzo/grot-weaver/pkg/nameindex"
 )
 
 func Test_ClassifyOrigin(t *testing.T) {

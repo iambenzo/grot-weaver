@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/identity"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/identity"
 )
 
 func cloudCollectors(t *testing.T) []Collector {

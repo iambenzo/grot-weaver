@@ -3,7 +3,7 @@ package nameindex
 import (
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
 )
 
 func loadCatalogue(t *testing.T) *catalogue.Catalogue {

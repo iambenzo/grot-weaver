@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/assessment"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
+	"github.com/iambenzo/grot-weaver/pkg/assessment"
+	"github.com/iambenzo/grot-weaver/pkg/scoring"
 )
 
 const (

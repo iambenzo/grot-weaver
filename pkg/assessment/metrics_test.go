@@ -6,8 +6,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/identity"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/identity"
 )
 
 func localTargetInfo(t *testing.T) []map[string]string {

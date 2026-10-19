@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
 )
 
 func Test_summariseChanges(t *testing.T) {

@@ -1,4 +1,4 @@
-module github.com/iambenzo/otel-semconv-compliance
+module github.com/iambenzo/grot-weaver
 
 go 1.26.5
 

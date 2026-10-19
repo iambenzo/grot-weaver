@@ -12,7 +12,7 @@ import (
 
 	"go.yaml.in/yaml/v3"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
 )
 
 const (

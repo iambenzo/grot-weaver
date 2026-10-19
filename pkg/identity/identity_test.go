@@ -3,7 +3,7 @@ package identity
 import (
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 func Test_ResolveTraceService(t *testing.T) {

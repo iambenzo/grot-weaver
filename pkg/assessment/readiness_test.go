@@ -4,9 +4,9 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/product"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/product"
+	"github.com/iambenzo/grot-weaver/pkg/scoring"
 )
 
 var checkout = finding.Owner{Kind: finding.OwnerService, Namespace: "shop", Name: "checkout"}

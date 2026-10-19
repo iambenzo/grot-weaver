@@ -1,6 +1,6 @@
 package finding
 
-import "github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+import "github.com/iambenzo/grot-weaver/pkg/catalogue"
 
 func (c Classifier) Misplacement(classified Finding) (Finding, bool) {
 	if classified.Matched == "" || classified.Signal != SignalTraces {

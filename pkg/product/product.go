@@ -1,6 +1,6 @@
 package product
 
-import "github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+import "github.com/iambenzo/grot-weaver/pkg/finding"
 
 type Level string
 

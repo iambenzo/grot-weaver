@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 const StartingPointLabel = "starting point; test before deploying"

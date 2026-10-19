@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 func inventoryAtServiceLimit() Inventory {

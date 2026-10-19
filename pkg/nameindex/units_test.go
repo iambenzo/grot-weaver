@@ -5,7 +5,7 @@ import (
 
 	"github.com/prometheus/otlptranslator"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
 )
 
 func Test_MetricIndex_NearMiss(t *testing.T) {

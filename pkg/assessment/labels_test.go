@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
 )
 
 func Test_Assess_metricLabelKeys(t *testing.T) {

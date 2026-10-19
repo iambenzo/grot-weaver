@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
 )
 
 type entryState struct {

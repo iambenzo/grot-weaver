@@ -6,7 +6,7 @@ import (
 
 	"github.com/prometheus/otlptranslator"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/catalogue"
+	"github.com/iambenzo/grot-weaver/pkg/catalogue"
 )
 
 type Confidence string

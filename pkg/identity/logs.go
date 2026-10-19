@@ -1,9 +1,9 @@
 package identity
 
 import (
-	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
-	"github.com/iambenzo/otel-semconv-compliance/pkg/scoring"
+	"github.com/iambenzo/grot-weaver/pkg/finding"
+	"github.com/iambenzo/grot-weaver/pkg/nameindex"
+	"github.com/iambenzo/grot-weaver/pkg/scoring"
 )
 
 const (

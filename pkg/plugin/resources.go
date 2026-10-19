@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/product"
+	"github.com/iambenzo/grot-weaver/pkg/product"
 )
 
 func (a *App) registerRoutes(mux *http.ServeMux) {

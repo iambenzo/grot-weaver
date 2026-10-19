@@ -3,7 +3,7 @@ package identity
 import (
 	"strings"
 
-	"github.com/iambenzo/otel-semconv-compliance/pkg/nameindex"
+	"github.com/iambenzo/grot-weaver/pkg/nameindex"
 )
 
 type Origin string
