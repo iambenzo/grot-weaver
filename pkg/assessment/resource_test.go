@@ -210,6 +210,40 @@ func Test_Assess_coverageCountsServicesWithUnmeasuredVolume(t *testing.T) {
 	}
 }
 
+func Test_Assess_coverageCountsEachUnmeasuredServiceOnce(t *testing.T) {
+	unknown := []UnknownPart{UnknownVolume}
+	inventory := Inventory{
+		Traces: []TraceDatasource{
+			{UID: "tempo-a", Services: []TraceService{
+				{ServiceName: "cart", ServiceNamespace: "shop", Unknown: unknown},
+				{ServiceName: "cart", ServiceNamespace: "outlet", Unknown: unknown},
+				{ServiceName: "", ServiceNamespace: "shop", Unknown: unknown},
+			}},
+			{UID: "tempo-b", Services: []TraceService{
+				{ServiceName: "cart", ServiceNamespace: "shop", Unknown: unknown},
+				{ServiceName: "", ServiceNamespace: "outlet", Unknown: unknown},
+			}},
+		},
+		Logs: []LogDatasource{
+			{UID: "loki-a", Services: []LogService{{ServiceName: "cart", ServiceNamespace: "shop", Unknown: unknown}}},
+			{UID: "loki-b", Services: []LogService{{ServiceName: "cart", ServiceNamespace: "shop", Unknown: unknown}}},
+		},
+	}
+
+	result := newAssessor(t).Assess(inventory, scoringDefaults)
+
+	unmeasured := map[finding.Signal]int{}
+	for _, row := range result.Coverage {
+		unmeasured[row.Signal] = row.Unmeasured
+	}
+	want := map[finding.Signal]int{finding.SignalTraces: 4, finding.SignalLogs: 1}
+	for signal, count := range want {
+		if got, seen := unmeasured[signal]; !seen || got != count {
+			t.Errorf("%s unmeasured = %d (row present %v), want %d", signal, got, seen, count)
+		}
+	}
+}
+
 func Test_Inventory_Validate_rejectsDuplicateUnknownParts(t *testing.T) {
 	inventory := Inventory{Window: Window{Start: 1, End: 2}, Logs: []LogDatasource{{UID: "loki", Services: []LogService{
 		{ServiceName: "checkout", Unknown: []UnknownPart{UnknownVolume, UnknownVolume}},
