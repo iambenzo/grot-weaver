@@ -251,8 +251,8 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
 
       <FieldSet label="Grafana Assistant">
         <Field
-          label="Show Ask Assistant buttons"
-          description="Shown when the Grafana Assistant app is installed. If it is not yet connected to Grafana Cloud, the Assistant offers to set it up instead. A button opens the Assistant with a prompt you can edit before sending. The prompt holds the finding: its type, signal and scope, the metric, span or log attribute names as sent and as expected, the registry note, the semantic conventions version, the service and namespace, and library names and versions. On the overview it names up to ten affected services and adds the time range; on a service page it adds the datasource name and evidence query when there is one. Nothing is sent until you send the prompt."
+          label="Use Grafana Assistant"
+          description="Applies when the Grafana Assistant app is installed; if it is not yet connected to Grafana Cloud, the Assistant offers to set it up instead. Ask Assistant buttons on findings open it with a prompt you can edit first. While you are on an overview or service page, a message you send to the Assistant also carries a summary of that page: the time range, scan status and limits, the scores, and up to 20 top violations or findings with their names, services and libraries. Nothing is sent until you send a message."
         >
           <Switch
             id="ac-assistant-buttons"

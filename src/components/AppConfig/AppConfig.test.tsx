@@ -63,7 +63,7 @@ describe('AppConfig', () => {
       'Log sample size',
       'Default window',
       'Weight scores by volume',
-      'Show Ask Assistant buttons',
+      'Use Grafana Assistant',
       'Translation strategy for Prometheus',
       'Rule 1 metric name pattern',
       'Rule 1 action',

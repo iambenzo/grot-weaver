@@ -42,7 +42,11 @@ When a check had to be limited, for example volume sampled because TraceQL metri
 
 ## Grafana Assistant
 
-The Ask Assistant buttons appear when the Grafana Assistant app is installed. It answers on Grafana Cloud and on a self-managed Grafana connected to Grafana Cloud; on one that is not connected yet, the Assistant offers to set it up instead. The prompt opens unsent so you can edit it first. It holds the finding: its type, signal and scope, the metric, span or log attribute names as sent and as expected, the registry note, the semantic conventions version, the service and namespace, and library names and versions. On the overview it names up to ten affected services and adds the time range; on a service page it adds the datasource name and evidence query when there is one. Nothing goes to the Assistant until you send it. An admin can hide the buttons in the app settings.
+The Ask Assistant buttons appear when the Grafana Assistant app is installed. It answers on Grafana Cloud and on a self-managed Grafana connected to Grafana Cloud; on one that is not connected yet, the Assistant offers to set it up instead. The prompt opens unsent so you can edit it first. It holds the finding: its type, signal and scope, the metric, span or log attribute names as sent and as expected, the registry note, the semantic conventions version, the service and namespace, and library names and versions. On the overview it names up to ten affected services and adds the time range; on a service page it adds the datasource name and evidence query when there is one. Nothing goes to the Assistant until you send it.
+
+While you are on the overview or a service page, a message you send to the Assistant also carries a summary of that page, so you can ask, for example, what to fix first. The summary holds the time range, whether the scan has finished and which checks were limited, the scores with what they were counted from, and up to 20 top violations or findings with their names, services and libraries. The overview adds up to ten services, worst first.
+
+An admin can turn the Assistant integration off in the app settings, which removes both the buttons and the page summary.
 
 ## Requirements
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
-import { GrafanaTheme2 } from '@grafana/data';
+import { GrafanaTheme2, rangeUtil } from '@grafana/data';
 import {
   SceneAppPage,
   SceneComponentProps,
@@ -40,7 +40,9 @@ import { ServiceIdentity, StackAssessment, mergeOwners, ownerKey } from '../../a
 import { evidenceTarget, exploreUrl, ownersIn } from '../../assessment/explore';
 import { libraryInfo } from '../../assessment/libraries';
 import { LibraryEvidence } from '../../inventory/traceLibraries';
-import { PluginSettings, concurrencyFrom } from '../../settings/settings';
+import { PluginSettings, concurrencyFrom, isVolumeWeighted } from '../../settings/settings';
+import { PageScan, serviceContextData } from '../../assistant/pageContext';
+import { useAssistantPageContext, usePageScan } from '../../assistant/useAssistantPageContext';
 import { QueryWindow } from '../../window/window';
 import { WidenWindowPrompt } from '../../window/WidenWindowPrompt';
 import { testIds } from '../../components/testIds';
@@ -156,6 +158,8 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
     load.status === 'ready' ? selectedIdentity(pickableIdentities(load.assessment), service, namespace) : undefined;
   const title = servicePageTitle(resolved?.owner);
   useEffect(() => model.showTitle(title), [model, title]);
+  const scan = usePageScan(load);
+  const windowLabel = rangeUtil.describeTimeRange(timeRange.raw, timeRangeObject.getTimeZone());
 
   if (load.status === 'loading') {
     return <LoadingProgress progress={load.progress} labels={load.labels} />;
@@ -210,8 +214,11 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
       {(empty === undefined || empty === 'no-otel-services') && identities.length > 0 && (
         <ServicePicker model={model} identities={identities} selected={selected} />
       )}
-      {selected ? (
+      {selected && scan ? (
         <SelectedService
+          scan={scan}
+          windowLabel={windowLabel}
+          quickView={quick}
           identity={selected}
           signal={activeSignal}
           onSignal={(next) => model.selectSignal(next)}
@@ -234,6 +241,9 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
 }
 
 interface SelectedServiceProps {
+  scan: PageScan;
+  windowLabel: string;
+  quickView: boolean;
   identity: ServiceIdentity;
   signal: Signal;
   onSignal: (signal: Signal) => void;
@@ -243,7 +253,24 @@ interface SelectedServiceProps {
   range: { from: string; to: string };
 }
 
-function SelectedService({ identity, signal, onSignal, assessment, window, settings, range }: SelectedServiceProps) {
+function SelectedService({
+  scan,
+  windowLabel,
+  quickView,
+  identity,
+  signal,
+  onSignal,
+  assessment,
+  window,
+  settings,
+  range,
+}: SelectedServiceProps) {
+  const volumeWeighted = isVolumeWeighted(settings);
+  const contextData = useMemo(
+    () => serviceContextData(scan, identity.owner, windowLabel, volumeWeighted, quickView),
+    [scan, identity, windowLabel, volumeWeighted, quickView]
+  );
+  useAssistantPageContext(ROUTES.Service, 'OTel Semconv Compliance service page', contextData);
   const owned = useMemo(
     () => assessment.result.findings.filter((finding) => sameOwner(finding.owner, identity.owner)),
     [assessment, identity]

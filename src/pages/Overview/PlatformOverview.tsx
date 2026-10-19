@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { rangeUtil } from '@grafana/data';
 import { SceneComponentProps, SceneObjectBase, SceneObjectState, SceneTimeRange, sceneGraph } from '@grafana/scenes';
 import { Alert, Badge, Stack, Tab, TabsBar, Text } from '@grafana/ui';
@@ -34,6 +34,9 @@ import { TopViolations } from './TopViolations';
 import { ServicesTable } from './ServicesTable';
 import { OwnerSections } from './OwnerSections';
 import { OverviewIntro } from './OverviewIntro';
+import { overviewContextData } from '../../assistant/pageContext';
+import { useAssistantPageContext, usePageScan } from '../../assistant/useAssistantPageContext';
+import { ROUTES } from '../../constants';
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
 const SIGNAL_LABELS: Record<Signal, string> = { metrics: 'Metrics', traces: 'Traces', logs: 'Logs' };
@@ -52,6 +55,14 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const { value: timeRange } = timeRangeObject.useState();
   const load = useStackAssessment(settings, timeRange);
   const [signal, setSignal] = useState<Signal>('metrics');
+  const windowLabel = rangeUtil.describeTimeRange(timeRange.raw, timeRangeObject.getTimeZone());
+  const scan = usePageScan(load);
+  const volumeWeighted = isVolumeWeighted(settings);
+  const contextData = useMemo(
+    () => scan && overviewContextData(scan, windowLabel, volumeWeighted),
+    [scan, windowLabel, volumeWeighted]
+  );
+  useAssistantPageContext(ROUTES.Overview, 'OTel Semconv Compliance overview', contextData);
 
   if (load.status === 'loading') {
     return <LoadingProgress progress={load.progress} labels={load.labels} />;
@@ -98,11 +109,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   if (empty) {
     return (
       <Stack direction="column" gap={3}>
-        <OverviewHeader
-          assessment={assessment}
-          windowLabel={rangeUtil.describeTimeRange(timeRange.raw, timeRangeObject.getTimeZone())}
-          settings={settings}
-        />
+        <OverviewHeader assessment={assessment} windowLabel={windowLabel} settings={settings} />
         {status(0)}
         <EmptyTelemetry kind={empty} result={result} />
         {empty === 'no-otel-services' && <OwnerSections result={result} />}
@@ -112,11 +119,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
 
   return (
     <Stack direction="column" gap={3}>
-      <OverviewHeader
-        assessment={assessment}
-        windowLabel={rangeUtil.describeTimeRange(timeRange.raw, timeRangeObject.getTimeZone())}
-        settings={settings}
-      />
+      <OverviewHeader assessment={assessment} windowLabel={windowLabel} settings={settings} />
       {status(result.findings.length)}
       <Stack direction="column" gap={2}>
         {SIGNALS.map((candidate) => (
