@@ -4,6 +4,8 @@ Scores how well your telemetry follows the [OpenTelemetry semantic conventions](
 
 The app reads the metric names, and the attribute and label keys, that your services send to Prometheus, Tempo and Loki. It checks them against the semantic conventions registry bundled with the plugin and tells you, service by service, which names are out of date, which units are wrong and which required attributes are missing.
 
+![Overview: scores per signal with what each was counted from](img/screenshot-overview-dark.png)
+
 ## What it scans
 
 - **Metrics** from Prometheus-compatible datasources: metric names, label keys and `target_info`.
@@ -32,6 +34,8 @@ When a check had to be limited, for example volume sampled because TraceQL metri
 
 ## From finding to fix
 
+![A service's findings, with one expanded to show its evidence, the Ask Assistant button and the fix tabs](img/screenshot-service-dark.png)
+
 1. On the **Overview**, start with **Services, worst first**, or with **Top violations**, which lists the names seen across the most services.
 2. Open a service to see each finding with its level (violation, improvement or information) and its share of the signal's volume.
 3. Expand a finding for its evidence in Explore, where it can be found, and the ways to fix it:
@@ -54,5 +58,7 @@ An admin can turn the Assistant integration off in the app settings, which remov
 - At least one Prometheus, Tempo or Loki datasource. Other plugin types can be added for each signal in the app settings.
 
 ## Settings
+
+![App settings: datasources, translation strategy, limits and scoring](img/screenshot-settings-dark.png)
 
 Open **Administration > Plugins and data > Plugins > OTel Semconv Compliance > Configuration** to change which datasources are scanned, the default time window, query limits, volume weighting, your custom attribute namespaces, required resource attributes and service-to-pipeline mappings. The app can also check GitHub once a day for a newer semantic conventions release; new registry versions arrive with plugin updates.
