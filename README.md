@@ -11,7 +11,6 @@ A Grafana app plugin that scores how well a stack's telemetry follows the OpenTe
 | `cmd/catalogue-gen/`, `catalogue/` | Generates the embedded catalogue (`pkg/catalogue/data/`) from the semantic conventions registry with Weaver.                                  |
 | `dev/`                             | Local stack (Prometheus, Loki, Tempo, Collector, emitters) for development. See [dev/README.md](./dev/README.md).                             |
 | `tests/`                           | End-to-end and accessibility tests with `@grafana/plugin-e2e`.                                                                                |
-| `backlog/`                         | Tasks, decisions and design docs, managed with Backlog.md.                                                                                    |
 
 ## Requirements
 

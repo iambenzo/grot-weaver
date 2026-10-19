@@ -1,0 +1,3051 @@
+{
+  "data": {
+    "result": [
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:75509:75509",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:619448:619448",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:619708:619708",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:13062:13062",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:13885:13885",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-application-controller-0.argocd-application-controller:70342",
+          "job": "argocd/argocd-application-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-22z95.argocd-applicationset-controller:70029",
+          "job": "argocd/argocd-applicationset-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-hgbzr.argocd-applicationset-controller:619969",
+          "job": "argocd/argocd-applicationset-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-dex-server-3eb272ce7b-cczbg.dex:11938",
+          "job": "argocd/argocd-dex-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-dex-server-3eb272ce7b-mnf57.dex:621514",
+          "job": "argocd/argocd-dex-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-zvnzt.argocd-notifications-controller:54165",
+          "job": "argocd/argocd-notifications-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-redis-fd4b6452d9-78xqb.redis:621627",
+          "job": "argocd/argocd-redis"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-q4v87.argocd-repo-server:74125",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-q4v87.argocd-repo-server:74137",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-q4v87.argocd-repo-server:74147",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-server-03dc32e3d2-bjsvn.argocd-server:620184",
+          "job": "argocd/argocd-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-server-03dc32e3d2-sp56j.argocd-server:68776",
+          "job": "argocd/argocd-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7jmgb.envoy:619384",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7jmgb.shutdown-manager:619530",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7jmgb.shutdown-manager:730130",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-mt8m9.shutdown-manager:54858",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-vm58s.envoy:10627",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-vm58s.shutdown-manager:11276",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7gvrw.envoy:85356",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-9m5x2.envoy-gateway:11156",
+          "job": "envoy-gateway-system/gateway-helm"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-678jg.envoy-gateway:85112",
+          "job": "envoy-gateway-system/gateway-helm"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-kjh2g.envoy-gateway:619411",
+          "job": "envoy-gateway-system/gateway-helm"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-8989919273-8dl45.controller:50838",
+          "job": "mariadb/mariadb-operator"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-qfctp.cert-controller:67205",
+          "job": "mariadb/mariadb-operator-cert-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-njv7j.cert-controller:617784",
+          "job": "mariadb/mariadb-operator-cert-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-wpmq5.cert-controller:11007",
+          "job": "mariadb/mariadb-operator-cert-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-7ql66.webhook:67351",
+          "job": "mariadb/mariadb-operator-webhook"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-knmms.webhook:73073",
+          "job": "mariadb/mariadb-operator-webhook"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-t8lcd.webhook:617639",
+          "job": "mariadb/mariadb-operator-webhook"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "redis.redis-master-0.redis:621089",
+          "job": "redis/redis"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-0.agent:75509",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-0.mariadb:75476",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-1.mariadb:13854",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-1.mariadb:9008",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.agent:619708",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.mariadb:13062",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.mariadb:619448",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.mariadb:86126",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-qbtgd.notelib:11569",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-qbtgd.notelib:11582",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-qbtgd.notelib:11584",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-pwq22.notelib:85671",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-pwq22.notelib:85684",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-vthxp.notelib:619702",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-dgmkx.notelib:53414",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-dgmkx.notelib:53428",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-dgmkx.notelib:53446",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75648",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75680",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75681",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75682",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76067",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76085",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76087",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76099",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76100",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76136",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76137",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621833",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621849",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621853",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621864",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621866",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "f4e68938-6741-4d41-a8dd-6805e953e183",
+          "job": "shop-demo/dotnet-demo"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-dex-server-3eb272ce7b-bzfjm.dex",
+          "job": "argocd/argocd-dex-server",
+          "service_name": "argocd-dex-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-j525l.argocd-notifications-controller",
+          "job": "argocd/argocd-notifications-controller",
+          "service_name": "argocd-notifications-controller",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-zvnzt.argocd-notifications-controller",
+          "job": "argocd/argocd-notifications-controller",
+          "service_name": "argocd-notifications-controller",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-redis-fd4b6452d9-6tb54.redis",
+          "job": "argocd/argocd-redis",
+          "service_name": "argocd-redis",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-repo-server-e38e020f8-q4v87.argocd-repo-server",
+          "job": "argocd/argocd-repo-server",
+          "service_name": "argocd-repo-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-server-03dc32e3d2-sp56j.argocd-server",
+          "job": "argocd/argocd-server",
+          "service_name": "argocd-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-server-03dc32e3d2-qjr4b.argocd-server",
+          "job": "argocd/argocd-server",
+          "service_name": "argocd-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7gvrw.envoy",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7gvrw.shutdown-manager",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-678jg.envoy-gateway",
+          "job": "envoy-gateway-system/gateway-helm",
+          "service_name": "gateway-helm",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-8989919273-kg4ts.controller",
+          "job": "mariadb/mariadb-operator",
+          "service_name": "mariadb-operator",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-nthtc.cert-controller",
+          "job": "mariadb/mariadb-operator-cert-controller",
+          "service_name": "mariadb-operator-cert-controller",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-qfctp.cert-controller",
+          "job": "mariadb/mariadb-operator-cert-controller",
+          "service_name": "mariadb-operator-cert-controller",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-7ql66.webhook",
+          "job": "mariadb/mariadb-operator-webhook",
+          "service_name": "mariadb-operator-webhook",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "notes.notes-notes-notelib-fa17d0453-pwq22.notelib",
+          "job": "notes/notelib",
+          "service_name": "notelib",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "notes.notes-notes-notelib-fa17d0453-dgmkx.notelib",
+          "job": "notes/notelib",
+          "service_name": "notelib",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service",
+          "job": "notes/notes-service",
+          "service_name": "notes-service",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-dex-server-3eb272ce7b-mnf57.dex",
+          "job": "argocd/argocd-dex-server",
+          "service_name": "argocd-dex-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-xmvsl.argocd-notifications-controller",
+          "job": "argocd/argocd-notifications-controller",
+          "service_name": "argocd-notifications-controller",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-server-03dc32e3d2-bjsvn.argocd-server",
+          "job": "argocd/argocd-server",
+          "service_name": "argocd-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-kjh2g.envoy-gateway",
+          "job": "envoy-gateway-system/gateway-helm",
+          "service_name": "gateway-helm",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-8989919273-f6bmm.controller",
+          "job": "mariadb/mariadb-operator",
+          "service_name": "mariadb-operator",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-t8lcd.webhook",
+          "job": "mariadb/mariadb-operator-webhook",
+          "service_name": "mariadb-operator-webhook",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.notes-db-mariadb-cluster-0.agent",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "2"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "notes.notes-notes-notelib-fa17d0453-vthxp.notelib",
+          "job": "notes/notelib",
+          "service_name": "notelib",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service",
+          "job": "notes/notes-service",
+          "service_name": "notes-service",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-dex-server-3eb272ce7b-cczbg.dex",
+          "job": "argocd/argocd-dex-server",
+          "service_name": "argocd-dex-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-vm58s.shutdown-manager",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-wpmq5.cert-controller",
+          "job": "mariadb/mariadb-operator-cert-controller",
+          "service_name": "mariadb-operator-cert-controller",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-vm58s"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-bb58f6aa52-9m5x2",
+          "job": "unknown_service:envoy-gateway",
+          "service_name": "unknown_service:envoy-gateway"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-mt8m9"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7gvrw"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal:916415",
+          "job": "shop-demo/weather-app"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "job": "shop-demo/weather-app"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "271bd489-8f89-4b6c-ab8e-16cf8b4e13b3",
+          "job": "ledger",
+          "service_name": "ledger"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "dcda6d6e-0c94-4a5c-a21f-11bddcc3d295",
+          "job": "ledger",
+          "service_name": "ledger"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "gen_ai_client_token_usage_bucket",
+          "instance": "260ed4cf-f786-4c56-a9e8-bcd5fc60d718",
+          "job": "ledger",
+          "service_name": "ledger"
+        },
+        "value": [
+          1791893792,
+          "60"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service",
+          "job": "notes/notes-service",
+          "service_name": "notes-service",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.notes-db-mariadb-cluster-1.agent",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.agent",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "argocd.argocd-application-controller-0.argocd-application-controller",
+          "job": "argocd/argocd-application-controller",
+          "service_name": "argocd-application-controller",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "argocd.argocd-repo-server-e38e020f8-xvfr4.argocd-repo-server",
+          "job": "argocd/argocd-repo-server",
+          "service_name": "argocd-repo-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "argocd.argocd-repo-server-e38e020f8-fhl2r.argocd-repo-server",
+          "job": "argocd/argocd-repo-server",
+          "service_name": "argocd-repo-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "argocd.argocd-repo-server-e38e020f8-q4v87.argocd-repo-server",
+          "job": "argocd/argocd-repo-server",
+          "service_name": "argocd-repo-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-vm58s.shutdown-manager",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7gvrw.shutdown-manager",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "argocd.argocd-server-03dc32e3d2-bjsvn.argocd-server",
+          "job": "argocd/argocd-server",
+          "service_name": "argocd-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service",
+          "job": "notes/notes-service",
+          "service_name": "notes-service",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "64"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:15699",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:72221",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:75509",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:86158",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:9041",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:14015",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:619708",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:13094",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:13885",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.notes-db-mariadb-cluster-0.agent",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7gvrw.envoy",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-9m5x2.envoy-gateway",
+          "job": "envoy-gateway-system/gateway-helm",
+          "service_name": "gateway-helm",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-678jg.envoy-gateway",
+          "job": "envoy-gateway-system/gateway-helm",
+          "service_name": "gateway-helm",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-kjh2g.envoy-gateway",
+          "job": "envoy-gateway-system/gateway-helm",
+          "service_name": "gateway-helm",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-nthtc.cert-controller",
+          "job": "mariadb/mariadb-operator-cert-controller",
+          "service_name": "mariadb-operator-cert-controller",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-njv7j.cert-controller",
+          "job": "mariadb/mariadb-operator-cert-controller",
+          "service_name": "mariadb-operator-cert-controller",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-wpmq5.cert-controller",
+          "job": "mariadb/mariadb-operator-cert-controller",
+          "service_name": "mariadb-operator-cert-controller",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-qfctp.cert-controller",
+          "job": "mariadb/mariadb-operator-cert-controller",
+          "service_name": "mariadb-operator-cert-controller",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7jmgb.shutdown-manager",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-mt8m9.shutdown-manager",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "32"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "argocd.argocd-server-03dc32e3d2-qjr4b.argocd-server",
+          "job": "argocd/argocd-server",
+          "service_name": "argocd-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "848"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "argocd.argocd-server-03dc32e3d2-sp56j.argocd-server",
+          "job": "argocd/argocd-server",
+          "service_name": "argocd-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1024"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-7ql66.webhook",
+          "job": "mariadb/mariadb-operator-webhook",
+          "service_name": "mariadb-operator-webhook",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-knmms.webhook",
+          "job": "mariadb/mariadb-operator-webhook",
+          "service_name": "mariadb-operator-webhook",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-t8lcd.webhook",
+          "job": "mariadb/mariadb-operator-webhook",
+          "service_name": "mariadb-operator-webhook",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "48"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service",
+          "job": "notes/notes-service",
+          "service_name": "notes-service",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "2112"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal:917512",
+          "job": "shop-demo/weather-app",
+          "service_name": "weather-app",
+          "service_namespace": "shop-demo"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal:916415",
+          "job": "shop-demo/weather-app",
+          "service_name": "weather-app",
+          "service_namespace": "shop-demo"
+        },
+        "value": [
+          1791893792,
+          "16"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "instance": "f4e68938-6741-4d41-a8dd-6805e953e183",
+          "job": "shop-demo/dotnet-demo"
+        },
+        "value": [
+          1791893792,
+          "15"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "http_server_request_duration_seconds_bucket",
+          "job": "shop-demo/weather-app"
+        },
+        "value": [
+          1791893792,
+          "5385"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:15666:15666",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:15699:15699",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:72001:72001",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:72221:72221",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:75476:75476",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:86126:86126",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:86158:86158",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:9008:9008",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:9041:9041",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:13982:13982",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:14015:14015",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "10-<redacted>.k8s-monitoring-node-exporter.grafana-k8s-monitoring.svc.cluster.local:13094:13094",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-application-controller-0.argocd-application-controller:620134",
+          "job": "argocd/argocd-application-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-application-controller-0.argocd-application-controller:620246",
+          "job": "argocd/argocd-application-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-application-controller-0.argocd-application-controller:70325",
+          "job": "argocd/argocd-application-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-application-controller-0.argocd-application-controller:73609",
+          "job": "argocd/argocd-application-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-application-controller-0.argocd-application-controller:73634",
+          "job": "argocd/argocd-application-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-22z95.argocd-applicationset-controller:70110",
+          "job": "argocd/argocd-applicationset-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-xbxz9.argocd-applicationset-controller:73526",
+          "job": "argocd/argocd-applicationset-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-xbxz9.argocd-applicationset-controller:73608",
+          "job": "argocd/argocd-applicationset-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-hgbzr.argocd-applicationset-controller:620083",
+          "job": "argocd/argocd-applicationset-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-dex-server-3eb272ce7b-bzfjm.dex:85563",
+          "job": "argocd/argocd-dex-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-dex-server-3eb272ce7b-xkppd.dex:54821",
+          "job": "argocd/argocd-dex-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-j525l.argocd-notifications-controller:73588",
+          "job": "argocd/argocd-notifications-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-j525l.argocd-notifications-controller:73648",
+          "job": "argocd/argocd-notifications-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-xmvsl.argocd-notifications-controller:619749",
+          "job": "argocd/argocd-notifications-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-xmvsl.argocd-notifications-controller:619762",
+          "job": "argocd/argocd-notifications-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-notifications-controller-e1899cf0e8-zvnzt.argocd-notifications-controller:54111",
+          "job": "argocd/argocd-notifications-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-redis-fd4b6452d9-7lkmb.redis:72159",
+          "job": "argocd/argocd-redis"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-redis-fd4b6452d9-6tb54.redis:74225",
+          "job": "argocd/argocd-redis"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-xvfr4.argocd-repo-server:71204",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-xvfr4.argocd-repo-server:71270",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-xvfr4.argocd-repo-server:71366",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-fhl2r.argocd-repo-server:621298",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-fhl2r.argocd-repo-server:621310",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-fhl2r.argocd-repo-server:621321",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-repo-server-e38e020f8-fhl2r.argocd-repo-server:621986",
+          "job": "argocd/argocd-repo-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-server-03dc32e3d2-bjsvn.argocd-server:620035",
+          "job": "argocd/argocd-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-server-03dc32e3d2-sp56j.argocd-server:68804",
+          "job": "argocd/argocd-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-server-03dc32e3d2-qjr4b.argocd-server:73508",
+          "job": "argocd/argocd-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "argocd.argocd-server-03dc32e3d2-qjr4b.argocd-server:73563",
+          "job": "argocd/argocd-server"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-mt8m9.envoy:54510",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7gvrw.shutdown-manager:85398",
+          "job": "envoy-gateway-system/envoy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-8989919273-kg4ts.controller:72557",
+          "job": "mariadb/mariadb-operator"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-8989919273-f6bmm.controller:617752",
+          "job": "mariadb/mariadb-operator"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-nthtc.cert-controller:84275",
+          "job": "mariadb/mariadb-operator-cert-controller"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "redis.redis-master-0.redis:11634",
+          "job": "redis/redis"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "redis.redis-master-0.redis:54492",
+          "job": "redis/redis"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "redis.redis-master-0.redis:86537",
+          "job": "redis/redis"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-1.agent:13885",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-1.agent:9041",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.agent:13094",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.agent:86158",
+          "job": "mariadb/mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-pwq22.notelib:85685",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-vthxp.notelib:619726",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notelib-fa17d0453-vthxp.notelib:619739",
+          "job": "notes/notelib"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75679",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75718",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75719",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75721",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75722",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75779",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service:75780",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76084",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76086",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76101",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-hn28g.notes-service:76102",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621850",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621851",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621865",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621867",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621892",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "process_memory_usage_bytes",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-sqz55.notes-service:621893",
+          "job": "notes/notes-service"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-application-controller-0.argocd-application-controller",
+          "job": "argocd/argocd-application-controller",
+          "service_name": "argocd-application-controller",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "3"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-22z95.argocd-applicationset-controller",
+          "job": "argocd/argocd-applicationset-controller",
+          "service_name": "argocd-applicationset-controller",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-xbxz9.argocd-applicationset-controller",
+          "job": "argocd/argocd-applicationset-controller",
+          "service_name": "argocd-applicationset-controller",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-dex-server-3eb272ce7b-xkppd.dex",
+          "job": "argocd/argocd-dex-server",
+          "service_name": "argocd-dex-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-redis-fd4b6452d9-7lkmb.redis",
+          "job": "argocd/argocd-redis",
+          "service_name": "argocd-redis",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-repo-server-e38e020f8-xvfr4.argocd-repo-server",
+          "job": "argocd/argocd-repo-server",
+          "service_name": "argocd-repo-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-mt8m9.envoy",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-mt8m9.shutdown-manager",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-8989919273-8dl45.controller",
+          "job": "mariadb/mariadb-operator",
+          "service_name": "mariadb-operator",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-webhook-9c5a9654e9-knmms.webhook",
+          "job": "mariadb/mariadb-operator-webhook",
+          "service_name": "mariadb-operator-webhook",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.notes-db-mariadb-cluster-0.mariadb",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "2"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "notes.notes-notes-notes-service-2b8aa264c-4v46f.notes-service",
+          "job": "notes/notes-service",
+          "service_name": "notes-service",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.notes-db-mariadb-cluster-1.agent",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "3"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.notes-db-mariadb-cluster-1.mariadb",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "3"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-applicationset-controller-2c8b91f24e-hgbzr.argocd-applicationset-controller",
+          "job": "argocd/argocd-applicationset-controller",
+          "service_name": "argocd-applicationset-controller",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-redis-fd4b6452d9-78xqb.redis",
+          "job": "argocd/argocd-redis",
+          "service_name": "argocd-redis",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "argocd.argocd-repo-server-e38e020f8-fhl2r.argocd-repo-server",
+          "job": "argocd/argocd-repo-server",
+          "service_name": "argocd-repo-server",
+          "service_namespace": "argocd"
+        },
+        "value": [
+          1791893792,
+          "2"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7jmgb.envoy",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7jmgb.shutdown-manager",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.mariadb-operator-cert-controller-5cf52cbc4-njv7j.cert-controller",
+          "job": "mariadb/mariadb-operator-cert-controller",
+          "service_name": "mariadb-operator-cert-controller",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.agent",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "4"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "mariadb.notes-db-mariadb-cluster-2.mariadb",
+          "job": "mariadb/mariadb",
+          "service_name": "mariadb",
+          "service_namespace": "mariadb"
+        },
+        "value": [
+          1791893792,
+          "4"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-vm58s.envoy",
+          "job": "envoy-gateway-system/envoy",
+          "service_name": "envoy",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-system.envoy-gateway-bb58f6aa52-9m5x2.envoy-gateway",
+          "job": "envoy-gateway-system/gateway-helm",
+          "service_name": "gateway-helm",
+          "service_namespace": "envoy-gateway-system"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "redis.redis-master-0.redis",
+          "job": "redis/redis",
+          "service_name": "redis",
+          "service_namespace": "redis"
+        },
+        "value": [
+          1791893792,
+          "4"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "notes.notes-notes-notelib-fa17d0453-qbtgd.notelib",
+          "job": "notes/notelib",
+          "service_name": "notelib",
+          "service_namespace": "notes"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-bb58f6aa52-vb6jx",
+          "job": "unknown_service:envoy-gateway",
+          "service_name": "unknown_service:envoy-gateway"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-envoy-gateway-system-envoy-c34b7059-d122ba8fa-7jmgb"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-bb58f6aa52-kjh2g",
+          "job": "unknown_service:envoy-gateway",
+          "service_name": "unknown_service:envoy-gateway"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "envoy-gateway-bb58f6aa52-678jg",
+          "job": "unknown_service:envoy-gateway",
+          "service_name": "unknown_service:envoy-gateway"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal:17",
+          "job": "shop-demo/weather-app",
+          "service_name": "weather-app",
+          "service_namespace": "shop-demo"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal:917512",
+          "job": "shop-demo/weather-app"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal:19",
+          "job": "shop-demo/weather-app",
+          "service_name": "weather-app",
+          "service_namespace": "shop-demo"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "f4e68938-6741-4d41-a8dd-6805e953e183",
+          "job": "shop-demo/dotnet-demo"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "7e207cb3-5027-481c-aab3-8d9a9071c6ae",
+          "job": "ledger",
+          "service_name": "ledger"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "d5d69c83-c7ba-49fb-a9f8-efa50693e8db",
+          "job": "ledger",
+          "service_name": "ledger"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "target_info",
+          "instance": "260ed4cf-f786-4c56-a9e8-bcd5fc60d718",
+          "job": "ledger",
+          "service_name": "ledger"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      }
+    ],
+    "resultType": "vector"
+  },
+  "status": "success"
+}

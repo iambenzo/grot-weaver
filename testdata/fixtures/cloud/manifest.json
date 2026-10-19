@@ -1,0 +1,59 @@
+{
+  "files": {
+    "loki/labels.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-logs/loki/api/v1/labels?start=1791807392000000000&end=1791893792000000000"
+    },
+    "loki/sample-categorized.json": {
+      "headers": {
+        "X-Loki-Response-Encoding-Flags": "categorize-labels"
+      },
+      "request": "/api/datasources/proxy/uid/grafanacloud-logs/loki/api/v1/query_range?query=%7Bservice_name%3D%22integrations%2Fdb-o11y%22%7D&limit=20&start=1791807392000000000&end=1791893792000000000&direction=backward"
+    },
+    "loki/service-name-values.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-logs/loki/api/v1/label/service_name/values?start=1791807392000000000&end=1791893792000000000"
+    },
+    "prometheus/collectors.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-prom/api/v1/query?query=count+by+%28job%2C+instance%2C+collector_id%2C+pod%2C+workload%2C+receiver%2C+component_path%2C+component_id%29+%28last_over_time%28%7B__name__%3D~%22otelcol_receiver_accepted_.%2B%7Calloy_build_info%22%7D%5B86400s%5D%29%29&time=1791893792"
+    },
+    "prometheus/metric-names.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-prom/api/v1/label/__name__/values?start=1791807392&end=1791893792"
+    },
+    "prometheus/owner-label-names.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-prom/api/v1/labels?match%5B%5D=http_server_request_duration_seconds_bucket%7Bjob%21%3D%22%22%7D&start=1791807392&end=1791893792"
+    },
+    "prometheus/owners-count.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-prom/api/v1/query?query=count+by+%28__name__%2C+job%2C+instance%2C+service_name%2C+service_namespace%29+%28last_over_time%28%7B__name__%3D~%22http_server_request_duration_seconds_bucket%7Chttp_server_duration_milliseconds_bucket%7Cgen_ai_client_token_usage_bucket%7Cprocess_memory_usage_bytes%7Ctarget_info%22%7D%5B86400s%5D%29%29&time=1791893792"
+    },
+    "prometheus/target-info-series.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-prom/api/v1/series?match%5B%5D=target_info&start=1791807392&end=1791893792"
+    },
+    "tempo/search-select-scopes.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-traces/api/search?q=%7B+resource.service.name+%21%3D+%22%22+%7D+%7C+select%28instrumentation%3Aname%2C+instrumentation%3Aversion%29&limit=20&spss=3&start=1791807392&end=1791893792"
+    },
+    "tempo/service-names.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-traces/api/v2/search/tag/resource.service.name/values?start=1791807392&end=1791893792"
+    },
+    "tempo/tags-resource.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-traces/api/v2/search/tags?scope=resource&start=1791807392&end=1791893792"
+    },
+    "tempo/tags-span.json": {
+      "headers": {},
+      "request": "/api/datasources/proxy/uid/grafanacloud-traces/api/v2/search/tags?scope=span&start=1791807392&end=1791893792"
+    }
+  },
+  "target": "cloud",
+  "window": {
+    "end": 1791893792,
+    "start": 1791807392
+  }
+}

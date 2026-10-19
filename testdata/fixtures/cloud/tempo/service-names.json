@@ -1,0 +1,79 @@
+{
+  "metrics": {
+    "inspectedBytes": "1036444"
+  },
+  "tagValues": [
+    {
+      "type": "string",
+      "value": "argocd-repo-server"
+    },
+    {
+      "type": "string",
+      "value": "redis"
+    },
+    {
+      "type": "string",
+      "value": "mariadb-operator"
+    },
+    {
+      "type": "string",
+      "value": "argocd-dex-server"
+    },
+    {
+      "type": "string",
+      "value": "dotnet-demo"
+    },
+    {
+      "type": "string",
+      "value": "argocd-applicationset-controller"
+    },
+    {
+      "type": "string",
+      "value": "mariadb-operator-cert-controller"
+    },
+    {
+      "type": "string",
+      "value": "envoy"
+    },
+    {
+      "type": "string",
+      "value": "argocd-server"
+    },
+    {
+      "type": "string",
+      "value": "mariadb"
+    },
+    {
+      "type": "string",
+      "value": "argocd-redis"
+    },
+    {
+      "type": "string",
+      "value": "ledger"
+    },
+    {
+      "type": "string",
+      "value": "weather-app"
+    },
+    {
+      "type": "string",
+      "value": "mariadb-operator-webhook"
+    },
+    {
+      "type": "string",
+      "value": "argocd-application-controller"
+    },
+    {
+      "type": "string",
+      "value": "gateway-helm"
+    },
+    {
+      "type": "string",
+      "value": "notes-service"
+    },
+    {
+      "type": "string",
+      "value": "argocd-notifications-controller"
+    }
+  ]
+}

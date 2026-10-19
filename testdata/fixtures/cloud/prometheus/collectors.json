@@ -1,0 +1,477 @@
+{
+  "data": {
+    "result": [
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-logs-5hw8k",
+          "workload": "k8s-monitoring-alloy-logs"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-logs-bfdrs",
+          "workload": "k8s-monitoring-alloy-logs"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-logs-6z2rj",
+          "workload": "k8s-monitoring-alloy-logs"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-logs-lh5w9",
+          "workload": "k8s-monitoring-alloy-logs"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-logs-mlhs8",
+          "workload": "k8s-monitoring-alloy-logs"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-metrics-0",
+          "workload": "k8s-monitoring-alloy-metrics"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-metrics-0",
+          "workload": "k8s-monitoring-alloy-metrics"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-profiles-btwj7",
+          "workload": "k8s-monitoring-alloy-profiles"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-profiles-mrh66",
+          "workload": "k8s-monitoring-alloy-profiles"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-profiles-227gd",
+          "workload": "k8s-monitoring-alloy-profiles"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-receiver-0b79b5bbf-jcm7d",
+          "workload": "k8s-monitoring-alloy-receiver"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-receiver-0b79b5bbf-kcgdj",
+          "workload": "k8s-monitoring-alloy-receiver"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-singleton-ec42814b0a-f69hm",
+          "workload": "k8s-monitoring-alloy-singleton"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "<windows-host>",
+          "instance": "<windows-host>",
+          "job": "integrations/alloy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "component_id": "otelcol.receiver.otlp.receiver",
+          "component_path": "/application_observability.feature",
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-receiver-0b79b5bbf-g9g2x",
+          "receiver": "otlp/application_observability.feature/otelcol.receiver.otlp.receiver",
+          "workload": "k8s-monitoring-alloy-receiver"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "component_id": "otelcol.receiver.otlp.in",
+          "component_path": "/remotecfg/shop_ecs_weather_app.default",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy",
+          "receiver": "otlp/remotecfg/shop_ecs_weather_app.default/otelcol.receiver.otlp.in"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "component_id": "otelcol.receiver.otlp.in",
+          "component_path": "/remotecfg/shop_ecs_dotnet_app.default",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy",
+          "receiver": "otlp/remotecfg/shop_ecs_dotnet_app.default/otelcol.receiver.otlp.in"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-logs-g9pq5",
+          "workload": "k8s-monitoring-alloy-logs"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-metrics-0",
+          "workload": "k8s-monitoring-alloy-metrics"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-profiles-l4vxr",
+          "workload": "k8s-monitoring-alloy-profiles"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-profiles-t7xwx",
+          "workload": "k8s-monitoring-alloy-profiles"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-profiles-ndzrz",
+          "workload": "k8s-monitoring-alloy-profiles"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-receiver-0b79b5bbf-x2mhm",
+          "workload": "k8s-monitoring-alloy-receiver"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-receiver-0b79b5bbf-g9g2x",
+          "workload": "k8s-monitoring-alloy-receiver"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-singleton-ec42814b0a-5c5nh",
+          "workload": "k8s-monitoring-alloy-singleton"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-singleton-ec42814b0a-66fxx",
+          "workload": "k8s-monitoring-alloy-singleton"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-singleton-ec42814b0a-tc9v7",
+          "workload": "k8s-monitoring-alloy-singleton"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "component_id": "otelcol.receiver.otlp.receiver",
+          "component_path": "/application_observability.feature",
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-receiver-0b79b5bbf-x2mhm",
+          "receiver": "otlp/application_observability.feature/otelcol.receiver.otlp.receiver",
+          "workload": "k8s-monitoring-alloy-receiver"
+        },
+        "value": [
+          1791893792,
+          "2"
+        ]
+      },
+      {
+        "metric": {
+          "component_id": "otelcol.receiver.otlp.receiver",
+          "component_path": "/application_observability.feature",
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-receiver-0b79b5bbf-jcm7d",
+          "receiver": "otlp/application_observability.feature/otelcol.receiver.otlp.receiver",
+          "workload": "k8s-monitoring-alloy-receiver"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "component_id": "otelcol.receiver.otlp.receiver",
+          "component_path": "/application_observability.feature",
+          "instance": "172.<redacted>:12345",
+          "job": "integrations/alloy",
+          "pod": "k8s-monitoring-alloy-receiver-0b79b5bbf-kcgdj",
+          "receiver": "otlp/application_observability.feature/otelcol.receiver.otlp.receiver",
+          "workload": "k8s-monitoring-alloy-receiver"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "<windows-host>",
+          "component_id": "otelcol.receiver.otlp.in",
+          "component_path": "/remotecfg/shop_ecs_windows_iis.default",
+          "instance": "<windows-host>",
+          "job": "integrations/alloy",
+          "receiver": "otlp/remotecfg/shop_ecs_windows_iis.default/otelcol.receiver.otlp.in"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "collector_id": "ip-<redacted>.eu-north-1.compute.internal",
+          "component_id": "otelcol.receiver.otlp.in",
+          "component_path": "/remotecfg/shop_ecs_weather_app.default",
+          "instance": "ip-<redacted>.eu-north-1.compute.internal",
+          "job": "integrations/alloy",
+          "receiver": "otlp/remotecfg/shop_ecs_weather_app.default/otelcol.receiver.otlp.in"
+        },
+        "value": [
+          1791893792,
+          "1"
+        ]
+      }
+    ],
+    "resultType": "vector"
+  },
+  "status": "success"
+}

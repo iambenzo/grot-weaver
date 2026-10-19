@@ -1,0 +1,1873 @@
+{
+  "metrics": {
+    "additionalMetrics": {
+      "engineBytes": "630"
+    },
+    "completedJobs": 1,
+    "totalBlockBytes": "139482102",
+    "totalBlocks": 66,
+    "totalJobs": 69
+  },
+  "traces": [
+    {
+      "rootServiceName": "redis",
+      "rootTraceName": "AUTH",
+      "serviceStats": {
+        "redis": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "redis"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "31890",
+            "spanID": "94a730b8fdb47887",
+            "startTimeUnixNano": "1791860310714616848"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "redis"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "31890",
+              "spanID": "94a730b8fdb47887",
+              "startTimeUnixNano": "1791860310714616848"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860310714616848",
+      "traceID": "2ea95ee8927aece36f59f78e3205b0"
+    },
+    {
+      "rootServiceName": "dotnet-demo",
+      "rootTraceName": "GET",
+      "serviceStats": {
+        "dotnet-demo": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "Microsoft.AspNetCore"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "dotnet-demo"
+                }
+              }
+            ],
+            "durationNanos": "224600",
+            "spanID": "128fd1572732f48e",
+            "startTimeUnixNano": "1791860286999872200"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "dotnet-demo"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": "System.Net.Http"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "909800",
+            "spanID": "b0d89bda8292b404",
+            "startTimeUnixNano": "1791860286999408300"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "Microsoft.AspNetCore"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "dotnet-demo"
+                  }
+                }
+              ],
+              "durationNanos": "224600",
+              "spanID": "128fd1572732f48e",
+              "startTimeUnixNano": "1791860286999872200"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "dotnet-demo"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": "System.Net.Http"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "909800",
+              "spanID": "b0d89bda8292b404",
+              "startTimeUnixNano": "1791860286999408300"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860286999408300",
+      "traceID": "0587e2c388a9de91ea7e7989d111f8d"
+    },
+    {
+      "durationMs": 17,
+      "rootServiceName": "gateway-helm",
+      "rootTraceName": "PATCH",
+      "serviceStats": {
+        "gateway-helm": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "gateway-helm"
+                }
+              }
+            ],
+            "durationNanos": "17438501",
+            "spanID": "ba9cbab3c5c870b6",
+            "startTimeUnixNano": "1791860239138766288"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "gateway-helm"
+                  }
+                }
+              ],
+              "durationNanos": "17438501",
+              "spanID": "ba9cbab3c5c870b6",
+              "startTimeUnixNano": "1791860239138766288"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860239138766288",
+      "traceID": "ace2cca6549503130fa10c51430ecb"
+    },
+    {
+      "durationMs": 5,
+      "rootServiceName": "gateway-helm",
+      "rootTraceName": "GET",
+      "serviceStats": {
+        "gateway-helm": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "gateway-helm"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "5081118",
+            "spanID": "d19ed54bfbad15f0",
+            "startTimeUnixNano": "1791860180224289246"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "gateway-helm"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "5081118",
+              "spanID": "d19ed54bfbad15f0",
+              "startTimeUnixNano": "1791860180224289246"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860180224289246",
+      "traceID": "1583a71d203731e1c06124605749904"
+    },
+    {
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "mariadb-operator-cert-controller": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb-operator-cert-controller"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "29110",
+            "spanID": "1c23aab2c00b9f35",
+            "startTimeUnixNano": "1791860168951727440"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb-operator-cert-controller"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "98436",
+            "spanID": "1735d0762ab67d5d",
+            "startTimeUnixNano": "1791860168951756550"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb-operator-cert-controller"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "29110",
+              "spanID": "1c23aab2c00b9f35",
+              "startTimeUnixNano": "1791860168951727440"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb-operator-cert-controller"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "98436",
+              "spanID": "1735d0762ab67d5d",
+              "startTimeUnixNano": "1791860168951756550"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860168951727440",
+      "traceID": "8616b0943c1f29ff92efe9e5dfcde0"
+    },
+    {
+      "rootServiceName": "redis",
+      "rootTraceName": "ping",
+      "serviceStats": {
+        "redis": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "redis"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "8212",
+            "spanID": "0ba2ad13aaa61bd4",
+            "startTimeUnixNano": "1791860167316807570"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "redis"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "8212",
+              "spanID": "0ba2ad13aaa61bd4",
+              "startTimeUnixNano": "1791860167316807570"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860167316807570",
+      "traceID": "5340dcfa65d01e1c8bbad086190b328"
+    },
+    {
+      "durationMs": 32,
+      "rootServiceName": "argocd-application-controller",
+      "rootTraceName": "PATCH",
+      "serviceStats": {
+        "argocd-application-controller": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "argocd-application-controller"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "32276836",
+            "spanID": "0cc238e438aca69b",
+            "startTimeUnixNano": "1791860165911331307"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "argocd-application-controller"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "32276836",
+              "spanID": "0cc238e438aca69b",
+              "startTimeUnixNano": "1791860165911331307"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860165911331307",
+      "traceID": "05310bda8c436b6c5917b0444fc335"
+    },
+    {
+      "durationMs": 10,
+      "rootServiceName": "gateway-helm",
+      "rootTraceName": "PUT",
+      "serviceStats": {
+        "gateway-helm": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "gateway-helm"
+                }
+              }
+            ],
+            "durationNanos": "10863385",
+            "spanID": "617a8db557d96a13",
+            "startTimeUnixNano": "1791860157346932861"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "gateway-helm"
+                  }
+                }
+              ],
+              "durationNanos": "10863385",
+              "spanID": "617a8db557d96a13",
+              "startTimeUnixNano": "1791860157346932861"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860157346932861",
+      "traceID": "cb7252f6f1529fe47b7f8b1eec3e31"
+    },
+    {
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "argocd-server": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "argocd-server"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "315026",
+            "spanID": "c3af6822eb400b58",
+            "startTimeUnixNano": "1791860127877442601"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "argocd-server"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "315026",
+              "spanID": "c3af6822eb400b58",
+              "startTimeUnixNano": "1791860127877442601"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860127877442601",
+      "traceID": "cb88f526171b05db5d16c622dfa69a"
+    },
+    {
+      "durationMs": 13,
+      "rootServiceName": "gateway-helm",
+      "rootTraceName": "PUT",
+      "serviceStats": {
+        "gateway-helm": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "gateway-helm"
+                }
+              }
+            ],
+            "durationNanos": "13134443",
+            "spanID": "ea4341cf34acaf31",
+            "startTimeUnixNano": "1791860125117723957"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "gateway-helm"
+                  }
+                }
+              ],
+              "durationNanos": "13134443",
+              "spanID": "ea4341cf34acaf31",
+              "startTimeUnixNano": "1791860125117723957"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860125117723957",
+      "traceID": "fb868c967688ee149fb152c570c888f"
+    },
+    {
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "argocd-redis": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "argocd-redis"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "96625",
+            "spanID": "dda2c2155681f1d5",
+            "startTimeUnixNano": "1791860117912904751"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "argocd-redis"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "96625",
+              "spanID": "dda2c2155681f1d5",
+              "startTimeUnixNano": "1791860117912904751"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860117912904751",
+      "traceID": "8ce5d2b82263ce30fefbd1f9f5d937"
+    },
+    {
+      "durationMs": 15,
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "mariadb": {
+          "spanCount": 3
+        }
+      },
+      "spanSet": {
+        "matched": 3,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "10894119",
+            "spanID": "19a019c1f2fbf4df",
+            "startTimeUnixNano": "1791860117761114396"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "20306",
+            "spanID": "259326f2c9fdb6d2",
+            "startTimeUnixNano": "1791860117760933729"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "15024001",
+            "spanID": "0dcdfe3c93258618",
+            "startTimeUnixNano": "1791860117760954035"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 3,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "10894119",
+              "spanID": "19a019c1f2fbf4df",
+              "startTimeUnixNano": "1791860117761114396"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "20306",
+              "spanID": "259326f2c9fdb6d2",
+              "startTimeUnixNano": "1791860117760933729"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "15024001",
+              "spanID": "0dcdfe3c93258618",
+              "startTimeUnixNano": "1791860117760954035"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860117760933729",
+      "traceID": "3b01058946d43cdd0718fe0a07ab9d1"
+    },
+    {
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "mariadb-operator": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb-operator"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "723562",
+            "spanID": "0d28817721ba612b",
+            "startTimeUnixNano": "1791860115907729082"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb-operator"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "723562",
+              "spanID": "0d28817721ba612b",
+              "startTimeUnixNano": "1791860115907729082"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860115907729082",
+      "traceID": "b97928422b2b13754147896548c1563"
+    },
+    {
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "argocd-repo-server": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "argocd-repo-server"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "19426",
+            "spanID": "c1767d89a148b0e0",
+            "startTimeUnixNano": "1791860077192944672"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "argocd-repo-server"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "25379",
+            "spanID": "8035ac418f322b36",
+            "startTimeUnixNano": "1791860077192964098"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "argocd-repo-server"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "19426",
+              "spanID": "c1767d89a148b0e0",
+              "startTimeUnixNano": "1791860077192944672"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "argocd-repo-server"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "25379",
+              "spanID": "8035ac418f322b36",
+              "startTimeUnixNano": "1791860077192964098"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860077192944672",
+      "traceID": "e800f5da40da77b9ca998d8199a2163"
+    },
+    {
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "argocd-application-controller": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "argocd-application-controller"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "300375",
+            "spanID": "735a8c4ed8554beb",
+            "startTimeUnixNano": "1791860057911183603"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "argocd-application-controller"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "300375",
+              "spanID": "735a8c4ed8554beb",
+              "startTimeUnixNano": "1791860057911183603"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860057911183603",
+      "traceID": "4702abeb30132921456b66804a5ffcb"
+    },
+    {
+      "durationMs": 15,
+      "rootServiceName": "gateway-helm",
+      "rootTraceName": "PUT",
+      "serviceStats": {
+        "gateway-helm": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "gateway-helm"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "15990201",
+            "spanID": "a34be0854f4c86ab",
+            "startTimeUnixNano": "1791860044574210592"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "gateway-helm"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "15990201",
+              "spanID": "a34be0854f4c86ab",
+              "startTimeUnixNano": "1791860044574210592"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860044574210592",
+      "traceID": "e820daeb47e83bf08adc337eacc64d3"
+    },
+    {
+      "durationMs": 1,
+      "rootServiceName": "notes-service",
+      "rootTraceName": "GET /",
+      "serviceStats": {
+        "notes-service": {
+          "spanCount": 7
+        }
+      },
+      "spanSet": {
+        "matched": 7,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "notes-service"
+                }
+              }
+            ],
+            "durationNanos": "855943",
+            "spanID": "9c48c0a976c5dcc1",
+            "startTimeUnixNano": "1791860034376691195"
+          },
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "notes-service"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "96842",
+            "spanID": "5452bd43a10b52c7",
+            "startTimeUnixNano": "1791860034376489680"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "notes-service"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "999760",
+            "spanID": "e40e2085eb3aea0a",
+            "startTimeUnixNano": "1791860034376586522"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 7,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "notes-service"
+                  }
+                }
+              ],
+              "durationNanos": "855943",
+              "spanID": "9c48c0a976c5dcc1",
+              "startTimeUnixNano": "1791860034376691195"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "notes-service"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "96842",
+              "spanID": "5452bd43a10b52c7",
+              "startTimeUnixNano": "1791860034376489680"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "notes-service"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "999760",
+              "spanID": "e40e2085eb3aea0a",
+              "startTimeUnixNano": "1791860034376586522"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860034376489680",
+      "traceID": "d654ca52e5e2caed6560a3e5a948696"
+    },
+    {
+      "rootServiceName": "redis",
+      "rootTraceName": "AUTH",
+      "serviceStats": {
+        "redis": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "redis"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "44132",
+            "spanID": "19950ed722415416",
+            "startTimeUnixNano": "1791860020716274572"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "redis"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "44132",
+              "spanID": "19950ed722415416",
+              "startTimeUnixNano": "1791860020716274572"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860020716274572",
+      "traceID": "d890862b163e2373ca717f7b1bd5280"
+    },
+    {
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "mariadb": {
+          "spanCount": 2
+        }
+      },
+      "spanSet": {
+        "matched": 2,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb"
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "22663",
+            "spanID": "5d4bb3ab5fb8be84",
+            "startTimeUnixNano": "1791860000519280123"
+          },
+          {
+            "attributes": [
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "34853",
+            "spanID": "66d841ab71a59e1d",
+            "startTimeUnixNano": "1791860000519302786"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 2,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb"
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "22663",
+              "spanID": "5d4bb3ab5fb8be84",
+              "startTimeUnixNano": "1791860000519280123"
+            },
+            {
+              "attributes": [
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "34853",
+              "spanID": "66d841ab71a59e1d",
+              "startTimeUnixNano": "1791860000519302786"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791860000519280123",
+      "traceID": "c9cb5cae5e206bf2218b432a43f64fb"
+    },
+    {
+      "durationMs": 4,
+      "rootServiceName": "<root span not yet received>",
+      "serviceStats": {
+        "mariadb-operator": {
+          "spanCount": 1
+        }
+      },
+      "spanSet": {
+        "matched": 1,
+        "spans": [
+          {
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "mariadb-operator"
+                }
+              },
+              {
+                "key": "instrumentation:name",
+                "value": {
+                  "stringValue": ""
+                }
+              },
+              {
+                "key": "instrumentation:version",
+                "value": {
+                  "stringValue": ""
+                }
+              }
+            ],
+            "durationNanos": "4374117",
+            "spanID": "1df0b5e7b63e5d81",
+            "startTimeUnixNano": "1791859973974812134"
+          }
+        ]
+      },
+      "spanSets": [
+        {
+          "matched": 1,
+          "spans": [
+            {
+              "attributes": [
+                {
+                  "key": "service.name",
+                  "value": {
+                    "stringValue": "mariadb-operator"
+                  }
+                },
+                {
+                  "key": "instrumentation:name",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "instrumentation:version",
+                  "value": {
+                    "stringValue": ""
+                  }
+                }
+              ],
+              "durationNanos": "4374117",
+              "spanID": "1df0b5e7b63e5d81",
+              "startTimeUnixNano": "1791859973974812134"
+            }
+          ]
+        }
+      ],
+      "startTimeUnixNano": "1791859973974812134",
+      "traceID": "f4027f1ffddd4cecd69fdbd6e09c99"
+    }
+  ]
+}

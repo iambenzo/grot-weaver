@@ -34,7 +34,7 @@ func Test_detectStrategy(t *testing.T) {
 		overridden    bool
 		unitCheckable bool
 	}{
-		{name: "cloud is the default suffix strategy", datasource: MetricDatasource{UID: "cloud", Names: fixtureNames(t, "cloud")}, want: otlptranslator.UnderscoreEscapingWithSuffixes, unitCheckable: true},
+		{name: "a Grafana Cloud stack uses the default suffix strategy", datasource: MetricDatasource{UID: "cloud", Names: fixtureNames(t, "cloud")}, want: otlptranslator.UnderscoreEscapingWithSuffixes, unitCheckable: true},
 		{name: "utf8 with suffixes", datasource: MetricDatasource{UID: "u", Names: []string{"http.server.request.duration_seconds_bucket", "process.memory.usage_bytes"}}, want: otlptranslator.NoUTF8EscapingWithSuffixes, unitCheckable: true},
 		{name: "without suffixes", datasource: MetricDatasource{UID: "oss", Names: []string{"http_server_request_duration_bucket", "process_memory_usage", "jvm_class_loaded"}}, want: otlptranslator.UnderscoreEscapingWithoutSuffixes},
 		{name: "no translation", datasource: MetricDatasource{UID: "utf8", Names: []string{"http.server.request.duration_bucket", "process.memory.usage", "jvm.class.loaded"}}, want: otlptranslator.NoTranslation},

@@ -18,11 +18,12 @@ const OUTPUT_DIR = path.resolve(__dirname, '../evidence/cloud-raw');
 const WINDOW_SECONDS = Number(process.env.VALIDATE_WINDOW_DAYS ?? 1) * 24 * 3600;
 const GCX_MAX_BUFFER_BYTES = 256 * 1024 * 1024;
 const COOKIE_JAR = process.env.LOCAL_GRAFANA_COOKIES ?? '';
+const GCX_CONTEXT = process.env.GCX_CONTEXT ?? '';
 
 const DATASOURCES = {
-  metrics: [{ uid: 'grafanacloud-prom', type: 'prometheus', name: 'grafanacloud-cloud-prom' }],
-  traces: [{ uid: 'grafanacloud-traces', type: 'tempo', name: 'grafanacloud-cloud-traces' }],
-  logs: [{ uid: 'grafanacloud-logs', type: 'loki', name: 'grafanacloud-cloud-logs' }],
+  metrics: [{ uid: 'grafanacloud-prom', type: 'prometheus', name: 'grafanacloud-prom' }],
+  traces: [{ uid: 'grafanacloud-traces', type: 'tempo', name: 'grafanacloud-traces' }],
+  logs: [{ uid: 'grafanacloud-logs', type: 'loki', name: 'grafanacloud-logs' }],
 };
 
 const cloudGet: ProxyGet = async <T>(
@@ -33,7 +34,7 @@ const cloudGet: ProxyGet = async <T>(
 ) => {
   const query = new URLSearchParams(params).toString();
   const proxyPath = `/api/datasources/proxy/uid/${encodeURIComponent(uid)}${requestPath}${query ? `?${query}` : ''}`;
-  const args = ['--context', 'cloud', 'api', proxyPath, '-X', 'GET', '-o', 'json'];
+  const args = ['--context', GCX_CONTEXT, 'api', proxyPath, '-X', 'GET', '-o', 'json'];
   for (const [name, value] of Object.entries(headers)) {
     args.push('-H', `${name}: ${value}`);
   }
@@ -70,9 +71,9 @@ function bodyArgs(resource: string, body: unknown): string[] {
   return ['-H', 'Content-Type: application/json', '--data-binary', `@${bodyFile}`];
 }
 
-const describeWhenEnabled = COOKIE_JAR ? describe : describe.skip;
+const describeWhenEnabled = COOKIE_JAR && GCX_CONTEXT ? describe : describe.skip;
 
-describeWhenEnabled('cloud end to end (read-only)', () => {
+describeWhenEnabled('Grafana Cloud end to end (read-only)', () => {
   it(
     'collects through gcx GETs and scores on the local backend',
     async () => {

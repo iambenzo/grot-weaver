@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -21,7 +22,6 @@ REDACTIONS = [
     (re.compile(r"psql-[a-z0-9-]+"), "<postgres-host>"),
     (re.compile(r"aks-([a-z]+)-\d+-vmss\d*"), r"aks-\1-<node>"),
     (re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=/resourceGroups)"), "<subscription-id>"),
-    (re.compile(r"<user>"), "<user>"),
     (re.compile(r"\b\d{12}\b"), "<account-id>"),
 ]
 
@@ -58,7 +58,8 @@ def proxy_path(datasource, path, params):
 
 
 def fetch_cloud(path, headers):
-    command = ["gcx", "--context", "cloud", "api", path, "-X", "GET", "-o", "json"]
+    context = os.environ.get("GCX_CONTEXT") or sys.exit("set GCX_CONTEXT to the gcx context of the Grafana Cloud stack to capture")
+    command = ["gcx", "--context", context, "api", path, "-X", "GET", "-o", "json"]
     for name, value in headers.items():
         command += ["-H", f"{name}: {value}"]
     result = subprocess.run(command, capture_output=True, text=True, check=True)
@@ -71,8 +72,13 @@ def fetch_local(base_url, path, headers):
         return response.read().decode()
 
 
+NAME_REDACTIONS = [
+    (re.compile(re.escape(name)), "<user>") for name in os.environ.get("REDACT_NAMES", "").split(",") if name
+]
+
+
 def redact(text):
-    for pattern, replacement in REDACTIONS:
+    for pattern, replacement in REDACTIONS + NAME_REDACTIONS:
         text = pattern.sub(replacement, text)
     return text
 

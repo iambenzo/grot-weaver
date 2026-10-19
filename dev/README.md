@@ -59,9 +59,7 @@ The Weaver template that builds the plugin catalogue now lives in `catalogue/tem
 | Path | What |
 |---|---|
 | `weaver/livecheck/` | Crafted Weaver live-check input and its report, the evidence for reusing live-check finding ids |
-| `evidence/cloud-raw/` | Raw read-only query dumps from cloud. Ignored by git because they contain real host and account names |
-
-Findings: Backlog doc-3 (local experiments). The other evidence is in doc-2 (cloud), doc-4 (Weaver) and doc-5 (docs).
+| `evidence/cloud-raw/` | Raw read-only query dumps from a Grafana Cloud stack. Ignored by git because they contain real host and account names |
 
 ## Test fixtures
 
@@ -69,20 +67,20 @@ Findings: Backlog doc-3 (local experiments). The other evidence is in doc-2 (clo
 
 ```sh
 python3 -I dev/scripts/capture_fixtures.py local   # needs the stack and emitters running
-python3 -I dev/scripts/capture_fixtures.py cloud   # read-only: GET requests through gcx --context cloud
+GCX_CONTEXT=<context> python3 -I dev/scripts/capture_fixtures.py cloud   # read-only: GET requests through gcx --context <context>
 ```
 
-The script redacts host, account, subscription and user names, and replaces Loki log lines with `<line>`. Check new captures before committing them.
+The script redacts private IP addresses, host, account and subscription names, any names listed in the comma-separated `REDACT_NAMES` environment variable (for example your username), and replaces Loki log lines with `<line>`. It does not rename clusters, namespaces, services, pods or cloud resource IDs, so a `cloud` capture still holds the stack's real names: replace them with neutral ones before committing. The committed `cloud` fixtures were sanitized this way.
 
 
-## End-to-end validation on cloud
+## End-to-end validation on a Grafana Cloud stack
 
-`dev/validate/cloud.validate.test.ts` runs the plugin's own collectors against cloud and scores the result on the local backend. Every cloud request is a `gcx --context cloud api ... -X GET`, and nothing is written to cloud. It needs the dev stack running and a local Grafana session cookie:
+`dev/validate/cloud.validate.test.ts` runs the plugin's own collectors against a Grafana Cloud stack and scores the result on the local backend. Every stack request is a `gcx --context $GCX_CONTEXT api ... -X GET`, and nothing is written to the stack. It needs the dev stack running, a gcx context for the stack and a local Grafana session cookie:
 
 ```sh
 J=$PWD/dev/evidence/cloud-raw/local-cookies.txt
 curl -s -c $J -H 'Content-Type: application/json' -d '{"user":"admin","password":"admin"}' localhost:13000/login
-VALIDATE_WINDOW_DAYS=30 LOCAL_GRAFANA_COOKIES=$J npx jest --ci --rootDir . --testMatch '<rootDir>/dev/validate/**/*.test.ts' --forceExit
+GCX_CONTEXT=<context> VALIDATE_WINDOW_DAYS=30 LOCAL_GRAFANA_COOKIES=$J npx jest --ci --rootDir . --testMatch '<rootDir>/dev/validate/**/*.test.ts' --forceExit
 ```
 
-The inventory and assessment are written to `dev/evidence/cloud-raw/` (git-ignored, because they contain real names). Without `LOCAL_GRAFANA_COOKIES` the suite is skipped. Grafana rotates session tokens from the client, so the suite calls `POST /api/user/auth-tokens/rotate` before each local request and writes the new cookie back to the jar. One login keeps working across runs; log in again only if a run fails with 401.
+The inventory and assessment are written to `dev/evidence/cloud-raw/` (git-ignored, because they contain real names). Without `GCX_CONTEXT` and `LOCAL_GRAFANA_COOKIES` the suite is skipped. Grafana rotates session tokens from the client, so the suite calls `POST /api/user/auth-tokens/rotate` before each local request and writes the new cookie back to the jar. One login keeps working across runs; log in again only if a run fails with 401.

@@ -1,0 +1,20 @@
+{
+  "data": [
+    "__time_shard__",
+    "channel",
+    "collector_id",
+    "computer",
+    "deployment_environment",
+    "instance",
+    "job",
+    "k8s_cluster_name",
+    "k8s_container_name",
+    "k8s_namespace_name",
+    "k8s_pod_name",
+    "op",
+    "server_id",
+    "service_name",
+    "service_namespace"
+  ],
+  "status": "success"
+}
