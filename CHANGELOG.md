@@ -2,7 +2,7 @@
 
 ## 1.0.0 (2026-10-19)
 
-First release. OTel Semconv Compliance scores how well the telemetry in your stack follows the OpenTelemetry semantic conventions and shows, service by service, where to fix it.
+First release. GROT Weaver scores how well the telemetry in your stack follows the OpenTelemetry semantic conventions and shows, service by service, where to fix it.
 
 ### Scanning
 

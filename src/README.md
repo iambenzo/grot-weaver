@@ -1,4 +1,4 @@
-# OTel Semconv Compliance
+# GROT Weaver
 
 Scores how well your telemetry follows the [OpenTelemetry semantic conventions](https://opentelemetry.io/docs/specs/semconv/) and shows where to fix it.
 
@@ -61,4 +61,4 @@ An admin can turn the Assistant integration off in the app settings, which remov
 
 ![App settings: datasources, translation strategy, limits and scoring](img/screenshot-settings-dark.png)
 
-Open **Administration > Plugins and data > Plugins > OTel Semconv Compliance > Configuration** to change which datasources are scanned, the default time window, query limits, volume weighting, your custom attribute namespaces, required resource attributes and service-to-pipeline mappings. The app can also check GitHub once a day for a newer semantic conventions release; new registry versions arrive with plugin updates.
+Open **Administration > Plugins and data > Plugins > GROT Weaver > Configuration** to change which datasources are scanned, the default time window, query limits, volume weighting, your custom attribute namespaces, required resource attributes and service-to-pipeline mappings. The app can also check GitHub once a day for a newer semantic conventions release; new registry versions arrive with plugin updates.

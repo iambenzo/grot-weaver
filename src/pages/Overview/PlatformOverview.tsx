@@ -65,7 +65,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
     () => scan && overviewContextData(scan, windowLabel, volumeWeighted),
     [scan, windowLabel, volumeWeighted]
   );
-  useAssistantPageContext(ROUTES.Overview, 'OTel Semconv Compliance overview', contextData);
+  useAssistantPageContext(ROUTES.Overview, 'GROT Weaver overview', contextData);
 
   if (load.status === 'loading') {
     return <LoadingProgress progress={load.progress} labels={load.labels} />;

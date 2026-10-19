@@ -24,7 +24,7 @@ export const MAX_CONTEXT_NAME = 100;
 
 const SIGNALS: Signal[] = ['metrics', 'traces', 'logs'];
 const ABOUT =
-  'OTel Semconv Compliance is a Grafana app that reads the metric names and attribute and label keys in this stack and scores them against the OpenTelemetry semantic conventions. Scores are shares of names or checks that pass; N/A means there was nothing to score. Findings are violations (must fix), improvements or information.';
+  'GROT Weaver is a Grafana app that reads the metric names and attribute and label keys in this stack and scores them against the OpenTelemetry semantic conventions. Scores are shares of names or checks that pass; N/A means there was nothing to score. Findings are violations (must fix), improvements or information.';
 
 export interface PageScan {
   assessment: StackAssessment;
@@ -44,7 +44,7 @@ export function overviewContextData(scan: PageScan, timeRange: string, volumeWei
   const groups = groupViolations(result.findings);
   const services = serviceRows(result);
   return {
-    page: 'OTel Semconv Compliance overview',
+    page: 'GROT Weaver overview',
     about: ABOUT,
     ...common(scan, timeRange, volumeWeighted),
     scores: Object.fromEntries(
@@ -90,7 +90,7 @@ export function serviceContextData(
     .filter((finding) => sameOwner(finding.owner, owner) && finding.type !== 'conformant')
     .sort((a, b) => b.impact_share - a.impact_share);
   return {
-    page: 'OTel Semconv Compliance service page',
+    page: 'GROT Weaver service page',
     about: ABOUT,
     service: clip(ownerName(owner), MAX_CONTEXT_NAME),
     ...common(scan, timeRange, volumeWeighted),

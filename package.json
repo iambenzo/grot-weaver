@@ -10,9 +10,10 @@
     "lint": "eslint --cache .",
     "lint:fix": "npm run lint -- --fix && prettier --write --list-different .",
     "e2e": "playwright test",
-    "server": "docker compose up --build"
+    "server": "docker compose up --build",
+    "sign": "npx --yes @grafana/sign-plugin@3.3.3"
   },
-  "author": "Iambenzo",
+  "author": "Ben Burbage",
   "license": "AGPL-3.0-only",
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

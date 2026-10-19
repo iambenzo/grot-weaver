@@ -270,7 +270,7 @@ function SelectedService({
     () => serviceContextData(scan, identity.owner, windowLabel, volumeWeighted, quickView),
     [scan, identity, windowLabel, volumeWeighted, quickView]
   );
-  useAssistantPageContext(ROUTES.Service, 'OTel Semconv Compliance service page', contextData);
+  useAssistantPageContext(ROUTES.Service, 'GROT Weaver service page', contextData);
   const owned = useMemo(
     () => assessment.result.findings.filter((finding) => sameOwner(finding.owner, identity.owner)),
     [assessment, identity]

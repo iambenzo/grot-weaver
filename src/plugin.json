@@ -1,21 +1,75 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "OTel Semconv Compliance",
+  "name": "GROT Weaver",
   "id": "benburbage-semconvcompliance-app",
   "backend": true,
   "executable": "gpx_semconv_compliance",
   "info": {
-    "keywords": ["app", "opentelemetry", "semantic conventions"],
+    "keywords": [
+      "opentelemetry",
+      "otel",
+      "semantic conventions",
+      "semconv",
+      "compliance",
+      "prometheus",
+      "tempo",
+      "loki",
+      "app"
+    ],
     "description": "Scores how well telemetry conforms to OpenTelemetry semantic conventions and shows where to fix it.",
     "author": {
-      "name": "iambenzo"
+      "name": "Ben Burbage",
+      "url": "https://github.com/iambenzo"
     },
+    "links": [
+      {
+        "name": "documentation",
+        "url": "https://github.com/iambenzo/otel-semconv-compliance/blob/main/src/README.md"
+      },
+      {
+        "name": "repository",
+        "url": "https://github.com/iambenzo/otel-semconv-compliance"
+      },
+      {
+        "name": "license",
+        "url": "https://github.com/iambenzo/otel-semconv-compliance/blob/main/LICENSE"
+      },
+      {
+        "name": "raise issue",
+        "url": "https://github.com/iambenzo/otel-semconv-compliance/issues"
+      }
+    ],
     "logos": {
       "small": "img/logo.svg",
       "large": "img/logo.svg"
     },
-    "screenshots": [],
+    "screenshots": [
+      {
+        "name": "Overview (dark)",
+        "path": "img/screenshot-overview-dark.png"
+      },
+      {
+        "name": "Overview (light)",
+        "path": "img/screenshot-overview-light.png"
+      },
+      {
+        "name": "Service findings (dark)",
+        "path": "img/screenshot-service-dark.png"
+      },
+      {
+        "name": "Service findings (light)",
+        "path": "img/screenshot-service-light.png"
+      },
+      {
+        "name": "Settings (dark)",
+        "path": "img/screenshot-settings-dark.png"
+      },
+      {
+        "name": "Settings (light)",
+        "path": "img/screenshot-settings-light.png"
+      }
+    ],
     "version": "%VERSION%",
     "updated": "%TODAY%"
   },
