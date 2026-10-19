@@ -17,7 +17,7 @@ import {
   useStyles2,
 } from '@grafana/ui';
 import pluginJson from '../../plugin.json';
-import { AssessmentResult, Signal } from '../../api/types';
+import { AssessmentResult, Owner, Signal } from '../../api/types';
 import { DatasourceProgress, DatasourceState, StackAssessment, mergeOwners } from '../../assessment/stackAssessment';
 import { LabelProgress } from '../../inventory/prometheus';
 import { loadingText } from '../../assessment/useStackAssessment';
@@ -360,7 +360,15 @@ export function IncompleteNote({ reasons, lead = 'Based on limited data' }: { re
 }
 
 export function hasOTelServices(result: AssessmentResult): boolean {
-  return mergeOwners(result).some((identity) => identity.owner.kind === 'service');
+  return attributedOwners(result).some((owner) => owner.kind === 'service');
+}
+
+function attributedOwners(result: AssessmentResult): Owner[] {
+  return [
+    ...result.attributions.map((attribution) => attribution.owner),
+    ...(result.metric_attributions ?? []).map((attribution) => attribution.owner),
+    ...(result.log_attributions ?? []).map((attribution) => attribution.owner),
+  ];
 }
 
 export type EmptyKind = 'no-datasources' | 'unreadable' | 'no-telemetry' | 'no-otel-services';
@@ -376,7 +384,7 @@ export function emptyKind({
   if (partial || hasOTelServices(result)) {
     return undefined;
   }
-  if (mergeOwners(result).length > 0) {
+  if (attributedOwners(result).length > 0) {
     return 'no-otel-services';
   }
   return progress.some((entry) => entry.state === 'ok') ? 'no-telemetry' : 'unreadable';

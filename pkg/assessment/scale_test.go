@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/iambenzo/otel-semconv-compliance/pkg/finding"
@@ -68,4 +69,26 @@ func Benchmark_Assess_atTheServiceLimit(b *testing.B) {
 	b.ReportMetric(float64(len(result.Findings)), "findings")
 	b.ReportMetric(float64(len(encoded))/(1<<20), "result-MB")
 	b.ReportMetric(float64(zipped.Len())/(1<<10), "gzipped-KB")
+}
+
+func Test_WriteScoreRequestAtTheServiceLimit(t *testing.T) {
+	path := os.Getenv("SCALE_SCORE_REQUEST_OUT")
+	if path == "" {
+		t.Skip("set SCALE_SCORE_REQUEST_OUT to write the gzipped score request used by dev/scripts/measure-render.mjs")
+	}
+	encoded, err := json.Marshal(map[string]any{"inventory": inventoryAtServiceLimit(), "volume_weighted": false})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var zipped bytes.Buffer
+	writer := gzip.NewWriter(&zipped)
+	if _, err := writer.Write(encoded); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, zipped.Bytes(), 0o600); err != nil {
+		t.Fatal(err)
+	}
 }

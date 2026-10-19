@@ -154,8 +154,9 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
   const timeRangeObject = sceneGraph.getTimeRange(model) as SceneTimeRange;
   const { value: timeRange } = timeRangeObject.useState();
   const { load, quick, fullScanError } = useServiceAssessment(settings, timeRange, service, namespace);
-  const resolved =
-    load.status === 'ready' ? selectedIdentity(pickableIdentities(load.assessment), service, namespace) : undefined;
+  const loadedAssessment = load.status === 'ready' ? load.assessment : undefined;
+  const identities = useMemo(() => (loadedAssessment ? pickableIdentities(loadedAssessment) : []), [loadedAssessment]);
+  const resolved = selectedIdentity(identities, service, namespace);
   const title = servicePageTitle(resolved?.owner);
   useEffect(() => model.showTitle(title), [model, title]);
   const scan = usePageScan(load);
@@ -174,8 +175,7 @@ function ServiceFindingsRenderer({ model }: SceneComponentProps<ServiceFindings>
 
   const { assessment } = load;
   const empty = emptyKind(assessment);
-  const identities = pickableIdentities(assessment);
-  const selected = selectedIdentity(identities, service, namespace);
+  const selected = resolved;
   const activeSignal = SIGNALS.find((candidate) => candidate === signal) ?? selected?.signals[0] ?? 'metrics';
 
   return (

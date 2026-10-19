@@ -318,12 +318,17 @@ export function mergeOwners(result: AssessmentResult): ServiceIdentity[] {
     }
   }
   const identities = [...merged.values()];
+  const byName = new Map<string, ServiceIdentity[]>();
   for (const identity of identities) {
-    identity.aliases = identities
-      .filter(
-        (other) =>
-          other !== identity && other.owner.name === identity.owner.name && other.owner.kind === identity.owner.kind
-      )
+    const key = `${identity.owner.kind}|${identity.owner.name}`;
+    const named = byName.get(key) ?? [];
+    named.push(identity);
+    byName.set(key, named);
+  }
+  for (const identity of identities) {
+    identity.aliases = byName
+      .get(`${identity.owner.kind}|${identity.owner.name}`)!
+      .filter((other) => other !== identity)
       .map((other) => other.owner);
   }
   return identities.sort((a, b) => ownerKey(a.owner).localeCompare(ownerKey(b.owner)));

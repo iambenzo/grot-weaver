@@ -57,6 +57,9 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const [signal, setSignal] = useState<Signal>('metrics');
   const windowLabel = rangeUtil.describeTimeRange(timeRange.raw, timeRangeObject.getTimeZone());
   const scan = usePageScan(load);
+  const shownResult = scan?.assessment.result;
+  const groups = useMemo(() => (shownResult ? groupViolations(shownResult.findings) : []), [shownResult]);
+  const services = useMemo(() => (shownResult ? serviceRows(shownResult) : []), [shownResult]);
   const volumeWeighted = isVolumeWeighted(settings);
   const contextData = useMemo(
     () => scan && overviewContextData(scan, windowLabel, volumeWeighted),
@@ -78,7 +81,6 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
   const { assessment } = load;
   const { result } = assessment;
   const range = { from: String(timeRange.raw.from), to: String(timeRange.raw.to) };
-  const groups = groupViolations(result.findings);
   const limits = scanLimits(assessment.progress, result);
   const incompleteFor = (candidate: Signal) => incompleteReasons(assessment.progress, limits, candidate);
   const limitedSignals = SIGNALS.filter((candidate) => incompleteFor(candidate).length > 0);
@@ -161,7 +163,7 @@ function PlatformOverviewRenderer({ model }: SceneComponentProps<PlatformOvervie
           lead="Some of these scores rest on limited data for"
           reasons={limitedSignals.map((candidate) => SIGNAL_LABELS[candidate].toLowerCase())}
         />
-        <ServicesTable rows={serviceRows(result)} range={range} />
+        <ServicesTable rows={services} range={range} />
       </Stack>
       <OwnerSections result={result} />
     </Stack>

@@ -40,6 +40,7 @@
     "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-react-hooks": "^7.1.0",
     "eslint-webpack-plugin": "^5.0.0",
+    "fake-indexeddb": "6.2.5",
     "fork-ts-checker-webpack-plugin": "^9.1.0",
     "glob": "^11.1.0",
     "identity-obj-proxy": "^3.0.0",
