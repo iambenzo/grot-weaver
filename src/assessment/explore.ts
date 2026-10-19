@@ -1,4 +1,5 @@
 import { AssessmentResult, Finding, Owner } from '../api/types';
+import { appHref } from '../utils/utils.routing';
 import { attributeSelector, escapeString, serviceFilterExpression } from '../inventory/traceql';
 import { streamSelector } from '../inventory/loki';
 
@@ -22,7 +23,7 @@ export function exploreUrl(target: ExploreTarget, from: string, to: string): str
       range: { from, to },
     },
   };
-  return `/explore?schemaVersion=1&panes=${encodeURIComponent(JSON.stringify(panes))}`;
+  return appHref(`/explore?schemaVersion=1&panes=${encodeURIComponent(JSON.stringify(panes))}`);
 }
 
 export function evidenceTarget(

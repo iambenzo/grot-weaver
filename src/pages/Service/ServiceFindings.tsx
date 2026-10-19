@@ -27,7 +27,7 @@ import {
   EmptyState,
   LinkButton,
 } from '@grafana/ui';
-import { prefixRoute } from '../../utils/utils.routing';
+import { appHref, prefixRoute } from '../../utils/utils.routing';
 import { ROUTES } from '../../constants';
 import { proxyGet } from '../../datasources/proxy';
 import { createLimiter } from '../../datasources/limiter';
@@ -452,7 +452,7 @@ function NoServiceSelected({ result, range }: { result: AssessmentResult; range:
       message="Choose a service to see its findings"
       hideImage
       button={
-        <LinkButton href={prefixRoute(ROUTES.Overview)} variant="secondary" icon="arrow-left">
+        <LinkButton href={appHref(prefixRoute(ROUTES.Overview))} variant="secondary" icon="arrow-left">
           All services on the Overview
         </LinkButton>
       }

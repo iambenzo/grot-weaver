@@ -22,6 +22,7 @@ import { DatasourceProgress, DatasourceState, StackAssessment, mergeOwners } fro
 import { LabelProgress } from '../../inventory/prometheus';
 import { loadingText } from '../../assessment/useStackAssessment';
 import { testIds } from '../testIds';
+import { appHref } from '../../utils/utils.routing';
 
 const OTEL_LANGUAGES_DOCS = 'https://opentelemetry.io/docs/languages/';
 const GRAFANA_INSTRUMENT_DOCS = 'https://grafana.com/docs/opentelemetry/instrument/';
@@ -408,10 +409,10 @@ function NoDatasources() {
       message="No metrics, trace or log datasources found"
       button={
         <Stack gap={1} justifyContent="center" wrap="wrap">
-          <LinkButton href={NEW_DATASOURCE_URL} icon="plus" size="lg">
+          <LinkButton href={appHref(NEW_DATASOURCE_URL)} icon="plus" size="lg">
             Add a datasource
           </LinkButton>
-          <LinkButton href={APP_SETTINGS_URL} icon="cog" size="lg" variant="secondary">
+          <LinkButton href={appHref(APP_SETTINGS_URL)} icon="cog" size="lg" variant="secondary">
             App settings
           </LinkButton>
         </Stack>
