@@ -6,6 +6,8 @@ import { Inventory } from '../inventory/types';
 import {
   DatasourceProgress,
   MAX_SERIES_PRESENCE_CHECKS,
+  PARTIAL_SCORING_MAX_SERVICES,
+  collectedServices,
   StackAssessment,
   StackDependencies,
   assessStack,
@@ -224,10 +226,13 @@ describe('progress, partial results and retry', () => {
   };
   const window = { startSeconds: 1, endSeconds: 2 };
 
-  function fakeStack(denied: string[]) {
+  function fakeStack(denied: string[], tempoServices = 0) {
     const get = (async (uid: string, requestPath: string) => {
       if (denied.includes(uid)) {
         throw { status: 403, data: { message: 'Access denied to this data source' } };
+      }
+      if (requestPath === '/api/v2/search/tag/resource.service.name/values') {
+        return { tagValues: Array.from({ length: tempoServices }, (_, index) => ({ value: `svc-${index}` })) };
       }
       if (requestPath.endsWith('/values')) {
         return { status: 'success', data: [], tagValues: [] };
@@ -282,6 +287,25 @@ describe('progress, partial results and retry', () => {
     expect(partials.every((partial) => partial.collections.length < 3)).toBe(true);
     expect(score).toHaveBeenCalledTimes(partials.length + 1);
     expect((assessment.result as unknown as { scored: string[] }).scored).toEqual(['tempo', 'prom', 'loki']);
+  });
+
+  it('scores only once, at the end, once the collected stack is larger than the partial-scoring limit', async () => {
+    const { deps, partials, score, progress } = fakeStack([], PARTIAL_SCORING_MAX_SERVICES + 1);
+    const slowTempo = deps.get;
+    deps.get = (async (uid: string, path: string, params: Record<string, string>) => {
+      if (uid !== 'tempo') {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      return slowTempo(uid, path, params);
+    }) as ProxyGet;
+
+    const assessment = await assessStack(datasources, window, {}, deps);
+
+    expect(partials).toEqual([]);
+    expect(score).toHaveBeenCalledTimes(1);
+    expect(assessment.partial).toBe(false);
+    expect(progress.length).toBeGreaterThanOrEqual(4);
+    expect(progress[progress.length - 1].map((entry) => entry.state)).toEqual(['ok', 'ok', 'ok']);
   });
 
   it('retries one datasource and keeps the others', async () => {
@@ -363,5 +387,58 @@ describe('cancellation through the collectors', () => {
     expect(startedBeforeAbort).toBe(2);
     expect(fetch).toHaveBeenCalledTimes(startedBeforeAbort);
     expect(unsubscribed).toHaveBeenCalledTimes(startedBeforeAbort);
+  });
+});
+
+describe('collectedServices', () => {
+  const ref = { uid: 'prom', type: 'prometheus', name: 'P' };
+  const metrics = (owners: Array<Record<string, string>>, targetInfo: Array<Record<string, string>> = []) => ({
+    ref,
+    signal: 'metrics' as const,
+    errors: [],
+    metrics: {
+      uid: 'prom',
+      names: [],
+      target_info: targetInfo,
+      owners: owners.flatMap((labels) => [
+        { metric: 'http_server_request_duration_seconds', labels, series: 1 },
+        { metric: 'process_cpu_seconds_total', labels, series: 1 },
+      ]),
+      label_keys: [],
+      collectors: [],
+    },
+  });
+
+  it('counts each metric owner once, however many metrics it sends', () => {
+    const owners = Array.from({ length: 1200 }, (_, index) => ({ job: `svc-${index}` }));
+
+    expect(collectedServices([metrics(owners)])).toBe(1200);
+  });
+
+  it('counts services named only by target_info, once each', () => {
+    expect(
+      collectedServices([
+        metrics([{ job: 'a' }], [{ job: 'a', instance: '1' }, { job: 'a', instance: '2' }, { job: 'b' }, { job: 'c' }]),
+      ])
+    ).toBe(3);
+  });
+
+  it('counts one service once across scopes, presence flags and label order', () => {
+    expect(
+      collectedServices([
+        metrics([
+          { job: 'shop/cart', service_name: 'cart', otel_scope_name: 'http' },
+          { otel_scope_name: 'db', service_name: 'cart', job: 'shop/cart' },
+          { job: 'shop/cart', service_name: 'cart', __present_service_instance_id: '1' },
+        ]),
+      ])
+    ).toBe(1);
+  });
+
+  it('adds trace and log services across datasources', () => {
+    const traces = { ref, signal: 'traces' as const, errors: [], traces: { uid: 't', services: [{}, {}] } };
+    const logs = { ref, signal: 'logs' as const, errors: [], logs: { uid: 'l', labels: [], services: [{}] } };
+
+    expect(collectedServices([traces, logs, metrics([{ job: 'a' }])] as never)).toBe(4);
   });
 });

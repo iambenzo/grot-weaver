@@ -1,13 +1,19 @@
 import { readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
 import { chromium } from 'playwright';
 
 const GRAFANA = process.env.GRAFANA_URL ?? 'http://localhost:13000';
 const APP = `${GRAFANA}/a/iambenzo-semconvcompliance-app`;
 const RUNS = Number(process.env.RUNS ?? 3);
 const requestPath = process.argv[2];
+const LARGE_STACK_SERVICES = 1001;
+const SLOW_DATASOURCE_MS = 3000;
 
 if (!requestPath) {
-  console.error('usage: node dev/scripts/measure-render.mjs <gzipped score request>');
+  console.error('usage: [LARGE_STACK=1] node dev/scripts/measure-render.mjs <gzipped score request>');
+  console.error(
+    'LARGE_STACK=1 makes Tempo report 1001 services and slows the other datasources, so Tempo answers first and the scan is large enough to skip partial scores'
+  );
   console.error(
     'write one with: SCALE_SCORE_REQUEST_OUT=<path> go test ./pkg/assessment/ -run Test_WriteScoreRequestAtTheServiceLimit'
   );
@@ -53,8 +59,26 @@ async function measure(browser, target) {
     });
   });
   let scoreCalls = 0;
+  if (process.env.LARGE_STACK) {
+    await page.route(/\/api\/datasources\/proxy\/uid\/(?!tempo\/)/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, SLOW_DATASOURCE_MS));
+      await route.continue();
+    });
+    await page.route('**/api/datasources/proxy/uid/tempo/**', (route) => {
+      const services = route.request().url().includes('/tag/resource.service.name/values')
+        ? Array.from({ length: LARGE_STACK_SERVICES }, (_, index) => ({ value: `svc-${index}` }))
+        : [];
+      return route.fulfill({ json: { tagValues: services, scopes: [], traces: [], series: [] } });
+    });
+  }
+  let fullScoreCalls = 0;
   await page.route('**/resources/score', async (route) => {
     scoreCalls++;
+    if (process.env.LARGE_STACK && !includesLargeStack(route.request().postDataBuffer())) {
+      await route.continue();
+      return;
+    }
+    fullScoreCalls++;
     await route.continue({ postData: scoreRequest });
   });
   const cdp = await context.newCDPSession(page);
@@ -62,7 +86,7 @@ async function measure(browser, target) {
   const started = Date.now();
   await page.goto(target.url);
   await page.getByTestId(target.ready).first().waitFor({ timeout: 120_000 });
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('networkidle', { timeout: 180_000 });
   const renderMs = Date.now() - started;
   const { metrics } = await cdp.send('Performance.getMetrics');
   const heapMb = metrics.find((metric) => metric.name === 'JSHeapUsedSize').value / 2 ** 20;
@@ -74,7 +98,13 @@ async function measure(browser, target) {
     longestTaskMs: Math.max(0, ...longTasks),
     longTasksMs: longTasks.reduce((total, duration) => total + duration, 0),
     scoreCalls,
+    fullScoreCalls,
   };
+}
+
+function includesLargeStack(body) {
+  const { inventory } = JSON.parse(gunzipSync(body).toString());
+  return inventory.traces.some((datasource) => datasource.services.length >= LARGE_STACK_SERVICES);
 }
 
 function median(values) {
@@ -89,7 +119,7 @@ for (const target of pages) {
     runs.push(await measure(browser, target));
   }
   const summary = Object.fromEntries(
-    ['renderMs', 'heapMb', 'longestTaskMs', 'longTasksMs', 'scoreCalls'].map((key) => [
+    ['renderMs', 'heapMb', 'longestTaskMs', 'longTasksMs', 'scoreCalls', 'fullScoreCalls'].map((key) => [
       key,
       Math.round(median(runs.map((entry) => entry[key]))),
     ])

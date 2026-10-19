@@ -143,7 +143,12 @@ async function runAssessment(
     targets.map(async (target) => {
       collections.push(await collect(target, window, settings, deps, rules, presenceAttributes));
       deps.onProgress?.(snapshot());
-      if (finished || collections.length === targetsOf(datasources).length || !deps.onPartial) {
+      if (
+        finished ||
+        collections.length === targetsOf(datasources).length ||
+        !deps.onPartial ||
+        collectedServices(collections) > PARTIAL_SCORING_MAX_SERVICES
+      ) {
         return;
       }
       const partial = await scoreCollected(true).catch(() => undefined);
@@ -158,6 +163,27 @@ async function runAssessment(
 }
 
 export const MAX_SERIES_PRESENCE_CHECKS = 100;
+export const PARTIAL_SCORING_MAX_SERVICES = 1000;
+
+function metricServices(metrics: MetricDatasource | undefined): number {
+  if (!metrics) {
+    return 0;
+  }
+  const identity = (labels: Record<string, string>) =>
+    JSON.stringify([labels.job ?? '', labels.service_name ?? '', labels.service_namespace ?? '']);
+  return new Set([...metrics.owners.map((owner) => identity(owner.labels)), ...metrics.target_info.map(identity)]).size;
+}
+
+export function collectedServices(collections: Collection[]): number {
+  return collections.reduce(
+    (total, collection) =>
+      total +
+      (collection.traces?.services.length ?? 0) +
+      (collection.logs?.services.length ?? 0) +
+      metricServices(collection.metrics),
+    0
+  );
+}
 
 export async function seriesPresenceAttributes(settings: PluginSettings, deps: StackDependencies): Promise<string[]> {
   const required = requiredResourceAttributes(settings);
