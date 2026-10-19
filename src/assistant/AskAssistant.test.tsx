@@ -39,7 +39,7 @@ describe('AskAssistant', () => {
     render(<AskAssistant origin="top-violation" prompt="Explain this" />);
 
     const button = screen.getByRole('button', { name: 'Ask Assistant' });
-    expect(button).toHaveAttribute('data-origin', 'iambenzo-semconvcompliance-app/top-violation');
+    expect(button).toHaveAttribute('data-origin', 'benburbage-semconvcompliance-app/top-violation');
     expect(button).toHaveAttribute('data-prompt', 'Explain this');
     expect(button).toHaveAttribute('data-autosend', 'false');
   });

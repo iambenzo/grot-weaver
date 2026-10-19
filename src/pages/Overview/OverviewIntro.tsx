@@ -4,7 +4,7 @@ import { useStoredValue } from '../../storage/useStoredValue';
 import { testIds } from '../../components/testIds';
 import { currentViewer, viewerId } from '../../assessment/savedResults';
 
-const INTRO_STATE_KEY = 'iambenzo-semconvcompliance-app.overview-intro';
+const INTRO_STATE_KEY = 'benburbage-semconvcompliance-app.overview-intro';
 const COLLAPSED = 'collapsed';
 const OPEN = 'open';
 

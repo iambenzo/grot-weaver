@@ -13,7 +13,7 @@ import { assessStack } from '../../src/assessment/stackAssessment';
 
 const run = promisify(execFile);
 const LOCAL_GRAFANA = 'http://localhost:13000';
-const PLUGIN_RESOURCES = `${LOCAL_GRAFANA}/api/plugins/iambenzo-semconvcompliance-app/resources`;
+const PLUGIN_RESOURCES = `${LOCAL_GRAFANA}/api/plugins/benburbage-semconvcompliance-app/resources`;
 const OUTPUT_DIR = path.resolve(__dirname, '../evidence/cloud-raw');
 const WINDOW_SECONDS = Number(process.env.VALIDATE_WINDOW_DAYS ?? 1) * 24 * 3600;
 const GCX_MAX_BUFFER_BYTES = 256 * 1024 * 1024;

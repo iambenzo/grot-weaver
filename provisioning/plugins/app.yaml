@@ -1,9 +1,9 @@
 apiVersion: 1
 
 apps:
-  - type: 'iambenzo-semconvcompliance-app'
+  - type: 'benburbage-semconvcompliance-app'
     org_id: 1
-    org_name: 'iambenzo'
+    org_name: 'benburbage'
     disabled: false
     jsonData:
       defaultWindow: now-24h

@@ -21,7 +21,7 @@ jest.mock('@grafana/runtime', () => ({
 
 function props(jsonData: object): AppConfigProps {
   const meta = {
-    id: 'iambenzo-semconvcompliance-app',
+    id: 'benburbage-semconvcompliance-app',
     enabled: true,
     pinned: true,
     jsonData,
@@ -107,7 +107,7 @@ describe('AppConfig', () => {
 
     const request = fetch.mock.calls[0][0];
     expect(request).toMatchObject({
-      url: '/api/plugins/iambenzo-semconvcompliance-app/settings',
+      url: '/api/plugins/benburbage-semconvcompliance-app/settings',
       method: 'POST',
       showErrorAlert: false,
     });

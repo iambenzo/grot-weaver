@@ -210,7 +210,7 @@ jobs:
       - name: Docker logs
         if: ${{ always() && steps.run-tests.outcome == 'failure' }}
         run: |
-          docker logs iambenzo-semconvcompliance-app >& grafana-server.log
+          docker logs benburbage-semconvcompliance-app >& grafana-server.log
 
       - name: Stop grafana docker
         run: docker compose down

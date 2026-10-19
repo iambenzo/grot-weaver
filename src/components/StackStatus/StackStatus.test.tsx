@@ -296,7 +296,7 @@ describe('emptyKind', () => {
     );
     expect(screen.getByRole('link', { name: /app settings/i })).toHaveAttribute(
       'href',
-      '/plugins/iambenzo-semconvcompliance-app'
+      '/plugins/benburbage-semconvcompliance-app'
     );
     expect(screen.queryByText(/Telemetry exists/)).not.toBeInTheDocument();
   });

@@ -39,7 +39,7 @@ describe('internal links', () => {
     serveFrom('/grafana');
 
     expect(serviceLink({ kind: 'service', name: 'checkout' }, { from: 'now-1h', to: 'now' })).toMatch(
-      /^\/grafana\/a\/iambenzo-semconvcompliance-app\/service\?/
+      /^\/grafana\/a\/benburbage-semconvcompliance-app\/service\?/
     );
     expect(exploreUrl({ uid: 'tempo', type: 'tempo', query: '{ }' }, 'now-1h', 'now')).toMatch(/^\/grafana\/explore\?/);
   });

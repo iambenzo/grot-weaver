@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
   "name": "OTel Semconv Compliance",
-  "id": "iambenzo-semconvcompliance-app",
+  "id": "benburbage-semconvcompliance-app",
   "backend": true,
   "executable": "gpx_semconv_compliance",
   "info": {

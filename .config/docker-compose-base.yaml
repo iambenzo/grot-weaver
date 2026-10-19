@@ -1,7 +1,7 @@
 services:
   grafana:
     user: root
-    container_name: 'iambenzo-semconvcompliance-app'
+    container_name: 'benburbage-semconvcompliance-app'
 
     build:
       context: .
@@ -19,13 +19,13 @@ services:
     cap_add:
       - SYS_PTRACE
     volumes:
-      - ../dist:/var/lib/grafana/plugins/iambenzo-semconvcompliance-app
+      - ../dist:/var/lib/grafana/plugins/benburbage-semconvcompliance-app
       - ../provisioning:/etc/grafana/provisioning
-      - ..:/root/iambenzo-semconvcompliance-app
+      - ..:/root/benburbage-semconvcompliance-app
 
     environment:
       NODE_ENV: development
-      GF_LOG_FILTERS: plugin.iambenzo-semconvcompliance-app:debug
+      GF_LOG_FILTERS: plugin.benburbage-semconvcompliance-app:debug
       GF_LOG_LEVEL: debug
       GF_DATAPROXY_LOGGING: 1
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: iambenzo-semconvcompliance-app
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: benburbage-semconvcompliance-app

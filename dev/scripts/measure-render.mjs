@@ -3,7 +3,7 @@ import { gunzipSync } from 'node:zlib';
 import { chromium } from 'playwright';
 
 const GRAFANA = process.env.GRAFANA_URL ?? 'http://localhost:13000';
-const APP = `${GRAFANA}/a/iambenzo-semconvcompliance-app`;
+const APP = `${GRAFANA}/a/benburbage-semconvcompliance-app`;
 const RUNS = Number(process.env.RUNS ?? 3);
 const requestPath = process.argv[2];
 const LARGE_STACK_SERVICES = 1001;

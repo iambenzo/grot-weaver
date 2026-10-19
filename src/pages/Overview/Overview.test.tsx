@@ -156,7 +156,7 @@ describe('ServicesTable', () => {
     };
 
     expect(serviceLink(row.owner, { from: 'now-24h', to: 'now' })).toBe(
-      '/a/iambenzo-semconvcompliance-app/service?service=checkout&from=now-24h&to=now&namespace=shop'
+      '/a/benburbage-semconvcompliance-app/service?service=checkout&from=now-24h&to=now&namespace=shop'
     );
     render(<ServicesTable rows={[row]} range={{ from: 'now-24h', to: 'now' }} />);
     expect(screen.getByRole('link', { name: 'shop/checkout' })).toBeInTheDocument();
@@ -252,7 +252,7 @@ describe('TopViolations', () => {
 
     expect(screen.getByRole('link', { name: 'shop/checkout' })).toHaveAttribute(
       'href',
-      '/a/iambenzo-semconvcompliance-app/service?service=checkout&from=now-24h&to=now&namespace=shop&signal=traces'
+      '/a/benburbage-semconvcompliance-app/service?service=checkout&from=now-24h&to=now&namespace=shop&signal=traces'
     );
   });
 

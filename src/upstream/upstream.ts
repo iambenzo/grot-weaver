@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { browserStorage, useStoredValue } from '../storage/useStoredValue';
 
 export const LATEST_RELEASE_URL = 'https://api.github.com/repos/open-telemetry/semantic-conventions/releases/latest';
-const CACHE_KEY = 'iambenzo-semconvcompliance-app.upstream-release';
+const CACHE_KEY = 'benburbage-semconvcompliance-app.upstream-release';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-const DISMISSED_KEY = 'iambenzo-semconvcompliance-app.upstream-dismissed';
+const DISMISSED_KEY = 'benburbage-semconvcompliance-app.upstream-dismissed';
 
 export interface UpstreamRelease {
   tag: string;

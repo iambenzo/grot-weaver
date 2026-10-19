@@ -35,7 +35,7 @@ describe('useAssistantPageContext', () => {
     const { unmount } = renderHook(() => useAssistantPageContext(ROUTES.Overview, 'Overview', { scores: 1 }));
 
     expect(mockProvide).toHaveBeenCalledTimes(1);
-    expect(mockProvide).toHaveBeenCalledWith('/a/iambenzo-semconvcompliance-app/overview**', [
+    expect(mockProvide).toHaveBeenCalledWith('/a/benburbage-semconvcompliance-app/overview**', [
       { type: 'structured', title: 'Overview', data: { scores: 1 } },
     ]);
 
@@ -54,7 +54,7 @@ describe('useAssistantPageContext', () => {
     rerender({ data: { scan: { scoresFinal: true } } });
     expect(mockUnregister).toHaveBeenCalledTimes(1);
     expect(mockProvide).toHaveBeenCalledTimes(2);
-    expect(mockProvide).toHaveBeenLastCalledWith('/a/iambenzo-semconvcompliance-app/service**', [
+    expect(mockProvide).toHaveBeenLastCalledWith('/a/benburbage-semconvcompliance-app/service**', [
       { type: 'structured', title: 'Service', data: { scan: { scoresFinal: true } } },
     ]);
   });
