@@ -3,7 +3,6 @@ package catalogue
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
 )
 
 const (
@@ -12,6 +11,8 @@ const (
 	RenamesFile  = "renames.json"
 	ManifestFile = "manifest.json"
 )
+
+type ReadFile func(name string) ([]byte, error)
 
 type Catalogue struct {
 	Manifest       Manifest
@@ -23,24 +24,24 @@ type Catalogue struct {
 	spanGroupRules []SpanGroupRule
 }
 
-func Load(fsys fs.FS) (*Catalogue, error) {
+func Load(read ReadFile) (*Catalogue, error) {
 	var manifest Manifest
-	if err := readJSON(fsys, ManifestFile, &manifest); err != nil {
+	if err := readJSON(read, ManifestFile, &manifest); err != nil {
 		return nil, err
 	}
 
-	core, err := readRegistry(fsys, CoreFile, SourceCore)
+	core, err := readRegistry(read, CoreFile, SourceCore)
 	if err != nil {
 		return nil, err
 	}
 
-	genAI, err := readRegistry(fsys, GenAIFile, SourceGenAI)
+	genAI, err := readRegistry(read, GenAIFile, SourceGenAI)
 	if err != nil {
 		return nil, err
 	}
 
 	var renames RenameHistory
-	if err := readJSON(fsys, RenamesFile, &renames); err != nil {
+	if err := readJSON(read, RenamesFile, &renames); err != nil {
 		return nil, err
 	}
 
@@ -59,16 +60,16 @@ func New(manifest Manifest, registry Registry, renames RenameHistory) *Catalogue
 	}
 }
 
-func readRegistry(fsys fs.FS, name string, source Source) (Registry, error) {
+func readRegistry(read ReadFile, name string, source Source) (Registry, error) {
 	var registry Registry
-	if err := readJSON(fsys, name, &registry); err != nil {
+	if err := readJSON(read, name, &registry); err != nil {
 		return Registry{}, err
 	}
 	return registry.withSource(source), nil
 }
 
-func readJSON(fsys fs.FS, name string, target any) error {
-	content, err := fs.ReadFile(fsys, name)
+func readJSON(read ReadFile, name string, target any) error {
+	content, err := read(name)
 	if err != nil {
 		return fmt.Errorf("read %s: %w", name, err)
 	}

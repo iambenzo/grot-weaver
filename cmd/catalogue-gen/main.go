@@ -133,7 +133,7 @@ func run(ctx context.Context, args []string, stdout io.Writer) error {
 }
 
 func loadPrevious(outputDir string) *catalogue.Catalogue {
-	previous, err := catalogue.Load(os.DirFS(outputDir))
+	previous, err := catalogue.Load(readFrom(outputDir))
 	if err != nil {
 		return nil
 	}
@@ -156,7 +156,7 @@ func writeSummary(path string, previous *catalogue.Catalogue, files []generatedF
 	if err := writeFiles(staging, files...); err != nil {
 		return err
 	}
-	next, err := catalogue.Load(os.DirFS(staging))
+	next, err := catalogue.Load(readFrom(staging))
 	if err != nil {
 		return fmt.Errorf("load generated catalogue: %w", err)
 	}
@@ -226,4 +226,10 @@ func writeFiles(outputDir string, files ...generatedFile) error {
 		errs = append(errs, os.WriteFile(filepath.Join(outputDir, file.name), file.content, 0o644))
 	}
 	return errors.Join(errs...)
+}
+
+func readFrom(dir string) catalogue.ReadFile {
+	return func(name string) ([]byte, error) {
+		return os.ReadFile(filepath.Join(dir, name))
+	}
 }

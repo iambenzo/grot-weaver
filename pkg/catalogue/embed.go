@@ -1,17 +1,12 @@
 package catalogue
 
-import (
-	"embed"
-	"io/fs"
-)
+import "embed"
 
 //go:embed data/*.json
 var embeddedData embed.FS
 
 func LoadEmbedded() (*Catalogue, error) {
-	data, err := fs.Sub(embeddedData, "data")
-	if err != nil {
-		return nil, err
-	}
-	return Load(data)
+	return Load(func(name string) ([]byte, error) {
+		return embeddedData.ReadFile("data/" + name)
+	})
 }

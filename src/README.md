@@ -4,7 +4,7 @@ Scores how well your telemetry follows the [OpenTelemetry semantic conventions](
 
 The app reads the metric names, and the attribute and label keys, that your services send to Prometheus, Tempo and Loki. It checks them against the semantic conventions registry bundled with the plugin and tells you, service by service, which names are out of date, which units are wrong and which required attributes are missing.
 
-![Overview: scores per signal with what each was counted from](img/screenshot-overview-dark.png)
+![Overview: scores per signal with what each was counted from](https://raw.githubusercontent.com/iambenzo/otel-semconv-compliance/main/src/img/screenshot-overview-dark.png)
 
 ## What it scans
 
@@ -34,7 +34,7 @@ When a check had to be limited, for example volume sampled because TraceQL metri
 
 ## From finding to fix
 
-![A service's findings, with one expanded to show its evidence, the Ask Assistant button and the fix tabs](img/screenshot-service-dark.png)
+![A service's findings, with one expanded to show its evidence, the Ask Assistant button and the fix tabs](https://raw.githubusercontent.com/iambenzo/otel-semconv-compliance/main/src/img/screenshot-service-dark.png)
 
 1. On the **Overview**, start with **Services, worst first**, or with **Top violations**, which lists the names seen across the most services.
 2. Open a service to see each finding with its level (violation, improvement or information) and its share of the signal's volume.
@@ -59,6 +59,6 @@ An admin can turn the Assistant integration off in the app settings, which remov
 
 ## Settings
 
-![App settings: datasources, translation strategy, limits and scoring](img/screenshot-settings-dark.png)
+![App settings: datasources, translation strategy, limits and scoring](https://raw.githubusercontent.com/iambenzo/otel-semconv-compliance/main/src/img/screenshot-settings-dark.png)
 
 Open **Administration > Plugins and data > Plugins > GROT Weaver > Configuration** to change which datasources are scanned, the default time window, query limits, volume weighting, your custom attribute namespaces, required resource attributes and service-to-pipeline mappings. The app can also check GitHub once a day for a newer semantic conventions release; new registry versions arrive with plugin updates.

@@ -2,6 +2,7 @@ package catalogue
 
 import (
 	"encoding/json"
+	"io/fs"
 	"os"
 	"strings"
 	"testing"
@@ -10,7 +11,8 @@ import (
 
 func loadGenerated(t *testing.T) *Catalogue {
 	t.Helper()
-	loaded, err := Load(os.DirFS("data"))
+	data := os.DirFS("data")
+	loaded, err := Load(func(name string) ([]byte, error) { return fs.ReadFile(data, name) })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +94,7 @@ func Test_Load_reportsMissingFile(t *testing.T) {
 		CoreFile:     {Data: []byte(`{}`)},
 	}
 
-	_, err := Load(fsys)
+	_, err := Load(fsys.ReadFile)
 
 	if err == nil || !strings.Contains(err.Error(), GenAIFile) {
 		t.Errorf("err = %v, want it to name %s", err, GenAIFile)
