@@ -34,7 +34,7 @@ func (a *App) handleScore(w http.ResponseWriter, req *http.Request) {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "decode request: " + err.Error()})
 		return
 	}
-	defer body.Close()
+	defer func() { _ = body.Close() }()
 	decoder := json.NewDecoder(body)
 	decoder.DisallowUnknownFields()
 	var request scoreRequest
