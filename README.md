@@ -56,7 +56,7 @@ Set the version and changelog first: `npm version <major|minor|patch> --no-git-t
 
 ### From a tag (GitHub Actions)
 
-Push a tag such as `v1.0.0`. `.github/workflows/release.yml` builds the frontend and every backend platform, signs the plugin when the repository secret `GRAFANA_ACCESS_POLICY_TOKEN` is set, attests the build and drafts a GitHub release with the ZIP and its SHA1. Attestation needs a public repository.
+Push a tag such as `v0.1.0`. `.github/workflows/release.yml` builds the frontend and every backend platform, signs the plugin when the repository secret `GRAFANA_ACCESS_POLICY_TOKEN` is set, attests the build and drafts a GitHub release with the ZIP and its SHA1. Attestation needs a public repository.
 
 For the first submission, leave the secret unset: Grafana assigns the signature level only after review, and signing before that fails before the release is drafted. Add the secret once the plugin is approved. The workflow pins `build-plugin` to a commit, but that action calls `package-plugin@main`, so packaging and signing can still change upstream.
 
@@ -69,8 +69,8 @@ go run github.com/magefile/mage@v1.17.2          # backends for every platform
 export GRAFANA_ACCESS_POLICY_TOKEN=<token>
 npm run sign                                     # writes dist/MANIFEST.txt
 cp -r dist benburbage-semconvcompliance-app
-zip -r benburbage-semconvcompliance-app-1.0.0.zip benburbage-semconvcompliance-app
-shasum benburbage-semconvcompliance-app-1.0.0.zip
+zip -r benburbage-semconvcompliance-app-0.1.0.zip benburbage-semconvcompliance-app
+shasum benburbage-semconvcompliance-app-0.1.0.zip
 ```
 
 Upload the ZIP and its SHA1 where the catalog submission can reach them, for example as GitHub release assets. Until the plugin has been reviewed and given a signature level, `npm run sign` fails; that first submission can be unsigned.
