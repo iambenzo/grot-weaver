@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { ROUTES } from '../src/constants';
+import { testIds } from '../src/components/testIds';
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
@@ -20,7 +21,7 @@ test.describe('accessibility', () => {
   test('service page has no WCAG A or AA violations', async ({ gotoPage, page }) => {
     await gotoPage(`/${ROUTES.Service}`);
     await expect(page.getByText('Semantic convention findings for one service, and where to fix them.')).toBeVisible();
-    await expect(page.getByRole('combobox').first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId(testIds.status.panel)).toBeVisible({ timeout: 30000 });
     expect(await violationsIn(page)).toEqual([]);
   });
 
