@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 (2026-10-20)
+
+Fixes from the first catalog review.
+
+- The backend now closes the gzip reader for compressed score requests once the request is read.
+- The score tile grid takes its minimum column width from Grafana's theme spacing instead of a fixed pixel value. Tiles look the same.
+
 ## 0.1.0 (2026-10-20)
 
 First release. GROT Weaver scores how well the telemetry in your stack follows the OpenTelemetry semantic conventions and shows, service by service, where to fix it.

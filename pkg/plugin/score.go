@@ -34,6 +34,7 @@ func (a *App) handleScore(w http.ResponseWriter, req *http.Request) {
 		writeJSON(w, http.StatusBadRequest, errorResponse{Error: "decode request: " + err.Error()})
 		return
 	}
+	defer func() { _ = body.Close() }()
 	decoder := json.NewDecoder(body)
 	decoder.DisallowUnknownFields()
 	var request scoreRequest
@@ -53,7 +54,7 @@ func (a *App) handleScore(w http.ResponseWriter, req *http.Request) {
 	writeCompressibleJSON(w, req, http.StatusOK, result)
 }
 
-func scoreBody(w http.ResponseWriter, req *http.Request) (io.Reader, error) {
+func scoreBody(w http.ResponseWriter, req *http.Request) (io.ReadCloser, error) {
 	wire := http.MaxBytesReader(w, req.Body, maxScoreRequestBytes)
 	if !strings.EqualFold(strings.TrimSpace(req.Header.Get("Content-Encoding")), gzipEncoding) {
 		return wire, nil
@@ -62,7 +63,7 @@ func scoreBody(w http.ResponseWriter, req *http.Request) (io.Reader, error) {
 	if err != nil {
 		return nil, err
 	}
-	return http.MaxBytesReader(w, io.NopCloser(unzipped), maxDecodedScoreRequestBytes), nil
+	return http.MaxBytesReader(w, unzipped, maxDecodedScoreRequestBytes), nil
 }
 
 func requireEnd(decoder *json.Decoder) error {

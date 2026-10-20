@@ -226,7 +226,7 @@ export function ScoreTiles(props: ScoreTilesProps) {
 const getStyles = (theme: GrafanaTheme2) => ({
   grid: css({
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+    gridTemplateColumns: `repeat(auto-fill, minmax(${theme.spacing(20)}, 1fr))`,
     gap: theme.spacing(1),
   }),
   tile: css({
