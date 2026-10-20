@@ -68,9 +68,10 @@ npm run build
 go run github.com/magefile/mage@v1.17.2          # backends for every platform
 export GRAFANA_ACCESS_POLICY_TOKEN=<token>
 npm run sign                                     # writes dist/MANIFEST.txt
+VERSION=$(node -p "require('./package.json').version")
 cp -r dist benburbage-semconvcompliance-app
-zip -r benburbage-semconvcompliance-app-0.1.0.zip benburbage-semconvcompliance-app
-shasum benburbage-semconvcompliance-app-0.1.0.zip
+zip -r benburbage-semconvcompliance-app-$VERSION.zip benburbage-semconvcompliance-app
+shasum benburbage-semconvcompliance-app-$VERSION.zip
 ```
 
 Upload the ZIP and its SHA1 where the catalog submission can reach them, for example as GitHub release assets. Until the plugin has been reviewed and given a signature level, `npm run sign` fails; that first submission can be unsigned.

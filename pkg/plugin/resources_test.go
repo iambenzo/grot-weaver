@@ -5,7 +5,9 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"slices"
 	"strings"
 	"testing"
@@ -345,4 +347,23 @@ func Test_CallResource_score_compression(t *testing.T) {
 			t.Errorf("status = %d, want %d", got, http.StatusBadRequest)
 		}
 	})
+}
+
+func Test_scoreBody_closesTheGzipReader(t *testing.T) {
+	corrupt := gzipped(t, []byte(`{"inventory":{}}`))
+	corrupt[10] = 0x07
+	req := httptest.NewRequest(http.MethodPost, "/score", bytes.NewReader(corrupt))
+	req.Header.Set("Content-Encoding", "gzip")
+
+	body, err := scoreBody(httptest.NewRecorder(), req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := io.ReadAll(body); err == nil {
+		t.Fatal("reading a corrupt gzip body succeeded")
+	}
+
+	if err := body.Close(); err == nil {
+		t.Error("Close returned no error for a corrupt stream, so it did not reach the gzip reader")
+	}
 }
