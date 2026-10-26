@@ -5,9 +5,9 @@
     "schema_url": "https://opentelemetry.io/schemas/1.44.0"
   },
   "genai": {
-    "commit": "5293effb97f18ddb0602da884dadee6119d67679",
-    "committed_at": "2026-10-12T19:05:02Z",
-    "registry": "https://github.com/open-telemetry/semantic-conventions-genai/archive/5293effb97f18ddb0602da884dadee6119d67679.zip[model]"
+    "commit": "20259355b9631e3f032dcc099d1b5a2666818c42",
+    "committed_at": "2026-10-26T04:55:42Z",
+    "registry": "https://github.com/open-telemetry/semantic-conventions-genai/archive/20259355b9631e3f032dcc099d1b5a2666818c42.zip[model]"
   },
   "weaver_image": "otel/weaver:v0.27.0@sha256:3049b4079049d4abb1b5632f511ada2c33505a1c60f3f8535e93f87f0696f056",
   "template_sha256": "c1ff46ecfd52a6d0029b3d11cff3a1f9d1dcbfb0f4e5ec24fb792cde78b0941e"
