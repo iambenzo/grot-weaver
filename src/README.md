@@ -32,6 +32,8 @@ Large stacks take a while to scan, so scores appear as each datasource answers a
 
 When a check had to be limited, for example volume sampled because TraceQL metrics are unavailable, the affected scores say "Based on limited data", and **Limited checks** in the status panel lists every limit.
 
+Tempo caps the time range of a single TraceQL metrics query: 3 hours by default on Tempo 2.x, and each Tempo can set its own limit. Newer versions can also reject a range that reads too much data. When Tempo rejects a long window, the app splits it into shorter queries and adds up the results. If Tempo keeps rejecting the shorter queries, the app samples span volume instead and **Limited checks** says so.
+
 ## From finding to fix
 
 ![A service's findings, with one expanded to show its evidence, the Ask Assistant button and the fix tabs](https://raw.githubusercontent.com/iambenzo/grot-weaver/main/src/img/screenshot-service-dark.png)
@@ -61,4 +63,4 @@ An admin can turn the Assistant integration off in the app settings, which remov
 
 ![App settings: datasources, translation strategy, limits and scoring](https://raw.githubusercontent.com/iambenzo/grot-weaver/main/src/img/screenshot-settings-dark.png)
 
-Open **Administration > Plugins and data > Plugins > GROT Weaver > Configuration** to change which datasources are scanned, the default time window, query limits, volume weighting, your custom attribute namespaces, required resource attributes and service-to-pipeline mappings. The app can also check GitHub once a day for a newer semantic conventions release; new registry versions arrive with plugin updates.
+Open **Administration > Plugins and data > Plugins > GROT Weaver > Configuration** to change which datasources are scanned, the default time window, query limits, volume weighting, your custom attribute namespaces, required resource attributes and service-to-pipeline mappings. The app can also check GitHub once a day for a newer semantic conventions release. This is off by default; when an admin turns it on, each viewer's browser calls api.github.com. New registry versions arrive with plugin updates either way.

@@ -128,7 +128,7 @@ export function requiredResourceAttributes(settings: PluginSettings): string[] {
 }
 
 export function isUpstreamCheckEnabled(settings: PluginSettings): boolean {
-  return settings.upstreamCheck !== false;
+  return settings.upstreamCheck === true;
 }
 
 export function isAssistantButtonsEnabled(settings: PluginSettings): boolean {

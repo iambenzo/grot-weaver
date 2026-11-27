@@ -92,9 +92,10 @@ describe('sampleLimit, upstream check and exclusions', () => {
     expect(sampleLimit(configured, 20)).toBe(expected);
   });
 
-  it('checks upstream releases unless turned off', () => {
-    expect(isUpstreamCheckEnabled({})).toBe(true);
+  it('checks upstream releases only when turned on', () => {
+    expect(isUpstreamCheckEnabled({})).toBe(false);
     expect(isUpstreamCheckEnabled({ upstreamCheck: false })).toBe(false);
+    expect(isUpstreamCheckEnabled({ upstreamCheck: true })).toBe(true);
   });
 
   it('shows Assistant buttons unless turned off', () => {
