@@ -30,6 +30,7 @@ import {
   DatasourceTypes,
   PipelineMapping,
   PluginSettings,
+  isUpstreamCheckEnabled,
   readSettings,
   requiredResourceAttributes,
 } from '../../settings/settings';
@@ -239,11 +240,11 @@ const AppConfig = ({ plugin }: AppConfigProps) => {
       <FieldSet label="Updates">
         <Field
           label="Check for newer semantic convention releases"
-          description="Your browser asks GitHub once a day. The catalogue itself only changes with a plugin update."
+          description="Off by default. When on, each viewer's browser asks api.github.com once a day. The catalogue itself only changes with a plugin update."
         >
           <Switch
             id="ac-upstream-check"
-            value={settings.upstreamCheck !== false}
+            value={isUpstreamCheckEnabled(settings)}
             onChange={(event) => update({ upstreamCheck: event.currentTarget.checked })}
           />
         </Field>
