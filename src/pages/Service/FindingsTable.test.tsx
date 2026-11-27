@@ -46,7 +46,7 @@ const fetchFix = jest.fn(async () => ({
 const shared = { semconvVersion: 'v1.44.0', fetchFix };
 
 describe('FindingsTable', () => {
-  it('shows each finding level and its share of the signal volume', () => {
+  it('shows each finding level and its share of the signal volume', async () => {
     const improvement: Finding = {
       ...renamed,
       type: 'recommended_attribute_not_present',
@@ -63,6 +63,7 @@ describe('FindingsTable', () => {
         {...shared}
       />
     );
+    await screen.findByRole('table');
 
     const rows = screen.getAllByRole('row').slice(1);
     expect(within(rows[0]).getByText('Violation')).toBeInTheDocument();
@@ -71,7 +72,7 @@ describe('FindingsTable', () => {
     expect(within(rows[1]).getByText('42%')).toBeInTheDocument();
   });
 
-  it('shows type, bucket, source and confidence as plain text', () => {
+  it('shows type, bucket, source and confidence as plain text', async () => {
     render(
       <FindingsTable
         findings={[{ ...renamed, confidence: 'medium' }]}
@@ -80,13 +81,15 @@ describe('FindingsTable', () => {
         {...shared}
       />
     );
+    await screen.findByRole('table');
 
     expect(screen.getByText('Stable · semconv · medium confidence')).toBeInTheDocument();
     expect(screen.getByText('Deprecated').tagName).toBe('SPAN');
   });
 
-  it('shows found and expected names, badges, library and first/last seen', () => {
+  it('shows found and expected names, badges, library and first/last seen', async () => {
     render(<FindingsTable findings={[renamed]} libraryFor={() => library} evidenceFor={() => evidence} {...shared} />);
+    await screen.findByRole('table');
 
     expect(screen.getByText('http.method')).toBeInTheDocument();
     expect(screen.getByText('http.request.method')).toBeInTheDocument();
@@ -100,6 +103,7 @@ describe('FindingsTable', () => {
 
   it('offers Open in Explore in the expanded row', async () => {
     render(<FindingsTable findings={[renamed]} libraryFor={() => library} evidenceFor={() => evidence} {...shared} />);
+    await screen.findByRole('table');
 
     fireEvent.click(screen.getByRole('button', { name: /toggle row expanded/i }));
 
@@ -107,20 +111,23 @@ describe('FindingsTable', () => {
     expect(await screen.findByText(/could not be identified|Identified/)).toBeInTheDocument();
   });
 
-  it('marks a likely library and says the library is unknown otherwise', () => {
+  it('marks a likely library and says the library is unknown otherwise', async () => {
     const likely = { ...library, likely: true, confidence: 'medium' as const, description: 'likely: from traces' };
     const { unmount } = render(
       <FindingsTable findings={[renamed]} libraryFor={() => likely} evidenceFor={none} {...shared} />
     );
+    await screen.findByRole('table');
     expect(screen.getByText(/Likely:/)).toBeInTheDocument();
     unmount();
 
     render(<FindingsTable findings={[renamed]} libraryFor={none} evidenceFor={none} {...shared} />);
+    await screen.findByRole('table');
     expect(screen.getByText('library unknown')).toBeInTheDocument();
   });
 
-  it('shows the stored form next to the registry name', () => {
+  it('shows the stored form next to the registry name', async () => {
     render(<FindingsTable findings={[noReplacement]} libraryFor={none} evidenceFor={none} {...shared} />);
+    await screen.findByRole('table');
 
     const row = screen.getByText('net_peer_name').closest('tr') as HTMLElement;
     expect(within(row).getByText('net.peer.name')).toBeInTheDocument();
@@ -129,6 +136,7 @@ describe('FindingsTable', () => {
 
   it('shows the registry note verbatim when there is no single replacement', async () => {
     render(<FindingsTable findings={[noReplacement]} libraryFor={none} evidenceFor={none} {...shared} />);
+    await screen.findByRole('table');
 
     fireEvent.click(screen.getByRole('button', { name: /toggle row expanded/i }));
 
@@ -136,7 +144,7 @@ describe('FindingsTable', () => {
     expect(await screen.findByText(/no one definition to link/)).toBeInTheDocument();
   });
 
-  it('describes a missing required attribute by group', () => {
+  it('describes a missing required attribute by group', async () => {
     const missing: Finding = {
       ...renamed,
       type: 'required_attribute_not_present',
@@ -149,6 +157,7 @@ describe('FindingsTable', () => {
     };
 
     render(<FindingsTable findings={[missing]} libraryFor={none} evidenceFor={none} {...shared} />);
+    await screen.findByRole('table');
 
     expect(screen.getByText('url.scheme').closest('span')?.textContent).toBe(
       'url.scheme missing from span.http.server spans'
@@ -157,7 +166,7 @@ describe('FindingsTable', () => {
     expect(screen.getByText('medium confidence')).toBeInTheDocument();
   });
 
-  it('says series for metric requirements and puts violations first', () => {
+  it('says series for metric requirements and puts violations first', async () => {
     const metricMissing: Finding = {
       ...renamed,
       type: 'required_attribute_not_present',
@@ -174,6 +183,7 @@ describe('FindingsTable', () => {
     };
 
     render(<FindingsTable findings={[improvement, metricMissing]} libraryFor={none} evidenceFor={none} {...shared} />);
+    await screen.findByRole('table');
 
     const rows = screen
       .getAllByRole('row')

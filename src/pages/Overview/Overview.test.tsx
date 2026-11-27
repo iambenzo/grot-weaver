@@ -146,7 +146,7 @@ describe('ScoreTiles coverage', () => {
 });
 
 describe('ServicesTable', () => {
-  it('links each service to the developer view with its namespace and window', () => {
+  it('links each service to the developer view with its namespace and window', async () => {
     const row = {
       owner: { kind: 'service' as const, namespace: 'shop', name: 'checkout' },
       scores: {},
@@ -159,6 +159,7 @@ describe('ServicesTable', () => {
       '/a/benburbage-semconvcompliance-app/service?service=checkout&from=now-24h&to=now&namespace=shop'
     );
     render(<ServicesTable rows={[row]} range={{ from: 'now-24h', to: 'now' }} />);
+    await screen.findByRole('table');
     expect(screen.getByRole('link', { name: 'shop/checkout' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Lowest naming score' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Traces: stable naming' })).toBeInTheDocument();
@@ -245,8 +246,9 @@ describe('TopViolations', () => {
     impactShare: 0,
   });
 
-  it('links an expanded violation to each affected service on its signal', () => {
+  it('links an expanded violation to each affected service on its signal', async () => {
     render(<TopViolations groups={[group(1)]} range={range} semconvVersion="v1.44.0" />);
+    await screen.findByRole('table');
 
     fireEvent.click(screen.getByRole('button', { name: /toggle row expanded/i }));
 
@@ -256,7 +258,7 @@ describe('TopViolations', () => {
     );
   });
 
-  it('says when the list is capped', () => {
+  it('says when the list is capped', async () => {
     render(
       <TopViolations
         groups={Array.from({ length: 30 }, (_, index) => group(index))}
@@ -264,6 +266,7 @@ describe('TopViolations', () => {
         semconvVersion="v1.44.0"
       />
     );
+    await screen.findByRole('table');
 
     expect(screen.getByText(/Showing the top 25 of 30 violations/)).toBeInTheDocument();
   });
