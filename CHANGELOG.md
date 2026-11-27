@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.2 (2026-11-27)
+
+Fixes from the second catalog review.
+
+- The daily check for a newer semantic conventions release on GitHub is now off by default. An admin can turn it on in the app settings; new registry versions still arrive with plugin updates.
+- Trace volume holds up better when Tempo limits the time range of TraceQL metrics queries (3 hours by default on Tempo 2.x). Split queries now fit Tempo 2.x's limit, no longer count spans on a split boundary twice, split again when Tempo rejects one of them, and handle Tempo's "reads too much data" rejection.
+- Updated golang.org/x/net and github.com/klauspost/compress, and the Go toolchain to go1.27.4, for the vulnerability scan.
+- The build-time catalogue generator reads the Weaver templates through `os.Root`.
+- Updated the Grafana packages to 13.3 and other dependencies. Grafana 13.2.0 or later is still supported.
+
 ## 0.1.1 (2026-10-20)
 
 Fixes from the first catalog review.
