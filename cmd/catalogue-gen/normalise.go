@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"io/fs"
 	"os"
-	"path/filepath"
 )
 
 func normaliseJSON(raw []byte) ([]byte, error) {
@@ -31,21 +30,22 @@ func marshalIndented(value any) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func hashDirectory(root string) (string, error) {
+func hashDirectory(dir string) (string, error) {
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = root.Close() }()
 	hash := sha256.New()
-	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+	err = fs.WalkDir(root.FS(), ".", func(path string, entry fs.DirEntry, err error) error {
 		if err != nil || entry.IsDir() {
 			return err
 		}
-		relative, err := filepath.Rel(root, path)
+		content, err := root.ReadFile(path)
 		if err != nil {
 			return err
 		}
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		hash.Write([]byte(filepath.ToSlash(relative)))
+		hash.Write([]byte(path))
 		hash.Write([]byte{0})
 		hash.Write(content)
 		hash.Write([]byte{0})
